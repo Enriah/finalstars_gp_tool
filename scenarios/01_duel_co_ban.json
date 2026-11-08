@@ -1,0 +1,13 @@
+{
+  "name": "Duel cơ bản: Amgar vs Baseline",
+  "note": "Hai nhân vật cùng bộ skill mẫu, chỉ khác nội tại. Xem tỉ lệ thắng và diễn biến HP.",
+  "mode": "fight",
+  "time": 120,
+  "runs": 150,
+  "team_a": [
+    "amgar"
+  ],
+  "team_b": [
+    "baseline"
+  ]
+}

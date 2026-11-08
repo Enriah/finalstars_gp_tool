@@ -1,0 +1,48 @@
+{
+  "name": "Blood Loss lên các loại mục tiêu",
+  "note": "cruor_2nd (Cruor là nhánh 2, basic Sylva nuôi Blood Loss). So Blood Loss bỏ qua Defense hay không, trên mục tiêu thường và tank.",
+  "mode": "dps",
+  "time": 40,
+  "runs": 60,
+  "team_a": [
+    "cruor_2nd"
+  ],
+  "team_b": [
+    "dummy:std"
+  ],
+  "set": {
+    "rules.combat.p_hit": 1.0
+  },
+  "variants": [
+    {
+      "name": "bỏ qua Def | mục tiêu thường"
+    },
+    {
+      "name": "bỏ qua Def | tank Def 3000",
+      "team_b": [
+        "dummy:tank3000"
+      ]
+    },
+    {
+      "name": "KHÔNG bỏ qua Def | tank Def 3000",
+      "team_b": [
+        "dummy:tank3000"
+      ],
+      "set": {
+        "rules.passives.blood_loss.bypass_def": false
+      }
+    },
+    {
+      "name": "bỏ qua Def | tank có RES Cruor 50%",
+      "team_b": [
+        "dummy:res_cruor50"
+      ]
+    },
+    {
+      "name": "heal chỉ xóa 3 tầng | mục tiêu thường",
+      "set": {
+        "rules.passives.blood_loss.heal_clears": 3
+      }
+    }
+  ]
+}

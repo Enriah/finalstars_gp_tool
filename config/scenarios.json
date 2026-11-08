@@ -1,0 +1,773 @@
+{
+  "_help": "KỊCH BẢN: 'dummies' = mục tiêu giả (đứng yên, không đánh). Dùng trong lệnh bằng cú pháp dummy:<id>. 'settings' = thiết lập toàn trận. Mục tiêu kind=object là vật thể ma thuật (có magic).",
+  "settings": {
+    "petra_object_present": false,
+    "chain_extra_targets": 0,
+    "target_order": [
+      "player",
+      "object"
+    ]
+  },
+  "dummies": {
+    "std": {
+      "kind": "player",
+      "hp": 2000,
+      "defense": 300,
+      "res": {}
+    },
+    "def1000": {
+      "kind": "player",
+      "hp": 6000,
+      "defense": 1000,
+      "res": {}
+    },
+    "tank3000": {
+      "kind": "player",
+      "hp": 20000,
+      "defense": 3000,
+      "res": {}
+    },
+    "tank10000": {
+      "kind": "player",
+      "hp": 50000,
+      "defense": 10000,
+      "res": {}
+    },
+    "res_cruor50": {
+      "kind": "player",
+      "hp": 2000,
+      "defense": 300,
+      "res": {
+        "Cruor": 0.5
+      }
+    },
+    "std_in_exo": {
+      "kind": "player",
+      "hp": 2000,
+      "defense": 300,
+      "res": {},
+      "in_exothermal": true
+    },
+    "std_wet": {
+      "kind": "player",
+      "hp": 2000,
+      "defense": 300,
+      "res": {},
+      "wet": true
+    },
+    "kim_wall": {
+      "kind": "object",
+      "magic": "Agenet",
+      "hp": 1000,
+      "defense": 150,
+      "res": {}
+    },
+    "petra_wall": {
+      "kind": "object",
+      "magic": "Petra",
+      "hp": 1000,
+      "defense": 150,
+      "res": {}
+    },
+    "ignis_totem": {
+      "kind": "object",
+      "magic": "Ignis",
+      "hp": 1000,
+      "defense": 150,
+      "res": {}
+    },
+    "sandbag": {
+      "kind": "player",
+      "hp": 50000,
+      "defense": 300,
+      "res": {}
+    },
+    "sandbag_exo": {
+      "kind": "player",
+      "hp": 50000,
+      "defense": 300,
+      "res": {},
+      "in_exothermal": true
+    }
+  },
+  "player_ranks": {
+    "master": {
+      "rank_title": "Master (Cao Thủ)",
+      "reaction_time": 0.12,
+      "dodge": {
+        "rate": 0.65,
+        "stamina_cost": 22,
+        "cd": 1.2,
+        "iframes": 0.35
+      },
+      "parry": {
+        "rate": 0.45,
+        "stamina_cost": 8,
+        "counter_stun": 0.8
+      },
+      "guard": {
+        "rate": 0.4,
+        "stamina_cost": 28
+      },
+      "movement": {
+        "spacing": 0.8,
+        "stamina_discipline": 0.8
+      },
+      "psychology": {
+        "panic_hp_threshold": 0.25,
+        "composure": 0.95
+      }
+    },
+    "diamond": {
+      "rank_title": "Diamond (Kim Cương)",
+      "reaction_time": 0.16,
+      "dodge": {
+        "rate": 0.55,
+        "stamina_cost": 24,
+        "cd": 1.3,
+        "iframes": 0.3
+      },
+      "parry": {
+        "rate": 0.35,
+        "stamina_cost": 9,
+        "counter_stun": 0.7
+      },
+      "guard": {
+        "rate": 0.38,
+        "stamina_cost": 29
+      },
+      "movement": {
+        "spacing": 0.65,
+        "stamina_discipline": 0.65
+      },
+      "psychology": {
+        "panic_hp_threshold": 0.28,
+        "composure": 0.8
+      }
+    },
+    "platinum": {
+      "rank_title": "Platinum (Bạch Kim)",
+      "reaction_time": 0.22,
+      "dodge": {
+        "rate": 0.4,
+        "stamina_cost": 25,
+        "cd": 1.5,
+        "iframes": 0.3
+      },
+      "parry": {
+        "rate": 0.2,
+        "stamina_cost": 10,
+        "counter_stun": 0.6
+      },
+      "guard": {
+        "rate": 0.35,
+        "stamina_cost": 30
+      },
+      "movement": {
+        "spacing": 0.5,
+        "stamina_discipline": 0.5
+      },
+      "psychology": {
+        "panic_hp_threshold": 0.3,
+        "composure": 0.6
+      }
+    },
+    "gold": {
+      "rank_title": "Gold (Vàng)",
+      "reaction_time": 0.3,
+      "dodge": {
+        "rate": 0.28,
+        "stamina_cost": 27,
+        "cd": 1.7,
+        "iframes": 0.25
+      },
+      "parry": {
+        "rate": 0.12,
+        "stamina_cost": 12,
+        "counter_stun": 0.5
+      },
+      "guard": {
+        "rate": 0.3,
+        "stamina_cost": 32
+      },
+      "movement": {
+        "spacing": 0.35,
+        "stamina_discipline": 0.35
+      },
+      "psychology": {
+        "panic_hp_threshold": 0.32,
+        "composure": 0.45
+      }
+    },
+    "beginner": {
+      "rank_title": "Beginner (Tân Thủ)",
+      "reaction_time": 0.45,
+      "dodge": {
+        "rate": 0.15,
+        "stamina_cost": 30,
+        "cd": 2.2,
+        "iframes": 0.2
+      },
+      "parry": {
+        "rate": 0.05,
+        "stamina_cost": 15,
+        "counter_stun": 0.4
+      },
+      "guard": {
+        "rate": 0.2,
+        "stamina_cost": 35
+      },
+      "movement": {
+        "spacing": 0.2,
+        "stamina_discipline": 0.2
+      },
+      "psychology": {
+        "panic_hp_threshold": 0.4,
+        "composure": 0.2
+      }
+    },
+    "rushdown": {
+      "rank_title": "Rushdown Berserker (Cuồng Bạo)",
+      "reaction_time": 0.18,
+      "dodge": {
+        "rate": 0.2,
+        "stamina_cost": 25,
+        "cd": 1.8,
+        "iframes": 0.25
+      },
+      "parry": {
+        "rate": 0.1,
+        "stamina_cost": 12,
+        "counter_stun": 0.5
+      },
+      "guard": {
+        "rate": 0.15,
+        "stamina_cost": 32
+      },
+      "movement": {
+        "spacing": 0.1,
+        "stamina_discipline": 0.15
+      },
+      "psychology": {
+        "panic_hp_threshold": 0.2,
+        "composure": 0.75
+      }
+    },
+    "counter": {
+      "rank_title": "Defensive Counter-Master (Phản Công)",
+      "reaction_time": 0.14,
+      "dodge": {
+        "rate": 0.55,
+        "stamina_cost": 22,
+        "cd": 1.3,
+        "iframes": 0.35
+      },
+      "parry": {
+        "rate": 0.6,
+        "stamina_cost": 8,
+        "counter_stun": 1.0
+      },
+      "guard": {
+        "rate": 0.5,
+        "stamina_cost": 25
+      },
+      "movement": {
+        "spacing": 0.9,
+        "stamina_discipline": 0.9
+      },
+      "psychology": {
+        "panic_hp_threshold": 0.3,
+        "composure": 0.85
+      }
+    },
+    "clutch": {
+      "rank_title": "Clutch King (Tâm Lý Thép)",
+      "reaction_time": 0.19,
+      "dodge": {
+        "rate": 0.35,
+        "stamina_cost": 24,
+        "cd": 1.5,
+        "iframes": 0.3
+      },
+      "parry": {
+        "rate": 0.25,
+        "stamina_cost": 10,
+        "counter_stun": 0.7
+      },
+      "guard": {
+        "rate": 0.35,
+        "stamina_cost": 30
+      },
+      "movement": {
+        "spacing": 0.6,
+        "stamina_discipline": 0.7
+      },
+      "psychology": {
+        "panic_hp_threshold": 0.35,
+        "composure": 1.0
+      }
+    },
+    "panic": {
+      "rank_title": "Choke Artist (Yếu Tâm Lý)",
+      "reaction_time": 0.2,
+      "dodge": {
+        "rate": 0.4,
+        "stamina_cost": 25,
+        "cd": 1.5,
+        "iframes": 0.3
+      },
+      "parry": {
+        "rate": 0.25,
+        "stamina_cost": 10,
+        "counter_stun": 0.6
+      },
+      "guard": {
+        "rate": 0.35,
+        "stamina_cost": 30
+      },
+      "movement": {
+        "spacing": 0.5,
+        "stamina_discipline": 0.3
+      },
+      "psychology": {
+        "panic_hp_threshold": 0.35,
+        "composure": 0.1
+      }
+    },
+    "high_ping": {
+      "rank_title": "High Ping (Mạng Lag 300ms)",
+      "reaction_time": 0.42,
+      "dodge": {
+        "rate": 0.18,
+        "stamina_cost": 28,
+        "cd": 2.0,
+        "iframes": 0.2
+      },
+      "parry": {
+        "rate": 0.08,
+        "stamina_cost": 12,
+        "counter_stun": 0.4
+      },
+      "guard": {
+        "rate": 0.25,
+        "stamina_cost": 35
+      },
+      "movement": {
+        "spacing": 0.3,
+        "stamina_discipline": 0.4
+      },
+      "psychology": {
+        "panic_hp_threshold": 0.3,
+        "composure": 0.4
+      }
+    }
+  },
+  "scenarios": {
+    "equal_standard": {
+      "name": "Cân Bằng: Rank Ngang Nhau (Bạch Kim vs Bạch Kim)",
+      "desc": "Hai người chơi có trình độ tương đương, phản xạ tốt (0.22s), né và parry ở mức khá, tâm lý ổn định.",
+      "team_a": {
+        "rank_title": "Platinum (Bạch Kim)",
+        "reaction_time": 0.22,
+        "dodge": {
+          "rate": 0.4,
+          "stamina_cost": 25,
+          "cd": 1.5,
+          "iframes": 0.3
+        },
+        "parry": {
+          "rate": 0.2,
+          "stamina_cost": 10,
+          "counter_stun": 0.6
+        },
+        "guard": {
+          "rate": 0.35,
+          "stamina_cost": 30
+        },
+        "movement": {
+          "spacing": 0.5,
+          "stamina_discipline": 0.5
+        },
+        "psychology": {
+          "panic_hp_threshold": 0.3,
+          "composure": 0.6
+        }
+      },
+      "team_b": {
+        "rank_title": "Platinum (Bạch Kim)",
+        "reaction_time": 0.22,
+        "dodge": {
+          "rate": 0.4,
+          "stamina_cost": 25,
+          "cd": 1.5,
+          "iframes": 0.3
+        },
+        "parry": {
+          "rate": 0.2,
+          "stamina_cost": 10,
+          "counter_stun": 0.6
+        },
+        "guard": {
+          "rate": 0.35,
+          "stamina_cost": 30
+        },
+        "movement": {
+          "spacing": 0.5,
+          "stamina_discipline": 0.5
+        },
+        "psychology": {
+          "panic_hp_threshold": 0.3,
+          "composure": 0.6
+        }
+      }
+    },
+    "pro_vs_pro": {
+      "name": "Đỉnh Cao: Cao Thủ vs Cao Thủ (Master vs Master)",
+      "desc": "Hai bậc thầy giác đấu với phản xạ siêu phàm (0.12s), tỉ lệ né và parry cực cao, kỷ luật thể lực nghiêm ngặt.",
+      "team_a": {
+        "rank_title": "Master (Cao Thủ)",
+        "reaction_time": 0.12,
+        "dodge": {
+          "rate": 0.65,
+          "stamina_cost": 22,
+          "cd": 1.2,
+          "iframes": 0.35
+        },
+        "parry": {
+          "rate": 0.45,
+          "stamina_cost": 8,
+          "counter_stun": 0.8
+        },
+        "guard": {
+          "rate": 0.4,
+          "stamina_cost": 28
+        },
+        "movement": {
+          "spacing": 0.8,
+          "stamina_discipline": 0.8
+        },
+        "psychology": {
+          "panic_hp_threshold": 0.25,
+          "composure": 0.95
+        }
+      },
+      "team_b": {
+        "rank_title": "Master (Cao Thủ)",
+        "reaction_time": 0.12,
+        "dodge": {
+          "rate": 0.65,
+          "stamina_cost": 22,
+          "cd": 1.2,
+          "iframes": 0.35
+        },
+        "parry": {
+          "rate": 0.45,
+          "stamina_cost": 8,
+          "counter_stun": 0.8
+        },
+        "guard": {
+          "rate": 0.4,
+          "stamina_cost": 28
+        },
+        "movement": {
+          "spacing": 0.8,
+          "stamina_discipline": 0.8
+        },
+        "psychology": {
+          "panic_hp_threshold": 0.25,
+          "composure": 0.95
+        }
+      }
+    },
+    "pro_vs_beginner": {
+      "name": "Chênh Lệch: Cao Thủ vs Tân Thủ (Master vs Beginner)",
+      "desc": "Đội A là cao thủ điêu luyện; Đội B là người mới chơi, phản xạ chậm (0.45s), hay hoảng loạn khi thấp máu.",
+      "team_a": {
+        "rank_title": "Master (Cao Thủ)",
+        "reaction_time": 0.12,
+        "dodge": {
+          "rate": 0.65,
+          "stamina_cost": 22,
+          "cd": 1.2,
+          "iframes": 0.35
+        },
+        "parry": {
+          "rate": 0.45,
+          "stamina_cost": 8,
+          "counter_stun": 0.8
+        },
+        "guard": {
+          "rate": 0.4,
+          "stamina_cost": 28
+        },
+        "movement": {
+          "spacing": 0.8,
+          "stamina_discipline": 0.8
+        },
+        "psychology": {
+          "panic_hp_threshold": 0.25,
+          "composure": 0.95
+        }
+      },
+      "team_b": {
+        "rank_title": "Beginner (Tân Thủ)",
+        "reaction_time": 0.45,
+        "dodge": {
+          "rate": 0.15,
+          "stamina_cost": 30,
+          "cd": 2.2,
+          "iframes": 0.2
+        },
+        "parry": {
+          "rate": 0.05,
+          "stamina_cost": 15,
+          "counter_stun": 0.4
+        },
+        "guard": {
+          "rate": 0.2,
+          "stamina_cost": 35
+        },
+        "movement": {
+          "spacing": 0.2,
+          "stamina_discipline": 0.2
+        },
+        "psychology": {
+          "panic_hp_threshold": 0.4,
+          "composure": 0.2
+        }
+      }
+    },
+    "aggressive_vs_counter": {
+      "name": "Lối Chơi: Cuồng Bạo vs Bậc Thầy Phản Đòn (Rush vs Counter)",
+      "desc": "Đội A tấn công cuồng loạn, liên tục ép sân, ít né tránh; Đội B giữ cự ly, kiên nhẫn canh parry phản kích.",
+      "team_a": {
+        "rank_title": "Rushdown Berserker (Cuồng Bạo)",
+        "reaction_time": 0.18,
+        "dodge": {
+          "rate": 0.2,
+          "stamina_cost": 25,
+          "cd": 1.8,
+          "iframes": 0.25
+        },
+        "parry": {
+          "rate": 0.1,
+          "stamina_cost": 12,
+          "counter_stun": 0.5
+        },
+        "guard": {
+          "rate": 0.15,
+          "stamina_cost": 32
+        },
+        "movement": {
+          "spacing": 0.1,
+          "stamina_discipline": 0.15
+        },
+        "psychology": {
+          "panic_hp_threshold": 0.2,
+          "composure": 0.75
+        }
+      },
+      "team_b": {
+        "rank_title": "Defensive Counter-Master (Phản Công)",
+        "reaction_time": 0.14,
+        "dodge": {
+          "rate": 0.55,
+          "stamina_cost": 22,
+          "cd": 1.3,
+          "iframes": 0.35
+        },
+        "parry": {
+          "rate": 0.6,
+          "stamina_cost": 8,
+          "counter_stun": 1.0
+        },
+        "guard": {
+          "rate": 0.5,
+          "stamina_cost": 25
+        },
+        "movement": {
+          "spacing": 0.9,
+          "stamina_discipline": 0.9
+        },
+        "psychology": {
+          "panic_hp_threshold": 0.3,
+          "composure": 0.85
+        }
+      }
+    },
+    "clutch_miracle": {
+      "name": "Tâm Lý: Thần Khắc Phục vs Dễ Hoảng Loạn (Clutch vs Panic)",
+      "desc": "Đội A càng ít máu càng đánh tập trung, tỉ lệ né/gạt tăng vọt; Đội B khi dưới 35% máu sẽ hoảng loạn và cạn thể lực.",
+      "team_a": {
+        "rank_title": "Clutch King (Tâm Lý Thép)",
+        "reaction_time": 0.19,
+        "dodge": {
+          "rate": 0.35,
+          "stamina_cost": 24,
+          "cd": 1.5,
+          "iframes": 0.3
+        },
+        "parry": {
+          "rate": 0.25,
+          "stamina_cost": 10,
+          "counter_stun": 0.7
+        },
+        "guard": {
+          "rate": 0.35,
+          "stamina_cost": 30
+        },
+        "movement": {
+          "spacing": 0.6,
+          "stamina_discipline": 0.7
+        },
+        "psychology": {
+          "panic_hp_threshold": 0.35,
+          "composure": 1.0
+        }
+      },
+      "team_b": {
+        "rank_title": "Choke Artist (Yếu Tâm Lý)",
+        "reaction_time": 0.2,
+        "dodge": {
+          "rate": 0.4,
+          "stamina_cost": 25,
+          "cd": 1.5,
+          "iframes": 0.3
+        },
+        "parry": {
+          "rate": 0.25,
+          "stamina_cost": 10,
+          "counter_stun": 0.6
+        },
+        "guard": {
+          "rate": 0.35,
+          "stamina_cost": 30
+        },
+        "movement": {
+          "spacing": 0.5,
+          "stamina_discipline": 0.3
+        },
+        "psychology": {
+          "panic_hp_threshold": 0.35,
+          "composure": 0.1
+        }
+      }
+    },
+    "high_ping_handicap": {
+      "name": "Bất Lợi Mạng: Mạng Nhanh vs Mạng Lag (Ping Delay 300ms)",
+      "desc": "Đội A kết nối hoàn hảo; Đội B bị độ trễ mạng cao (0.42s delay), giảm mạnh tỉ lệ dự đoán né và gạt đòn.",
+      "team_a": {
+        "rank_title": "Diamond (Kim Cương)",
+        "reaction_time": 0.16,
+        "dodge": {
+          "rate": 0.55,
+          "stamina_cost": 24,
+          "cd": 1.3,
+          "iframes": 0.3
+        },
+        "parry": {
+          "rate": 0.35,
+          "stamina_cost": 9,
+          "counter_stun": 0.7
+        },
+        "guard": {
+          "rate": 0.38,
+          "stamina_cost": 29
+        },
+        "movement": {
+          "spacing": 0.65,
+          "stamina_discipline": 0.65
+        },
+        "psychology": {
+          "panic_hp_threshold": 0.28,
+          "composure": 0.8
+        }
+      },
+      "team_b": {
+        "rank_title": "High Ping (Mạng Lag 300ms)",
+        "reaction_time": 0.42,
+        "dodge": {
+          "rate": 0.18,
+          "stamina_cost": 28,
+          "cd": 2.0,
+          "iframes": 0.2
+        },
+        "parry": {
+          "rate": 0.08,
+          "stamina_cost": 12,
+          "counter_stun": 0.4
+        },
+        "guard": {
+          "rate": 0.25,
+          "stamina_cost": 35
+        },
+        "movement": {
+          "spacing": 0.3,
+          "stamina_discipline": 0.4
+        },
+        "psychology": {
+          "panic_hp_threshold": 0.3,
+          "composure": 0.4
+        }
+      }
+    },
+    "custom": {
+      "name": "⚙ Tùy Chỉnh Kịch Bản (Custom 1v1 Scenario)",
+      "desc": "Người dùng tùy ý thiết lập mọi chỉ số phản xạ, tâm lý, né đòn, parry và di chuyển cho từng người chơi.",
+      "team_a": {
+        "rank_title": "Tùy Chỉnh Đội A",
+        "reaction_time": 0.2,
+        "dodge": {
+          "rate": 0.45,
+          "stamina_cost": 25,
+          "cd": 1.5,
+          "iframes": 0.3
+        },
+        "parry": {
+          "rate": 0.25,
+          "stamina_cost": 10,
+          "counter_stun": 0.6
+        },
+        "guard": {
+          "rate": 0.35,
+          "stamina_cost": 30
+        },
+        "movement": {
+          "spacing": 0.5,
+          "stamina_discipline": 0.6
+        },
+        "psychology": {
+          "panic_hp_threshold": 0.3,
+          "composure": 0.7
+        }
+      },
+      "team_b": {
+        "rank_title": "Tùy Chỉnh Đội B",
+        "reaction_time": 0.2,
+        "dodge": {
+          "rate": 0.45,
+          "stamina_cost": 25,
+          "cd": 1.5,
+          "iframes": 0.3
+        },
+        "parry": {
+          "rate": 0.25,
+          "stamina_cost": 10,
+          "counter_stun": 0.6
+        },
+        "guard": {
+          "rate": 0.35,
+          "stamina_cost": 30
+        },
+        "movement": {
+          "spacing": 0.5,
+          "stamina_discipline": 0.6
+        },
+        "psychology": {
+          "panic_hp_threshold": 0.3,
+          "composure": 0.7
+        }
+      }
+    }
+  }
+}

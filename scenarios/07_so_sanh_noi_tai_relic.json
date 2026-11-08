@@ -1,0 +1,90 @@
+{
+  "name": "So sánh nội tại/relic cho cùng một nhân vật",
+  "note": "Cùng nhân vật nền (Petra + Sylva), mỗi biến thể gắn một relic khác nhau, đấu với baseline.",
+  "mode": "dps",
+  "time": 30,
+  "runs": 120,
+  "team_a": [
+    "hero"
+  ],
+  "team_b": [
+    "baseline"
+  ],
+  "fighters": {
+    "hero": {
+      "skills": [
+        "Petra_1",
+        "Petra_2",
+        "Sylva_3",
+        "Sylva_4"
+      ],
+      "basic": "Petra_basic",
+      "relics": []
+    }
+  },
+  "variants": [
+    {
+      "name": "không relic"
+    },
+    {
+      "name": "+300 ATK",
+      "fighters": {
+        "hero": {
+          "relics": [
+            "relic_atk"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Molten Core",
+      "fighters": {
+        "hero": {
+          "relics": [
+            "passive_molten_core"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Chronomancy",
+      "fighters": {
+        "hero": {
+          "relics": [
+            "passive_chronomancy"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Blood Loss",
+      "fighters": {
+        "hero": {
+          "relics": [
+            "passive_blood_loss"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Zephyr Core",
+      "fighters": {
+        "hero": {
+          "relics": [
+            "passive_zephyr_core"
+          ]
+        }
+      }
+    },
+    {
+      "name": "-15% hồi chiêu",
+      "fighters": {
+        "hero": {
+          "relics": [
+            "relic_cdr"
+          ]
+        }
+      }
+    }
+  ]
+}

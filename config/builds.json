@@ -1,0 +1,4209 @@
+{
+  "_help": "BUILD = 2 nhánh magic (mỗi nhánh 2 skill) + 1 basic + relic + chỉ số ghi đè (stats) + thứ tự ưu tiên cast (priority, tùy chọn). Thứ tự nhánh QUAN TRỌNG: branch_a = nhánh chọn trước, basic phải lấy từ bể basic của magic branch_a và không trùng 4 skill còn lại. Hai nhánh cùng magic = PureType. 'skip_balance': true để lệnh balance bỏ qua (build hỗ trợ).",
+  "baseline": {
+    "label": "Baseline (Petra+Sylva, không passive tác động 1v1)",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "amgar": {
+    "label": "Amgar + Sylva",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "gale": {
+    "label": "Gale + Sylva",
+    "basic": "Gale_basic",
+    "branch_a": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_1",
+        "Gale_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "fulgur": {
+    "label": "Fulgur + Sylva",
+    "basic": "Fulgur_basic",
+    "branch_a": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_1",
+        "Fulgur_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "sable": {
+    "label": "Sable + Sylva",
+    "basic": "Sable_basic",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "glacia": {
+    "label": "Glacia + Sylva",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "ether": {
+    "label": "Ether + Sylva",
+    "basic": "Ether_basic",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "cruor": {
+    "label": "Cruor + Sylva",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "entropy": {
+    "label": "Entropy + Sylva",
+    "basic": "Entropy_basic",
+    "branch_a": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_1",
+        "Entropy_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "timeflow": {
+    "label": "TimeFlow + Sylva",
+    "basic": "TimeFlow_basic",
+    "branch_a": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_1",
+        "TimeFlow_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "pure_amgar": {
+    "label": "PureType Amgar",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_3",
+        "Amgar_4"
+      ]
+    },
+    "relic": null
+  },
+  "pure_baseline": {
+    "label": "PureType Petra (đối chứng)",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null
+  },
+  "amgar_relic_ignore": {
+    "label": "Amgar + relic ignore",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": "relic_ignore"
+  },
+  "amgar_relic_mc": {
+    "label": "Amgar + relic MC",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": "relic_mc"
+  },
+  "aqua_support": {
+    "label": "Hỗ trợ Aqua (tạo Wet)",
+    "basic": "Aqua_basic",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null,
+    "skip_balance": true
+  },
+  "kim_support": {
+    "label": "Hỗ trợ Kim (Break)",
+    "basic": "Agenet_basic",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null,
+    "skip_balance": true
+  },
+  "glacia_support": {
+    "label": "Glacia thuần hỗ trợ",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null,
+    "skip_balance": true
+  },
+  "cruor_support": {
+    "label": "Cruor hỗ trợ",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null,
+    "skip_balance": true
+  },
+  "ice_glacia": {
+    "label": "Combo băng: Glacia (basic nhanh)",
+    "basic": "Glacia_rapid",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null,
+    "skip_balance": true
+  },
+  "ice_aqua": {
+    "label": "Combo băng: Aqua (giữ Wet)",
+    "basic": "Aqua_rapid",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null,
+    "skip_balance": true
+  },
+  "ice_kim": {
+    "label": "Combo băng: Kim (Break)",
+    "basic": "Agenet_rapid",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null,
+    "skip_balance": true
+  },
+  "cruor_rapid": {
+    "label": "Cruor + basic nhanh",
+    "basic": "Cruor_rapid",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "ether_rapid": {
+    "label": "Ether + basic nhanh",
+    "basic": "Ether_rapid",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "sable_rapid": {
+    "label": "Sable + basic nhanh",
+    "basic": "Sable_rapid",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "glacia_rapid": {
+    "label": "Glacia + basic nhanh",
+    "basic": "Glacia_rapid",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "cruor_2nd": {
+    "label": "Cruor làm nhánh 2 (basic Sylva nuôi Blood Loss)",
+    "basic": "Sylva_basic",
+    "branch_a": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_1",
+        "Sylva_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_3",
+        "Cruor_4"
+      ]
+    },
+    "relic": null
+  },
+  "amgar_glacia": {
+    "label": "Amgar + Glacia",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_3",
+        "Glacia_4"
+      ]
+    },
+    "relic": null
+  },
+  "amgar_cruor": {
+    "label": "Amgar + Cruor",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_3",
+        "Cruor_4"
+      ]
+    },
+    "relic": null
+  },
+  "amgar_ether": {
+    "label": "Amgar + Ether",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_3",
+        "Ether_4"
+      ]
+    },
+    "relic": null
+  },
+  "amgar_gale": {
+    "label": "Amgar + Gale",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_3",
+        "Gale_4"
+      ]
+    },
+    "relic": null
+  },
+  "amgar_fulgur": {
+    "label": "Amgar + Fulgur",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_3",
+        "Fulgur_4"
+      ]
+    },
+    "relic": null
+  },
+  "amgar_sable": {
+    "label": "Amgar + Sable",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_3",
+        "Sable_4"
+      ]
+    },
+    "relic": null
+  },
+  "amgar_entropy": {
+    "label": "Amgar + Entropy",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_3",
+        "Entropy_4"
+      ]
+    },
+    "relic": null
+  },
+  "amgar_timeflow": {
+    "label": "Amgar + TimeFlow",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_3",
+        "TimeFlow_4"
+      ]
+    },
+    "relic": null
+  },
+  "amgar_agenet": {
+    "label": "Amgar + Agenet",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_3",
+        "Agenet_4"
+      ]
+    },
+    "relic": null
+  },
+  "amgar_aqua": {
+    "label": "Amgar + Aqua",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_3",
+        "Aqua_4"
+      ]
+    },
+    "relic": null
+  },
+  "amgar_sylva": {
+    "label": "Amgar + Sylva",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "amgar_petra": {
+    "label": "Amgar + Petra",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null
+  },
+  "amgar_ignis": {
+    "label": "Amgar + Ignis",
+    "basic": "Amgar_basic",
+    "branch_a": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_1",
+        "Amgar_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_3",
+        "Ignis_4"
+      ]
+    },
+    "relic": null
+  },
+  "glacia_amgar": {
+    "label": "Glacia + Amgar",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_3",
+        "Amgar_4"
+      ]
+    },
+    "relic": null
+  },
+  "pure_glacia": {
+    "label": "PureType Glacia",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_3",
+        "Glacia_4"
+      ]
+    },
+    "relic": null
+  },
+  "glacia_cruor": {
+    "label": "Glacia + Cruor",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_3",
+        "Cruor_4"
+      ]
+    },
+    "relic": null
+  },
+  "glacia_ether": {
+    "label": "Glacia + Ether",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_3",
+        "Ether_4"
+      ]
+    },
+    "relic": null
+  },
+  "glacia_gale": {
+    "label": "Glacia + Gale",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_3",
+        "Gale_4"
+      ]
+    },
+    "relic": null
+  },
+  "glacia_fulgur": {
+    "label": "Glacia + Fulgur",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_3",
+        "Fulgur_4"
+      ]
+    },
+    "relic": null
+  },
+  "glacia_sable": {
+    "label": "Glacia + Sable",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_3",
+        "Sable_4"
+      ]
+    },
+    "relic": null
+  },
+  "glacia_entropy": {
+    "label": "Glacia + Entropy",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_3",
+        "Entropy_4"
+      ]
+    },
+    "relic": null
+  },
+  "glacia_timeflow": {
+    "label": "Glacia + TimeFlow",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_3",
+        "TimeFlow_4"
+      ]
+    },
+    "relic": null
+  },
+  "glacia_agenet": {
+    "label": "Glacia + Agenet",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_3",
+        "Agenet_4"
+      ]
+    },
+    "relic": null
+  },
+  "glacia_aqua": {
+    "label": "Glacia + Aqua",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_3",
+        "Aqua_4"
+      ]
+    },
+    "relic": null
+  },
+  "glacia_sylva": {
+    "label": "Glacia + Sylva",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "glacia_petra": {
+    "label": "Glacia + Petra",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null
+  },
+  "glacia_ignis": {
+    "label": "Glacia + Ignis",
+    "basic": "Glacia_basic",
+    "branch_a": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_1",
+        "Glacia_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_3",
+        "Ignis_4"
+      ]
+    },
+    "relic": null
+  },
+  "cruor_amgar": {
+    "label": "Cruor + Amgar",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_3",
+        "Amgar_4"
+      ]
+    },
+    "relic": null
+  },
+  "cruor_glacia": {
+    "label": "Cruor + Glacia",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_3",
+        "Glacia_4"
+      ]
+    },
+    "relic": null
+  },
+  "pure_cruor": {
+    "label": "PureType Cruor",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_3",
+        "Cruor_4"
+      ]
+    },
+    "relic": null
+  },
+  "cruor_ether": {
+    "label": "Cruor + Ether",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_3",
+        "Ether_4"
+      ]
+    },
+    "relic": null
+  },
+  "cruor_gale": {
+    "label": "Cruor + Gale",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_3",
+        "Gale_4"
+      ]
+    },
+    "relic": null
+  },
+  "cruor_fulgur": {
+    "label": "Cruor + Fulgur",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_3",
+        "Fulgur_4"
+      ]
+    },
+    "relic": null
+  },
+  "cruor_sable": {
+    "label": "Cruor + Sable",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_3",
+        "Sable_4"
+      ]
+    },
+    "relic": null
+  },
+  "cruor_entropy": {
+    "label": "Cruor + Entropy",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_3",
+        "Entropy_4"
+      ]
+    },
+    "relic": null
+  },
+  "cruor_timeflow": {
+    "label": "Cruor + TimeFlow",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_3",
+        "TimeFlow_4"
+      ]
+    },
+    "relic": null
+  },
+  "cruor_agenet": {
+    "label": "Cruor + Agenet",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_3",
+        "Agenet_4"
+      ]
+    },
+    "relic": null
+  },
+  "cruor_aqua": {
+    "label": "Cruor + Aqua",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_3",
+        "Aqua_4"
+      ]
+    },
+    "relic": null
+  },
+  "cruor_sylva": {
+    "label": "Cruor + Sylva",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "cruor_petra": {
+    "label": "Cruor + Petra",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null
+  },
+  "cruor_ignis": {
+    "label": "Cruor + Ignis",
+    "basic": "Cruor_basic",
+    "branch_a": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_1",
+        "Cruor_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_3",
+        "Ignis_4"
+      ]
+    },
+    "relic": null
+  },
+  "ether_amgar": {
+    "label": "Ether + Amgar",
+    "basic": "Ether_basic",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_3",
+        "Amgar_4"
+      ]
+    },
+    "relic": null
+  },
+  "ether_glacia": {
+    "label": "Ether + Glacia",
+    "basic": "Ether_basic",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_3",
+        "Glacia_4"
+      ]
+    },
+    "relic": null
+  },
+  "ether_cruor": {
+    "label": "Ether + Cruor",
+    "basic": "Ether_basic",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_3",
+        "Cruor_4"
+      ]
+    },
+    "relic": null
+  },
+  "pure_ether": {
+    "label": "PureType Ether",
+    "basic": "Ether_basic",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_3",
+        "Ether_4"
+      ]
+    },
+    "relic": null
+  },
+  "ether_gale": {
+    "label": "Ether + Gale",
+    "basic": "Ether_basic",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_3",
+        "Gale_4"
+      ]
+    },
+    "relic": null
+  },
+  "ether_fulgur": {
+    "label": "Ether + Fulgur",
+    "basic": "Ether_basic",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_3",
+        "Fulgur_4"
+      ]
+    },
+    "relic": null
+  },
+  "ether_sable": {
+    "label": "Ether + Sable",
+    "basic": "Ether_basic",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_3",
+        "Sable_4"
+      ]
+    },
+    "relic": null
+  },
+  "ether_entropy": {
+    "label": "Ether + Entropy",
+    "basic": "Ether_basic",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_3",
+        "Entropy_4"
+      ]
+    },
+    "relic": null
+  },
+  "ether_timeflow": {
+    "label": "Ether + TimeFlow",
+    "basic": "Ether_basic",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_3",
+        "TimeFlow_4"
+      ]
+    },
+    "relic": null
+  },
+  "ether_agenet": {
+    "label": "Ether + Agenet",
+    "basic": "Ether_basic",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_3",
+        "Agenet_4"
+      ]
+    },
+    "relic": null
+  },
+  "ether_aqua": {
+    "label": "Ether + Aqua",
+    "basic": "Ether_basic",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_3",
+        "Aqua_4"
+      ]
+    },
+    "relic": null
+  },
+  "ether_sylva": {
+    "label": "Ether + Sylva",
+    "basic": "Ether_basic",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "ether_petra": {
+    "label": "Ether + Petra",
+    "basic": "Ether_basic",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null
+  },
+  "ether_ignis": {
+    "label": "Ether + Ignis",
+    "basic": "Ether_basic",
+    "branch_a": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_1",
+        "Ether_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_3",
+        "Ignis_4"
+      ]
+    },
+    "relic": null
+  },
+  "gale_amgar": {
+    "label": "Gale + Amgar",
+    "basic": "Gale_basic",
+    "branch_a": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_1",
+        "Gale_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_3",
+        "Amgar_4"
+      ]
+    },
+    "relic": null
+  },
+  "gale_glacia": {
+    "label": "Gale + Glacia",
+    "basic": "Gale_basic",
+    "branch_a": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_1",
+        "Gale_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_3",
+        "Glacia_4"
+      ]
+    },
+    "relic": null
+  },
+  "gale_cruor": {
+    "label": "Gale + Cruor",
+    "basic": "Gale_basic",
+    "branch_a": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_1",
+        "Gale_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_3",
+        "Cruor_4"
+      ]
+    },
+    "relic": null
+  },
+  "gale_ether": {
+    "label": "Gale + Ether",
+    "basic": "Gale_basic",
+    "branch_a": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_1",
+        "Gale_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_3",
+        "Ether_4"
+      ]
+    },
+    "relic": null
+  },
+  "pure_gale": {
+    "label": "PureType Gale",
+    "basic": "Gale_basic",
+    "branch_a": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_1",
+        "Gale_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_3",
+        "Gale_4"
+      ]
+    },
+    "relic": null
+  },
+  "gale_fulgur": {
+    "label": "Gale + Fulgur",
+    "basic": "Gale_basic",
+    "branch_a": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_1",
+        "Gale_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_3",
+        "Fulgur_4"
+      ]
+    },
+    "relic": null
+  },
+  "gale_sable": {
+    "label": "Gale + Sable",
+    "basic": "Gale_basic",
+    "branch_a": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_1",
+        "Gale_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_3",
+        "Sable_4"
+      ]
+    },
+    "relic": null
+  },
+  "gale_entropy": {
+    "label": "Gale + Entropy",
+    "basic": "Gale_basic",
+    "branch_a": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_1",
+        "Gale_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_3",
+        "Entropy_4"
+      ]
+    },
+    "relic": null
+  },
+  "gale_timeflow": {
+    "label": "Gale + TimeFlow",
+    "basic": "Gale_basic",
+    "branch_a": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_1",
+        "Gale_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_3",
+        "TimeFlow_4"
+      ]
+    },
+    "relic": null
+  },
+  "gale_agenet": {
+    "label": "Gale + Agenet",
+    "basic": "Gale_basic",
+    "branch_a": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_1",
+        "Gale_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_3",
+        "Agenet_4"
+      ]
+    },
+    "relic": null
+  },
+  "gale_aqua": {
+    "label": "Gale + Aqua",
+    "basic": "Gale_basic",
+    "branch_a": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_1",
+        "Gale_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_3",
+        "Aqua_4"
+      ]
+    },
+    "relic": null
+  },
+  "gale_sylva": {
+    "label": "Gale + Sylva",
+    "basic": "Gale_basic",
+    "branch_a": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_1",
+        "Gale_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "gale_petra": {
+    "label": "Gale + Petra",
+    "basic": "Gale_basic",
+    "branch_a": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_1",
+        "Gale_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null
+  },
+  "gale_ignis": {
+    "label": "Gale + Ignis",
+    "basic": "Gale_basic",
+    "branch_a": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_1",
+        "Gale_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_3",
+        "Ignis_4"
+      ]
+    },
+    "relic": null
+  },
+  "fulgur_amgar": {
+    "label": "Fulgur + Amgar",
+    "basic": "Fulgur_basic",
+    "branch_a": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_1",
+        "Fulgur_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_3",
+        "Amgar_4"
+      ]
+    },
+    "relic": null
+  },
+  "fulgur_glacia": {
+    "label": "Fulgur + Glacia",
+    "basic": "Fulgur_basic",
+    "branch_a": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_1",
+        "Fulgur_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_3",
+        "Glacia_4"
+      ]
+    },
+    "relic": null
+  },
+  "fulgur_cruor": {
+    "label": "Fulgur + Cruor",
+    "basic": "Fulgur_basic",
+    "branch_a": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_1",
+        "Fulgur_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_3",
+        "Cruor_4"
+      ]
+    },
+    "relic": null
+  },
+  "fulgur_ether": {
+    "label": "Fulgur + Ether",
+    "basic": "Fulgur_basic",
+    "branch_a": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_1",
+        "Fulgur_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_3",
+        "Ether_4"
+      ]
+    },
+    "relic": null
+  },
+  "fulgur_gale": {
+    "label": "Fulgur + Gale",
+    "basic": "Fulgur_basic",
+    "branch_a": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_1",
+        "Fulgur_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_3",
+        "Gale_4"
+      ]
+    },
+    "relic": null
+  },
+  "pure_fulgur": {
+    "label": "PureType Fulgur",
+    "basic": "Fulgur_basic",
+    "branch_a": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_1",
+        "Fulgur_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_3",
+        "Fulgur_4"
+      ]
+    },
+    "relic": null
+  },
+  "fulgur_sable": {
+    "label": "Fulgur + Sable",
+    "basic": "Fulgur_basic",
+    "branch_a": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_1",
+        "Fulgur_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_3",
+        "Sable_4"
+      ]
+    },
+    "relic": null
+  },
+  "fulgur_entropy": {
+    "label": "Fulgur + Entropy",
+    "basic": "Fulgur_basic",
+    "branch_a": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_1",
+        "Fulgur_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_3",
+        "Entropy_4"
+      ]
+    },
+    "relic": null
+  },
+  "fulgur_timeflow": {
+    "label": "Fulgur + TimeFlow",
+    "basic": "Fulgur_basic",
+    "branch_a": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_1",
+        "Fulgur_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_3",
+        "TimeFlow_4"
+      ]
+    },
+    "relic": null
+  },
+  "fulgur_agenet": {
+    "label": "Fulgur + Agenet",
+    "basic": "Fulgur_basic",
+    "branch_a": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_1",
+        "Fulgur_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_3",
+        "Agenet_4"
+      ]
+    },
+    "relic": null
+  },
+  "fulgur_aqua": {
+    "label": "Fulgur + Aqua",
+    "basic": "Fulgur_basic",
+    "branch_a": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_1",
+        "Fulgur_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_3",
+        "Aqua_4"
+      ]
+    },
+    "relic": null
+  },
+  "fulgur_sylva": {
+    "label": "Fulgur + Sylva",
+    "basic": "Fulgur_basic",
+    "branch_a": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_1",
+        "Fulgur_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "fulgur_petra": {
+    "label": "Fulgur + Petra",
+    "basic": "Fulgur_basic",
+    "branch_a": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_1",
+        "Fulgur_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null
+  },
+  "fulgur_ignis": {
+    "label": "Fulgur + Ignis",
+    "basic": "Fulgur_basic",
+    "branch_a": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_1",
+        "Fulgur_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_3",
+        "Ignis_4"
+      ]
+    },
+    "relic": null
+  },
+  "sable_amgar": {
+    "label": "Sable + Amgar",
+    "basic": "Sable_basic",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_3",
+        "Amgar_4"
+      ]
+    },
+    "relic": null
+  },
+  "sable_glacia": {
+    "label": "Sable + Glacia",
+    "basic": "Sable_basic",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_3",
+        "Glacia_4"
+      ]
+    },
+    "relic": null
+  },
+  "sable_cruor": {
+    "label": "Sable + Cruor",
+    "basic": "Sable_basic",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_3",
+        "Cruor_4"
+      ]
+    },
+    "relic": null
+  },
+  "sable_ether": {
+    "label": "Sable + Ether",
+    "basic": "Sable_basic",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_3",
+        "Ether_4"
+      ]
+    },
+    "relic": null
+  },
+  "sable_gale": {
+    "label": "Sable + Gale",
+    "basic": "Sable_basic",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_3",
+        "Gale_4"
+      ]
+    },
+    "relic": null
+  },
+  "sable_fulgur": {
+    "label": "Sable + Fulgur",
+    "basic": "Sable_basic",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_3",
+        "Fulgur_4"
+      ]
+    },
+    "relic": null
+  },
+  "pure_sable": {
+    "label": "PureType Sable",
+    "basic": "Sable_basic",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_3",
+        "Sable_4"
+      ]
+    },
+    "relic": null
+  },
+  "sable_entropy": {
+    "label": "Sable + Entropy",
+    "basic": "Sable_basic",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_3",
+        "Entropy_4"
+      ]
+    },
+    "relic": null
+  },
+  "sable_timeflow": {
+    "label": "Sable + TimeFlow",
+    "basic": "Sable_basic",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_3",
+        "TimeFlow_4"
+      ]
+    },
+    "relic": null
+  },
+  "sable_agenet": {
+    "label": "Sable + Agenet",
+    "basic": "Sable_basic",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_3",
+        "Agenet_4"
+      ]
+    },
+    "relic": null
+  },
+  "sable_aqua": {
+    "label": "Sable + Aqua",
+    "basic": "Sable_basic",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_3",
+        "Aqua_4"
+      ]
+    },
+    "relic": null
+  },
+  "sable_sylva": {
+    "label": "Sable + Sylva",
+    "basic": "Sable_basic",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "sable_petra": {
+    "label": "Sable + Petra",
+    "basic": "Sable_basic",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null
+  },
+  "sable_ignis": {
+    "label": "Sable + Ignis",
+    "basic": "Sable_basic",
+    "branch_a": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_1",
+        "Sable_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_3",
+        "Ignis_4"
+      ]
+    },
+    "relic": null
+  },
+  "entropy_amgar": {
+    "label": "Entropy + Amgar",
+    "basic": "Entropy_basic",
+    "branch_a": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_1",
+        "Entropy_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_3",
+        "Amgar_4"
+      ]
+    },
+    "relic": null
+  },
+  "entropy_glacia": {
+    "label": "Entropy + Glacia",
+    "basic": "Entropy_basic",
+    "branch_a": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_1",
+        "Entropy_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_3",
+        "Glacia_4"
+      ]
+    },
+    "relic": null
+  },
+  "entropy_cruor": {
+    "label": "Entropy + Cruor",
+    "basic": "Entropy_basic",
+    "branch_a": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_1",
+        "Entropy_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_3",
+        "Cruor_4"
+      ]
+    },
+    "relic": null
+  },
+  "entropy_ether": {
+    "label": "Entropy + Ether",
+    "basic": "Entropy_basic",
+    "branch_a": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_1",
+        "Entropy_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_3",
+        "Ether_4"
+      ]
+    },
+    "relic": null
+  },
+  "entropy_gale": {
+    "label": "Entropy + Gale",
+    "basic": "Entropy_basic",
+    "branch_a": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_1",
+        "Entropy_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_3",
+        "Gale_4"
+      ]
+    },
+    "relic": null
+  },
+  "entropy_fulgur": {
+    "label": "Entropy + Fulgur",
+    "basic": "Entropy_basic",
+    "branch_a": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_1",
+        "Entropy_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_3",
+        "Fulgur_4"
+      ]
+    },
+    "relic": null
+  },
+  "entropy_sable": {
+    "label": "Entropy + Sable",
+    "basic": "Entropy_basic",
+    "branch_a": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_1",
+        "Entropy_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_3",
+        "Sable_4"
+      ]
+    },
+    "relic": null
+  },
+  "pure_entropy": {
+    "label": "PureType Entropy",
+    "basic": "Entropy_basic",
+    "branch_a": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_1",
+        "Entropy_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_3",
+        "Entropy_4"
+      ]
+    },
+    "relic": null
+  },
+  "entropy_timeflow": {
+    "label": "Entropy + TimeFlow",
+    "basic": "Entropy_basic",
+    "branch_a": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_1",
+        "Entropy_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_3",
+        "TimeFlow_4"
+      ]
+    },
+    "relic": null
+  },
+  "entropy_agenet": {
+    "label": "Entropy + Agenet",
+    "basic": "Entropy_basic",
+    "branch_a": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_1",
+        "Entropy_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_3",
+        "Agenet_4"
+      ]
+    },
+    "relic": null
+  },
+  "entropy_aqua": {
+    "label": "Entropy + Aqua",
+    "basic": "Entropy_basic",
+    "branch_a": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_1",
+        "Entropy_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_3",
+        "Aqua_4"
+      ]
+    },
+    "relic": null
+  },
+  "entropy_sylva": {
+    "label": "Entropy + Sylva",
+    "basic": "Entropy_basic",
+    "branch_a": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_1",
+        "Entropy_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "entropy_petra": {
+    "label": "Entropy + Petra",
+    "basic": "Entropy_basic",
+    "branch_a": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_1",
+        "Entropy_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null
+  },
+  "entropy_ignis": {
+    "label": "Entropy + Ignis",
+    "basic": "Entropy_basic",
+    "branch_a": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_1",
+        "Entropy_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_3",
+        "Ignis_4"
+      ]
+    },
+    "relic": null
+  },
+  "timeflow_amgar": {
+    "label": "TimeFlow + Amgar",
+    "basic": "TimeFlow_basic",
+    "branch_a": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_1",
+        "TimeFlow_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_3",
+        "Amgar_4"
+      ]
+    },
+    "relic": null
+  },
+  "timeflow_glacia": {
+    "label": "TimeFlow + Glacia",
+    "basic": "TimeFlow_basic",
+    "branch_a": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_1",
+        "TimeFlow_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_3",
+        "Glacia_4"
+      ]
+    },
+    "relic": null
+  },
+  "timeflow_cruor": {
+    "label": "TimeFlow + Cruor",
+    "basic": "TimeFlow_basic",
+    "branch_a": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_1",
+        "TimeFlow_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_3",
+        "Cruor_4"
+      ]
+    },
+    "relic": null
+  },
+  "timeflow_ether": {
+    "label": "TimeFlow + Ether",
+    "basic": "TimeFlow_basic",
+    "branch_a": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_1",
+        "TimeFlow_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_3",
+        "Ether_4"
+      ]
+    },
+    "relic": null
+  },
+  "timeflow_gale": {
+    "label": "TimeFlow + Gale",
+    "basic": "TimeFlow_basic",
+    "branch_a": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_1",
+        "TimeFlow_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_3",
+        "Gale_4"
+      ]
+    },
+    "relic": null
+  },
+  "timeflow_fulgur": {
+    "label": "TimeFlow + Fulgur",
+    "basic": "TimeFlow_basic",
+    "branch_a": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_1",
+        "TimeFlow_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_3",
+        "Fulgur_4"
+      ]
+    },
+    "relic": null
+  },
+  "timeflow_sable": {
+    "label": "TimeFlow + Sable",
+    "basic": "TimeFlow_basic",
+    "branch_a": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_1",
+        "TimeFlow_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_3",
+        "Sable_4"
+      ]
+    },
+    "relic": null
+  },
+  "timeflow_entropy": {
+    "label": "TimeFlow + Entropy",
+    "basic": "TimeFlow_basic",
+    "branch_a": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_1",
+        "TimeFlow_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_3",
+        "Entropy_4"
+      ]
+    },
+    "relic": null
+  },
+  "pure_timeflow": {
+    "label": "PureType TimeFlow",
+    "basic": "TimeFlow_basic",
+    "branch_a": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_1",
+        "TimeFlow_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_3",
+        "TimeFlow_4"
+      ]
+    },
+    "relic": null
+  },
+  "timeflow_agenet": {
+    "label": "TimeFlow + Agenet",
+    "basic": "TimeFlow_basic",
+    "branch_a": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_1",
+        "TimeFlow_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_3",
+        "Agenet_4"
+      ]
+    },
+    "relic": null
+  },
+  "timeflow_aqua": {
+    "label": "TimeFlow + Aqua",
+    "basic": "TimeFlow_basic",
+    "branch_a": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_1",
+        "TimeFlow_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_3",
+        "Aqua_4"
+      ]
+    },
+    "relic": null
+  },
+  "timeflow_sylva": {
+    "label": "TimeFlow + Sylva",
+    "basic": "TimeFlow_basic",
+    "branch_a": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_1",
+        "TimeFlow_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "timeflow_petra": {
+    "label": "TimeFlow + Petra",
+    "basic": "TimeFlow_basic",
+    "branch_a": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_1",
+        "TimeFlow_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null
+  },
+  "timeflow_ignis": {
+    "label": "TimeFlow + Ignis",
+    "basic": "TimeFlow_basic",
+    "branch_a": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_1",
+        "TimeFlow_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_3",
+        "Ignis_4"
+      ]
+    },
+    "relic": null
+  },
+  "agenet_amgar": {
+    "label": "Agenet + Amgar",
+    "basic": "Agenet_basic",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_3",
+        "Amgar_4"
+      ]
+    },
+    "relic": null
+  },
+  "agenet_glacia": {
+    "label": "Agenet + Glacia",
+    "basic": "Agenet_basic",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_3",
+        "Glacia_4"
+      ]
+    },
+    "relic": null
+  },
+  "agenet_cruor": {
+    "label": "Agenet + Cruor",
+    "basic": "Agenet_basic",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_3",
+        "Cruor_4"
+      ]
+    },
+    "relic": null
+  },
+  "agenet_ether": {
+    "label": "Agenet + Ether",
+    "basic": "Agenet_basic",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_3",
+        "Ether_4"
+      ]
+    },
+    "relic": null
+  },
+  "agenet_gale": {
+    "label": "Agenet + Gale",
+    "basic": "Agenet_basic",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_3",
+        "Gale_4"
+      ]
+    },
+    "relic": null
+  },
+  "agenet_fulgur": {
+    "label": "Agenet + Fulgur",
+    "basic": "Agenet_basic",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_3",
+        "Fulgur_4"
+      ]
+    },
+    "relic": null
+  },
+  "agenet_sable": {
+    "label": "Agenet + Sable",
+    "basic": "Agenet_basic",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_3",
+        "Sable_4"
+      ]
+    },
+    "relic": null
+  },
+  "agenet_entropy": {
+    "label": "Agenet + Entropy",
+    "basic": "Agenet_basic",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_3",
+        "Entropy_4"
+      ]
+    },
+    "relic": null
+  },
+  "agenet_timeflow": {
+    "label": "Agenet + TimeFlow",
+    "basic": "Agenet_basic",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_3",
+        "TimeFlow_4"
+      ]
+    },
+    "relic": null
+  },
+  "pure_agenet": {
+    "label": "PureType Agenet",
+    "basic": "Agenet_basic",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_3",
+        "Agenet_4"
+      ]
+    },
+    "relic": null
+  },
+  "agenet_aqua": {
+    "label": "Agenet + Aqua",
+    "basic": "Agenet_basic",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_3",
+        "Aqua_4"
+      ]
+    },
+    "relic": null
+  },
+  "agenet_sylva": {
+    "label": "Agenet + Sylva",
+    "basic": "Agenet_basic",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "agenet_petra": {
+    "label": "Agenet + Petra",
+    "basic": "Agenet_basic",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null
+  },
+  "agenet_ignis": {
+    "label": "Agenet + Ignis",
+    "basic": "Agenet_basic",
+    "branch_a": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_1",
+        "Agenet_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_3",
+        "Ignis_4"
+      ]
+    },
+    "relic": null
+  },
+  "aqua_amgar": {
+    "label": "Aqua + Amgar",
+    "basic": "Aqua_basic",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_3",
+        "Amgar_4"
+      ]
+    },
+    "relic": null
+  },
+  "aqua_glacia": {
+    "label": "Aqua + Glacia",
+    "basic": "Aqua_basic",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_3",
+        "Glacia_4"
+      ]
+    },
+    "relic": null
+  },
+  "aqua_cruor": {
+    "label": "Aqua + Cruor",
+    "basic": "Aqua_basic",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_3",
+        "Cruor_4"
+      ]
+    },
+    "relic": null
+  },
+  "aqua_ether": {
+    "label": "Aqua + Ether",
+    "basic": "Aqua_basic",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_3",
+        "Ether_4"
+      ]
+    },
+    "relic": null
+  },
+  "aqua_gale": {
+    "label": "Aqua + Gale",
+    "basic": "Aqua_basic",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_3",
+        "Gale_4"
+      ]
+    },
+    "relic": null
+  },
+  "aqua_fulgur": {
+    "label": "Aqua + Fulgur",
+    "basic": "Aqua_basic",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_3",
+        "Fulgur_4"
+      ]
+    },
+    "relic": null
+  },
+  "aqua_sable": {
+    "label": "Aqua + Sable",
+    "basic": "Aqua_basic",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_3",
+        "Sable_4"
+      ]
+    },
+    "relic": null
+  },
+  "aqua_entropy": {
+    "label": "Aqua + Entropy",
+    "basic": "Aqua_basic",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_3",
+        "Entropy_4"
+      ]
+    },
+    "relic": null
+  },
+  "aqua_timeflow": {
+    "label": "Aqua + TimeFlow",
+    "basic": "Aqua_basic",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_3",
+        "TimeFlow_4"
+      ]
+    },
+    "relic": null
+  },
+  "aqua_agenet": {
+    "label": "Aqua + Agenet",
+    "basic": "Aqua_basic",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_3",
+        "Agenet_4"
+      ]
+    },
+    "relic": null
+  },
+  "pure_aqua": {
+    "label": "PureType Aqua",
+    "basic": "Aqua_basic",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_3",
+        "Aqua_4"
+      ]
+    },
+    "relic": null
+  },
+  "aqua_sylva": {
+    "label": "Aqua + Sylva",
+    "basic": "Aqua_basic",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "aqua_petra": {
+    "label": "Aqua + Petra",
+    "basic": "Aqua_basic",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null
+  },
+  "aqua_ignis": {
+    "label": "Aqua + Ignis",
+    "basic": "Aqua_basic",
+    "branch_a": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_1",
+        "Aqua_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_3",
+        "Ignis_4"
+      ]
+    },
+    "relic": null
+  },
+  "sylva_amgar": {
+    "label": "Sylva + Amgar",
+    "basic": "Sylva_basic",
+    "branch_a": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_1",
+        "Sylva_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_3",
+        "Amgar_4"
+      ]
+    },
+    "relic": null
+  },
+  "sylva_glacia": {
+    "label": "Sylva + Glacia",
+    "basic": "Sylva_basic",
+    "branch_a": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_1",
+        "Sylva_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_3",
+        "Glacia_4"
+      ]
+    },
+    "relic": null
+  },
+  "sylva_cruor": {
+    "label": "Sylva + Cruor",
+    "basic": "Sylva_basic",
+    "branch_a": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_1",
+        "Sylva_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_3",
+        "Cruor_4"
+      ]
+    },
+    "relic": null
+  },
+  "sylva_ether": {
+    "label": "Sylva + Ether",
+    "basic": "Sylva_basic",
+    "branch_a": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_1",
+        "Sylva_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_3",
+        "Ether_4"
+      ]
+    },
+    "relic": null
+  },
+  "sylva_gale": {
+    "label": "Sylva + Gale",
+    "basic": "Sylva_basic",
+    "branch_a": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_1",
+        "Sylva_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_3",
+        "Gale_4"
+      ]
+    },
+    "relic": null
+  },
+  "sylva_fulgur": {
+    "label": "Sylva + Fulgur",
+    "basic": "Sylva_basic",
+    "branch_a": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_1",
+        "Sylva_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_3",
+        "Fulgur_4"
+      ]
+    },
+    "relic": null
+  },
+  "sylva_sable": {
+    "label": "Sylva + Sable",
+    "basic": "Sylva_basic",
+    "branch_a": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_1",
+        "Sylva_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_3",
+        "Sable_4"
+      ]
+    },
+    "relic": null
+  },
+  "sylva_entropy": {
+    "label": "Sylva + Entropy",
+    "basic": "Sylva_basic",
+    "branch_a": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_1",
+        "Sylva_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_3",
+        "Entropy_4"
+      ]
+    },
+    "relic": null
+  },
+  "sylva_timeflow": {
+    "label": "Sylva + TimeFlow",
+    "basic": "Sylva_basic",
+    "branch_a": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_1",
+        "Sylva_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_3",
+        "TimeFlow_4"
+      ]
+    },
+    "relic": null
+  },
+  "sylva_agenet": {
+    "label": "Sylva + Agenet",
+    "basic": "Sylva_basic",
+    "branch_a": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_1",
+        "Sylva_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_3",
+        "Agenet_4"
+      ]
+    },
+    "relic": null
+  },
+  "sylva_aqua": {
+    "label": "Sylva + Aqua",
+    "basic": "Sylva_basic",
+    "branch_a": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_1",
+        "Sylva_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_3",
+        "Aqua_4"
+      ]
+    },
+    "relic": null
+  },
+  "pure_sylva": {
+    "label": "PureType Sylva",
+    "basic": "Sylva_basic",
+    "branch_a": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_1",
+        "Sylva_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "sylva_petra": {
+    "label": "Sylva + Petra",
+    "basic": "Sylva_basic",
+    "branch_a": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_1",
+        "Sylva_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null
+  },
+  "sylva_ignis": {
+    "label": "Sylva + Ignis",
+    "basic": "Sylva_basic",
+    "branch_a": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_1",
+        "Sylva_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_3",
+        "Ignis_4"
+      ]
+    },
+    "relic": null
+  },
+  "petra_amgar": {
+    "label": "Petra + Amgar",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_3",
+        "Amgar_4"
+      ]
+    },
+    "relic": null
+  },
+  "petra_glacia": {
+    "label": "Petra + Glacia",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_3",
+        "Glacia_4"
+      ]
+    },
+    "relic": null
+  },
+  "petra_cruor": {
+    "label": "Petra + Cruor",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_3",
+        "Cruor_4"
+      ]
+    },
+    "relic": null
+  },
+  "petra_ether": {
+    "label": "Petra + Ether",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_3",
+        "Ether_4"
+      ]
+    },
+    "relic": null
+  },
+  "petra_gale": {
+    "label": "Petra + Gale",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_3",
+        "Gale_4"
+      ]
+    },
+    "relic": null
+  },
+  "petra_fulgur": {
+    "label": "Petra + Fulgur",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_3",
+        "Fulgur_4"
+      ]
+    },
+    "relic": null
+  },
+  "petra_sable": {
+    "label": "Petra + Sable",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_3",
+        "Sable_4"
+      ]
+    },
+    "relic": null
+  },
+  "petra_entropy": {
+    "label": "Petra + Entropy",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_3",
+        "Entropy_4"
+      ]
+    },
+    "relic": null
+  },
+  "petra_timeflow": {
+    "label": "Petra + TimeFlow",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_3",
+        "TimeFlow_4"
+      ]
+    },
+    "relic": null
+  },
+  "petra_agenet": {
+    "label": "Petra + Agenet",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_3",
+        "Agenet_4"
+      ]
+    },
+    "relic": null
+  },
+  "petra_aqua": {
+    "label": "Petra + Aqua",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_3",
+        "Aqua_4"
+      ]
+    },
+    "relic": null
+  },
+  "petra_sylva": {
+    "label": "Petra + Sylva",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "pure_petra": {
+    "label": "PureType Petra",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null
+  },
+  "petra_ignis": {
+    "label": "Petra + Ignis",
+    "basic": "Petra_basic",
+    "branch_a": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_1",
+        "Petra_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_3",
+        "Ignis_4"
+      ]
+    },
+    "relic": null
+  },
+  "ignis_amgar": {
+    "label": "Ignis + Amgar",
+    "basic": "Ignis_basic",
+    "branch_a": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_1",
+        "Ignis_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Amgar",
+      "skills": [
+        "Amgar_3",
+        "Amgar_4"
+      ]
+    },
+    "relic": null
+  },
+  "ignis_glacia": {
+    "label": "Ignis + Glacia",
+    "basic": "Ignis_basic",
+    "branch_a": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_1",
+        "Ignis_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Glacia",
+      "skills": [
+        "Glacia_3",
+        "Glacia_4"
+      ]
+    },
+    "relic": null
+  },
+  "ignis_cruor": {
+    "label": "Ignis + Cruor",
+    "basic": "Ignis_basic",
+    "branch_a": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_1",
+        "Ignis_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Cruor",
+      "skills": [
+        "Cruor_3",
+        "Cruor_4"
+      ]
+    },
+    "relic": null
+  },
+  "ignis_ether": {
+    "label": "Ignis + Ether",
+    "basic": "Ignis_basic",
+    "branch_a": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_1",
+        "Ignis_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ether",
+      "skills": [
+        "Ether_3",
+        "Ether_4"
+      ]
+    },
+    "relic": null
+  },
+  "ignis_gale": {
+    "label": "Ignis + Gale",
+    "basic": "Ignis_basic",
+    "branch_a": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_1",
+        "Ignis_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Gale",
+      "skills": [
+        "Gale_3",
+        "Gale_4"
+      ]
+    },
+    "relic": null
+  },
+  "ignis_fulgur": {
+    "label": "Ignis + Fulgur",
+    "basic": "Ignis_basic",
+    "branch_a": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_1",
+        "Ignis_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Fulgur",
+      "skills": [
+        "Fulgur_3",
+        "Fulgur_4"
+      ]
+    },
+    "relic": null
+  },
+  "ignis_sable": {
+    "label": "Ignis + Sable",
+    "basic": "Ignis_basic",
+    "branch_a": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_1",
+        "Ignis_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sable",
+      "skills": [
+        "Sable_3",
+        "Sable_4"
+      ]
+    },
+    "relic": null
+  },
+  "ignis_entropy": {
+    "label": "Ignis + Entropy",
+    "basic": "Ignis_basic",
+    "branch_a": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_1",
+        "Ignis_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Entropy",
+      "skills": [
+        "Entropy_3",
+        "Entropy_4"
+      ]
+    },
+    "relic": null
+  },
+  "ignis_timeflow": {
+    "label": "Ignis + TimeFlow",
+    "basic": "Ignis_basic",
+    "branch_a": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_1",
+        "Ignis_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "TimeFlow",
+      "skills": [
+        "TimeFlow_3",
+        "TimeFlow_4"
+      ]
+    },
+    "relic": null
+  },
+  "ignis_agenet": {
+    "label": "Ignis + Agenet",
+    "basic": "Ignis_basic",
+    "branch_a": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_1",
+        "Ignis_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Agenet",
+      "skills": [
+        "Agenet_3",
+        "Agenet_4"
+      ]
+    },
+    "relic": null
+  },
+  "ignis_aqua": {
+    "label": "Ignis + Aqua",
+    "basic": "Ignis_basic",
+    "branch_a": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_1",
+        "Ignis_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Aqua",
+      "skills": [
+        "Aqua_3",
+        "Aqua_4"
+      ]
+    },
+    "relic": null
+  },
+  "ignis_sylva": {
+    "label": "Ignis + Sylva",
+    "basic": "Ignis_basic",
+    "branch_a": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_1",
+        "Ignis_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Sylva",
+      "skills": [
+        "Sylva_3",
+        "Sylva_4"
+      ]
+    },
+    "relic": null
+  },
+  "ignis_petra": {
+    "label": "Ignis + Petra",
+    "basic": "Ignis_basic",
+    "branch_a": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_1",
+        "Ignis_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Petra",
+      "skills": [
+        "Petra_3",
+        "Petra_4"
+      ]
+    },
+    "relic": null
+  },
+  "pure_ignis": {
+    "label": "PureType Ignis",
+    "basic": "Ignis_basic",
+    "branch_a": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_1",
+        "Ignis_2"
+      ]
+    },
+    "branch_b": {
+      "magic": "Ignis",
+      "skills": [
+        "Ignis_3",
+        "Ignis_4"
+      ]
+    },
+    "relic": null
+  }
+}

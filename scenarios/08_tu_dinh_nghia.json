@@ -1,0 +1,88 @@
+{
+  "name": "Ví dụ tự định nghĩa skill, relic và mục tiêu",
+  "note": "Mẫu để bạn sửa: skill mới có làm chậm, relic mới, mục tiêu mới. Mọi thứ nằm trong file này nên gửi lại là tái lập được.",
+  "mode": "fight",
+  "time": 90,
+  "runs": 100,
+  "team_a": [
+    "lancer"
+  ],
+  "team_b": [
+    "dummy:armored"
+  ],
+  "skills_def": {
+    "ice_lance": {
+      "name": "Băng Thương",
+      "magic": "Glacia",
+      "tier": "Mid",
+      "base": 220,
+      "cd": 5,
+      "effects": [
+        {
+          "type": "slow",
+          "value": 0.3,
+          "duration": 3.0,
+          "name": "lance_slow"
+        }
+      ]
+    },
+    "ice_nova": {
+      "name": "Bão Băng",
+      "magic": "Glacia",
+      "tier": "Ultimate",
+      "base": 450,
+      "cd": 15,
+      "hits": 3,
+      "hit_interval": 0.3
+    }
+  },
+  "relics_def": {
+    "sharp_edge": {
+      "name": "Lưỡi Sắc",
+      "mods": [
+        {
+          "stat": "flat_def_ignore",
+          "mode": "add",
+          "value": 80
+        }
+      ]
+    }
+  },
+  "dummies": {
+    "armored": {
+      "kind": "player",
+      "hp": 3500,
+      "defense": 700,
+      "res": {
+        "Glacia": 0.25
+      }
+    }
+  },
+  "fighters": {
+    "lancer": {
+      "skills": [
+        "ice_lance",
+        "ice_nova",
+        "Sylva_1",
+        "Sylva_2"
+      ],
+      "basic": "Glacia_basic",
+      "relics": [
+        "sharp_edge"
+      ]
+    }
+  },
+  "variants": [
+    {
+      "name": "có Lưỡi Sắc"
+    },
+    {
+      "name": "không relic",
+      "fighters": {
+        "lancer": {
+          "relics": []
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+{
+ "_help": "RELIC = nội tại có thể chọn tự do. Một relic có thể có: 'grants' (danh sách nội tại được cấp: molten_core, zephyr_core, fulgur_chain, shadow_screep, frigid_core, vague_drain, blood_loss, eruptive_core, chronomancy, break), 'mods' (chỉnh chỉ số {stat, mode: add|pct, value, group}), 'triggers' (periodic|on_hit|on_cast + effects). Build dùng 'relics': [id,...] (tối đa passive_system.relic_slots). stat hợp lệ: atk, hp, defense, mc, pct_def_ignore, flat_def_ignore, res_pen, damage_mult, cdr, cdr_nonbasic, stamina_cost_mult, speed_mult, heal_mult.",
+ "relic_atk": {
+  "name": "VD: +300 ATK",
+  "mods": [
+   {
+    "stat": "atk",
+    "mode": "add",
+    "value": 300
+   }
+  ]
+ },
+ "relic_ignore": {
+  "name": "VD: +100 flat & +10% DefIgnore",
+  "mods": [
+   {
+    "stat": "flat_def_ignore",
+    "mode": "add",
+    "value": 100
+   },
+   {
+    "stat": "pct_def_ignore",
+    "mode": "add",
+    "value": 0.1
+   }
+  ]
+ },
+ "relic_cdr": {
+  "name": "VD: -15% hồi chiêu",
+  "mods": [
+   {
+    "stat": "cdr",
+    "mode": "add",
+    "value": 0.15
+   }
+  ]
+ },
+ "relic_mc": {
+  "name": "VD: +25% MagicCapacity",
+  "mods": [
+   {
+    "stat": "mc",
+    "mode": "add",
+    "value": 0.25
+   }
+  ]
+ },
+ "relic_tank": {
+  "name": "VD: +50% HP, +500 Def",
+  "mods": [
+   {
+    "stat": "hp",
+    "mode": "pct",
+    "value": 0.5,
+    "group": "relic"
+   },
+   {
+    "stat": "defense",
+    "mode": "add",
+    "value": 500
+   }
+  ]
+ },
+ "relic_shield_pulse": {
+  "name": "VD: cứ 12s nhận khiên 10% maxHP",
+  "triggers": [
+   {
+    "type": "periodic",
+    "every": 12.0,
+    "effects": [
+     {
+      "type": "shield",
+      "to": "self",
+      "pct_max": 0.1,
+      "duration": 6.0
+     }
+    ]
+   }
+  ]
+ },
+ "relic_slow_on_hit": {
+  "name": "VD: mỗi đòn (ICD 4s) làm chậm 20% 2s",
+  "triggers": [
+   {
+    "type": "on_hit",
+    "icd": 4.0,
+    "effects": [
+     {
+      "type": "slow",
+      "to": "enemy",
+      "value": 0.2,
+      "duration": 2.0,
+      "name": "relic_slow"
+     }
+    ]
+   }
+  ]
+ },
+ "passive_molten_core": {
+  "name": "Nội tại: Molten Core",
+  "grants": [
+   "molten_core"
+  ]
+ },
+ "passive_zephyr_core": {
+  "name": "Nội tại: Zephyr Core",
+  "grants": [
+   "zephyr_core"
+  ]
+ },
+ "passive_fulgur_chain": {
+  "name": "Nội tại: Fulgur Chain",
+  "grants": [
+   "fulgur_chain"
+  ]
+ },
+ "passive_shadow_screep": {
+  "name": "Nội tại: Shadow Screep",
+  "grants": [
+   "shadow_screep"
+  ]
+ },
+ "passive_frigid_core": {
+  "name": "Nội tại: Frigid Core",
+  "grants": [
+   "frigid_core"
+  ]
+ },
+ "passive_vague_drain": {
+  "name": "Nội tại: Vague/Drained",
+  "grants": [
+   "vague_drain"
+  ]
+ },
+ "passive_blood_loss": {
+  "name": "Nội tại: Blood Loss",
+  "grants": [
+   "blood_loss"
+  ]
+ },
+ "passive_eruptive_core": {
+  "name": "Nội tại: Eruptive Core",
+  "grants": [
+   "eruptive_core"
+  ]
+ },
+ "passive_chronomancy": {
+  "name": "Nội tại: Chronomancy",
+  "grants": [
+   "chronomancy"
+  ]
+ },
+ "passive_break": {
+  "name": "Nội tại: Break",
+  "grants": [
+   "break"
+  ]
+ }
+}

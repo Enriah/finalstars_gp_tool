@@ -1,0 +1,42 @@
+{
+  "name": "Damage của Amgar lên các mức Defense",
+  "note": "Cùng nhân vật, đổi mục tiêu từ Def 300 tới Def 10000 (Defense không cap).",
+  "mode": "dps",
+  "time": 30,
+  "runs": 40,
+  "team_a": [
+    "amgar"
+  ],
+  "team_b": [
+    "dummy:std"
+  ],
+  "set": {
+    "rules.combat.p_hit": 1.0
+  },
+  "variants": [
+    {
+      "name": "Def 300 (HP 2000)",
+      "team_b": [
+        "dummy:std"
+      ]
+    },
+    {
+      "name": "Def 1000 (HP 6000)",
+      "team_b": [
+        "dummy:def1000"
+      ]
+    },
+    {
+      "name": "Def 3000 (HP 20000)",
+      "team_b": [
+        "dummy:tank3000"
+      ]
+    },
+    {
+      "name": "Def 10000 (HP 50000)",
+      "team_b": [
+        "dummy:tank10000"
+      ]
+    }
+  ]
+}

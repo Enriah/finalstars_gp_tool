@@ -1,0 +1,45 @@
+{
+  "name": "So sánh nerf Molten Core (flat DefIgnore)",
+  "note": "Cùng một trận Amgar vs Baseline, thay đổi flat_ignore của Molten Core. Chế độ dps để so tỉ lệ damage A/B.",
+  "mode": "dps",
+  "time": 30,
+  "runs": 150,
+  "team_a": [
+    "amgar"
+  ],
+  "team_b": [
+    "baseline"
+  ],
+  "variants": [
+    {
+      "name": "flat 0",
+      "set": {
+        "rules.passives.molten_core.flat_ignore": 0
+      }
+    },
+    {
+      "name": "flat 25",
+      "set": {
+        "rules.passives.molten_core.flat_ignore": 25
+      }
+    },
+    {
+      "name": "flat 50 (hiện tại)",
+      "set": {
+        "rules.passives.molten_core.flat_ignore": 50
+      }
+    },
+    {
+      "name": "flat 75",
+      "set": {
+        "rules.passives.molten_core.flat_ignore": 75
+      }
+    },
+    {
+      "name": "flat 100",
+      "set": {
+        "rules.passives.molten_core.flat_ignore": 100
+      }
+    }
+  ]
+}

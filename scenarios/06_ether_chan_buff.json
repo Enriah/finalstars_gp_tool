@@ -1,0 +1,44 @@
+{
+  "name": "Ether (Drained) chặn buff của đối thủ",
+  "note": "Đối thủ có skill buff ATK (ex_warcry). Ether dựng Vague rồi kích hoạt Drained bằng sát thương magic khác. Xem dòng 'buff bị Drained CHẶN' trong nhật ký và cột 'buff bị chặn'.",
+  "mode": "dps",
+  "time": 60,
+  "runs": 40,
+  "team_a": [
+    "ether_rapid"
+  ],
+  "team_b": [
+    "buffer"
+  ],
+  "fighters": {
+    "buffer": {
+      "skills": [
+        "ex_warcry",
+        "Gale_1",
+        "Gale_3",
+        "Gale_4"
+      ],
+      "basic": "Gale_basic"
+    }
+  },
+  "set": {
+    "rules.combat.p_hit": 1.0
+  },
+  "variants": [
+    {
+      "name": "mặc định"
+    },
+    {
+      "name": "Vague tồn tại 10s mỗi tầng",
+      "set": {
+        "rules.passives.vague_drain.stack_duration": 10.0
+      }
+    },
+    {
+      "name": "Drained 2s mỗi tầng",
+      "set": {
+        "rules.passives.vague_drain.drained_per_stack": 2.0
+      }
+    }
+  ]
+}

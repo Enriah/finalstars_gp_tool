@@ -1,0 +1,634 @@
+{
+  "_help": "THƯ VIỆN SKILL. Mỗi skill: magic, tier (Basic|Mid|High|Ultimate; tier KHÔNG khóa chỉ số), base (AbilityBaseDamage), cd (giây, mỗi charge), charges, cast_time, hits, hit_interval, hit_chance (null = combat.p_hit), true_base, effects, lifetime. Bể basic của 1 magic = các skill tier Basic thuộc magic đó. Skill mẫu M_basic/M_1..M_4 chỉ là SỐ GIẢ ĐỊNH để thử tool, hãy thay bằng skill thật.",
+  "Agenet_basic": {
+    "name": "Agenet basic (mẫu)",
+    "magic": "Agenet",
+    "tier": "Basic",
+    "base": 60,
+    "cd": 1.5
+  },
+  "Agenet_1": {
+    "name": "Agenet #1 (mẫu)",
+    "magic": "Agenet",
+    "tier": "Mid",
+    "base": 120,
+    "cd": 4
+  },
+  "Agenet_2": {
+    "name": "Agenet #2 (mẫu)",
+    "magic": "Agenet",
+    "tier": "Mid",
+    "base": 180,
+    "cd": 6
+  },
+  "Agenet_3": {
+    "name": "Agenet #3 (mẫu)",
+    "magic": "Agenet",
+    "tier": "High",
+    "base": 250,
+    "cd": 9
+  },
+  "Agenet_4": {
+    "name": "Agenet #4 (mẫu)",
+    "magic": "Agenet",
+    "tier": "Ultimate",
+    "base": 400,
+    "cd": 14
+  },
+  "Sylva_basic": {
+    "name": "Sylva basic (mẫu)",
+    "magic": "Sylva",
+    "tier": "Basic",
+    "base": 60,
+    "cd": 1.5
+  },
+  "Sylva_1": {
+    "name": "Sylva #1 (mẫu)",
+    "magic": "Sylva",
+    "tier": "Mid",
+    "base": 120,
+    "cd": 4
+  },
+  "Sylva_2": {
+    "name": "Sylva #2 (mẫu)",
+    "magic": "Sylva",
+    "tier": "Mid",
+    "base": 180,
+    "cd": 6
+  },
+  "Sylva_3": {
+    "name": "Sylva #3 (mẫu)",
+    "magic": "Sylva",
+    "tier": "High",
+    "base": 250,
+    "cd": 9
+  },
+  "Sylva_4": {
+    "name": "Sylva #4 (mẫu)",
+    "magic": "Sylva",
+    "tier": "Ultimate",
+    "base": 400,
+    "cd": 14
+  },
+  "Aqua_basic": {
+    "name": "Aqua basic (mẫu)",
+    "magic": "Aqua",
+    "tier": "Basic",
+    "base": 60,
+    "cd": 1.5
+  },
+  "Aqua_1": {
+    "name": "Aqua #1 (mẫu)",
+    "magic": "Aqua",
+    "tier": "Mid",
+    "base": 120,
+    "cd": 4
+  },
+  "Aqua_2": {
+    "name": "Aqua #2 (mẫu)",
+    "magic": "Aqua",
+    "tier": "Mid",
+    "base": 180,
+    "cd": 6
+  },
+  "Aqua_3": {
+    "name": "Aqua #3 (mẫu)",
+    "magic": "Aqua",
+    "tier": "High",
+    "base": 250,
+    "cd": 9
+  },
+  "Aqua_4": {
+    "name": "Aqua #4 (mẫu)",
+    "magic": "Aqua",
+    "tier": "Ultimate",
+    "base": 400,
+    "cd": 14
+  },
+  "Ignis_basic": {
+    "name": "Ignis basic (mẫu)",
+    "magic": "Ignis",
+    "tier": "Basic",
+    "base": 60,
+    "cd": 1.5
+  },
+  "Ignis_1": {
+    "name": "Ignis #1 (mẫu)",
+    "magic": "Ignis",
+    "tier": "Mid",
+    "base": 120,
+    "cd": 4
+  },
+  "Ignis_2": {
+    "name": "Ignis #2 (mẫu)",
+    "magic": "Ignis",
+    "tier": "Mid",
+    "base": 180,
+    "cd": 6
+  },
+  "Ignis_3": {
+    "name": "Ignis #3 (mẫu)",
+    "magic": "Ignis",
+    "tier": "High",
+    "base": 250,
+    "cd": 9
+  },
+  "Ignis_4": {
+    "name": "Ignis #4 (mẫu)",
+    "magic": "Ignis",
+    "tier": "Ultimate",
+    "base": 400,
+    "cd": 14
+  },
+  "Petra_basic": {
+    "name": "Petra basic (mẫu)",
+    "magic": "Petra",
+    "tier": "Basic",
+    "base": 60,
+    "cd": 1.5
+  },
+  "Petra_1": {
+    "name": "Petra #1 (mẫu)",
+    "magic": "Petra",
+    "tier": "Mid",
+    "base": 120,
+    "cd": 4
+  },
+  "Petra_2": {
+    "name": "Petra #2 (mẫu)",
+    "magic": "Petra",
+    "tier": "Mid",
+    "base": 180,
+    "cd": 6
+  },
+  "Petra_3": {
+    "name": "Petra #3 (mẫu)",
+    "magic": "Petra",
+    "tier": "High",
+    "base": 250,
+    "cd": 9
+  },
+  "Petra_4": {
+    "name": "Petra #4 (mẫu)",
+    "magic": "Petra",
+    "tier": "Ultimate",
+    "base": 400,
+    "cd": 14
+  },
+  "Gale_basic": {
+    "name": "Gale basic (mẫu)",
+    "magic": "Gale",
+    "tier": "Basic",
+    "base": 60,
+    "cd": 1.5
+  },
+  "Gale_1": {
+    "name": "Gale #1 (mẫu)",
+    "magic": "Gale",
+    "tier": "Mid",
+    "base": 120,
+    "cd": 4
+  },
+  "Gale_2": {
+    "name": "Gale #2 (mẫu)",
+    "magic": "Gale",
+    "tier": "Mid",
+    "base": 180,
+    "cd": 6
+  },
+  "Gale_3": {
+    "name": "Gale #3 (mẫu)",
+    "magic": "Gale",
+    "tier": "High",
+    "base": 250,
+    "cd": 9
+  },
+  "Gale_4": {
+    "name": "Gale #4 (mẫu)",
+    "magic": "Gale",
+    "tier": "Ultimate",
+    "base": 400,
+    "cd": 14
+  },
+  "Amgar_basic": {
+    "name": "Amgar basic (mẫu)",
+    "magic": "Amgar",
+    "tier": "Basic",
+    "base": 60,
+    "cd": 1.5
+  },
+  "Amgar_1": {
+    "name": "Amgar #1 (mẫu)",
+    "magic": "Amgar",
+    "tier": "Mid",
+    "base": 120,
+    "cd": 4
+  },
+  "Amgar_2": {
+    "name": "Amgar #2 (mẫu)",
+    "magic": "Amgar",
+    "tier": "Mid",
+    "base": 180,
+    "cd": 6
+  },
+  "Amgar_3": {
+    "name": "Amgar #3 (mẫu)",
+    "magic": "Amgar",
+    "tier": "High",
+    "base": 250,
+    "cd": 9
+  },
+  "Amgar_4": {
+    "name": "Amgar #4 (mẫu)",
+    "magic": "Amgar",
+    "tier": "Ultimate",
+    "base": 400,
+    "cd": 14
+  },
+  "Glacia_basic": {
+    "name": "Glacia basic (mẫu)",
+    "magic": "Glacia",
+    "tier": "Basic",
+    "base": 60,
+    "cd": 1.5
+  },
+  "Glacia_1": {
+    "name": "Glacia #1 (mẫu)",
+    "magic": "Glacia",
+    "tier": "Mid",
+    "base": 120,
+    "cd": 4
+  },
+  "Glacia_2": {
+    "name": "Glacia #2 (mẫu)",
+    "magic": "Glacia",
+    "tier": "Mid",
+    "base": 180,
+    "cd": 6
+  },
+  "Glacia_3": {
+    "name": "Glacia #3 (mẫu)",
+    "magic": "Glacia",
+    "tier": "High",
+    "base": 250,
+    "cd": 9
+  },
+  "Glacia_4": {
+    "name": "Glacia #4 (mẫu)",
+    "magic": "Glacia",
+    "tier": "Ultimate",
+    "base": 400,
+    "cd": 14
+  },
+  "Sable_basic": {
+    "name": "Sable basic (mẫu)",
+    "magic": "Sable",
+    "tier": "Basic",
+    "base": 60,
+    "cd": 1.5
+  },
+  "Sable_1": {
+    "name": "Sable #1 (mẫu)",
+    "magic": "Sable",
+    "tier": "Mid",
+    "base": 120,
+    "cd": 4
+  },
+  "Sable_2": {
+    "name": "Sable #2 (mẫu)",
+    "magic": "Sable",
+    "tier": "Mid",
+    "base": 180,
+    "cd": 6
+  },
+  "Sable_3": {
+    "name": "Sable #3 (mẫu)",
+    "magic": "Sable",
+    "tier": "High",
+    "base": 250,
+    "cd": 9
+  },
+  "Sable_4": {
+    "name": "Sable #4 (mẫu)",
+    "magic": "Sable",
+    "tier": "Ultimate",
+    "base": 400,
+    "cd": 14
+  },
+  "Fulgur_basic": {
+    "name": "Fulgur basic (mẫu)",
+    "magic": "Fulgur",
+    "tier": "Basic",
+    "base": 60,
+    "cd": 1.5
+  },
+  "Fulgur_1": {
+    "name": "Fulgur #1 (mẫu)",
+    "magic": "Fulgur",
+    "tier": "Mid",
+    "base": 120,
+    "cd": 4
+  },
+  "Fulgur_2": {
+    "name": "Fulgur #2 (mẫu)",
+    "magic": "Fulgur",
+    "tier": "Mid",
+    "base": 180,
+    "cd": 6
+  },
+  "Fulgur_3": {
+    "name": "Fulgur #3 (mẫu)",
+    "magic": "Fulgur",
+    "tier": "High",
+    "base": 250,
+    "cd": 9
+  },
+  "Fulgur_4": {
+    "name": "Fulgur #4 (mẫu)",
+    "magic": "Fulgur",
+    "tier": "Ultimate",
+    "base": 400,
+    "cd": 14
+  },
+  "Cruor_basic": {
+    "name": "Cruor basic (mẫu)",
+    "magic": "Cruor",
+    "tier": "Basic",
+    "base": 60,
+    "cd": 1.5
+  },
+  "Cruor_1": {
+    "name": "Cruor #1 (mẫu)",
+    "magic": "Cruor",
+    "tier": "Mid",
+    "base": 120,
+    "cd": 4
+  },
+  "Cruor_2": {
+    "name": "Cruor #2 (mẫu)",
+    "magic": "Cruor",
+    "tier": "Mid",
+    "base": 180,
+    "cd": 6
+  },
+  "Cruor_3": {
+    "name": "Cruor #3 (mẫu)",
+    "magic": "Cruor",
+    "tier": "High",
+    "base": 250,
+    "cd": 9
+  },
+  "Cruor_4": {
+    "name": "Cruor #4 (mẫu)",
+    "magic": "Cruor",
+    "tier": "Ultimate",
+    "base": 400,
+    "cd": 14
+  },
+  "Ether_basic": {
+    "name": "Ether basic (mẫu)",
+    "magic": "Ether",
+    "tier": "Basic",
+    "base": 60,
+    "cd": 1.5
+  },
+  "Ether_1": {
+    "name": "Ether #1 (mẫu)",
+    "magic": "Ether",
+    "tier": "Mid",
+    "base": 120,
+    "cd": 4
+  },
+  "Ether_2": {
+    "name": "Ether #2 (mẫu)",
+    "magic": "Ether",
+    "tier": "Mid",
+    "base": 180,
+    "cd": 6
+  },
+  "Ether_3": {
+    "name": "Ether #3 (mẫu)",
+    "magic": "Ether",
+    "tier": "High",
+    "base": 250,
+    "cd": 9
+  },
+  "Ether_4": {
+    "name": "Ether #4 (mẫu)",
+    "magic": "Ether",
+    "tier": "Ultimate",
+    "base": 400,
+    "cd": 14
+  },
+  "TimeFlow_basic": {
+    "name": "TimeFlow basic (mẫu)",
+    "magic": "TimeFlow",
+    "tier": "Basic",
+    "base": 60,
+    "cd": 1.5
+  },
+  "TimeFlow_1": {
+    "name": "TimeFlow #1 (mẫu)",
+    "magic": "TimeFlow",
+    "tier": "Mid",
+    "base": 120,
+    "cd": 4
+  },
+  "TimeFlow_2": {
+    "name": "TimeFlow #2 (mẫu)",
+    "magic": "TimeFlow",
+    "tier": "Mid",
+    "base": 180,
+    "cd": 6
+  },
+  "TimeFlow_3": {
+    "name": "TimeFlow #3 (mẫu)",
+    "magic": "TimeFlow",
+    "tier": "High",
+    "base": 250,
+    "cd": 9
+  },
+  "TimeFlow_4": {
+    "name": "TimeFlow #4 (mẫu)",
+    "magic": "TimeFlow",
+    "tier": "Ultimate",
+    "base": 400,
+    "cd": 14
+  },
+  "Entropy_basic": {
+    "name": "Entropy basic (mẫu)",
+    "magic": "Entropy",
+    "tier": "Basic",
+    "base": 60,
+    "cd": 1.5
+  },
+  "Entropy_1": {
+    "name": "Entropy #1 (mẫu)",
+    "magic": "Entropy",
+    "tier": "Mid",
+    "base": 120,
+    "cd": 4
+  },
+  "Entropy_2": {
+    "name": "Entropy #2 (mẫu)",
+    "magic": "Entropy",
+    "tier": "Mid",
+    "base": 180,
+    "cd": 6
+  },
+  "Entropy_3": {
+    "name": "Entropy #3 (mẫu)",
+    "magic": "Entropy",
+    "tier": "High",
+    "base": 250,
+    "cd": 9
+  },
+  "Entropy_4": {
+    "name": "Entropy #4 (mẫu)",
+    "magic": "Entropy",
+    "tier": "Ultimate",
+    "base": 400,
+    "cd": 14
+  },
+  "Glacia_rapid": {
+    "name": "Glacia basic nhanh (mẫu)",
+    "magic": "Glacia",
+    "tier": "Basic",
+    "base": 40,
+    "cd": 1.5
+  },
+  "Aqua_rapid": {
+    "name": "Aqua basic nhanh (mẫu)",
+    "magic": "Aqua",
+    "tier": "Basic",
+    "base": 40,
+    "cd": 1.5
+  },
+  "Agenet_rapid": {
+    "name": "Agenet basic nhanh (mẫu)",
+    "magic": "Agenet",
+    "tier": "Basic",
+    "base": 80,
+    "cd": 2.0
+  },
+  "Cruor_rapid": {
+    "name": "Cruor basic nhanh (mẫu)",
+    "magic": "Cruor",
+    "tier": "Basic",
+    "base": 40,
+    "cd": 1.5
+  },
+  "Ether_rapid": {
+    "name": "Ether basic nhanh (mẫu)",
+    "magic": "Ether",
+    "tier": "Basic",
+    "base": 40,
+    "cd": 2.0
+  },
+  "Sable_rapid": {
+    "name": "Sable basic nhanh (mẫu)",
+    "magic": "Sable",
+    "tier": "Basic",
+    "base": 40,
+    "cd": 1.5
+  },
+  "ex_slow_bolt": {
+    "name": "VD: đạn làm chậm",
+    "magic": "Petra",
+    "tier": "Mid",
+    "base": 100,
+    "cd": 5,
+    "effects": [
+      {
+        "type": "slow",
+        "value": 0.3,
+        "duration": 3.0,
+        "name": "ex_slow"
+      }
+    ]
+  },
+  "ex_burn": {
+    "name": "VD: đốt (DoT)",
+    "magic": "Ignis",
+    "tier": "Mid",
+    "base": 80,
+    "cd": 7,
+    "effects": [
+      {
+        "type": "dot",
+        "dps_base": 40,
+        "atk_coef": 0.0,
+        "duration": 5.0,
+        "tick": 0.5
+      }
+    ]
+  },
+  "ex_warcry": {
+    "name": "VD: buff ATK +20% 6s",
+    "magic": "Gale",
+    "tier": "High",
+    "base": 0,
+    "cd": 15,
+    "hits": 0,
+    "effects": [
+      {
+        "type": "buff",
+        "to": "self",
+        "stat": "atk",
+        "mode": "pct",
+        "value": 0.2,
+        "duration": 6.0,
+        "group": "skill",
+        "name": "warcry"
+      }
+    ]
+  },
+  "ex_heal": {
+    "name": "VD: hồi 10% maxHP",
+    "magic": "Sylva",
+    "tier": "Mid",
+    "base": 0,
+    "cd": 18,
+    "hits": 0,
+    "effects": [
+      {
+        "type": "heal",
+        "to": "self",
+        "pct_max": 0.1
+      }
+    ]
+  },
+  "ex_barrier": {
+    "name": "VD: khiên 15% maxHP 6s",
+    "magic": "Petra",
+    "tier": "High",
+    "base": 0,
+    "cd": 20,
+    "hits": 0,
+    "effects": [
+      {
+        "type": "shield",
+        "to": "self",
+        "pct_max": 0.15,
+        "duration": 6.0
+      }
+    ]
+  },
+  "ex_wall": {
+    "name": "VD: tường (lifetime 12s)",
+    "magic": "Petra",
+    "tier": "High",
+    "base": 0,
+    "cd": 15,
+    "hits": 0,
+    "lifetime": 12.0
+  },
+  "ex_charge2": {
+    "name": "VD: skill 2 charge",
+    "magic": "Agenet",
+    "tier": "Mid",
+    "base": 150,
+    "cd": 8,
+    "charges": 2
+  }
+}

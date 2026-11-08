@@ -1,0 +1,41 @@
+{
+  "name": "Combo băng: Glacia + Aqua + Kim lên bao cát",
+  "note": "Ba người cùng đánh một mục tiêu HP lớn trong 90s. Xem uptime Frozen/Freezing và true damage của Break. Đặt p_hit=1 để loại nhiễu trúng/trượt.",
+  "mode": "dps",
+  "time": 90,
+  "runs": 60,
+  "team_a": [
+    "ice_glacia",
+    "ice_aqua",
+    "ice_kim"
+  ],
+  "team_b": [
+    "dummy:sandbag"
+  ],
+  "set": {
+    "rules.combat.p_hit": 1.0
+  },
+  "variants": [
+    {
+      "name": "mặc định"
+    },
+    {
+      "name": "Frozen không tạo lại khi nhận Wet",
+      "set": {
+        "rules.switches.frozen_retrigger_on_wet.value": false
+      }
+    },
+    {
+      "name": "miễn Frozen 6s sau mỗi lần",
+      "set": {
+        "rules.passives.frigid_core.frozen_immunity": 6.0
+      }
+    },
+    {
+      "name": "mục tiêu trong Exothermal",
+      "team_b": [
+        "dummy:sandbag_exo"
+      ]
+    }
+  ]
+}

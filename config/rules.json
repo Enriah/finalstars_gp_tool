@@ -1,0 +1,404 @@
+{
+ "_help": "RULES: toàn bộ luật nền + số liệu từng hiệu ứng. Sửa số ở đây là engine đổi theo ngay. Khóa bắt đầu bằng '_' chỉ là ghi chú.",
+ "combat": {
+  "_help": "Tham số giả định cho mô phỏng chiến đấu (KHÔNG có trong tài liệu thiết kế của bạn).",
+  "dt": 0.1,
+  "gcd": 0.6,
+  "p_hit": 0.6,
+  "guard_q": 0.35,
+  "guard_lock": 0.5,
+  "slow_hit_bonus": 0.5
+ },
+ "stats_base": {
+  "_help": "Chỉ số gốc theo 'Stats, Combat, Attributes, Damage.md'.",
+  "atk": 200,
+  "hp": 2000,
+  "defense": 300,
+  "mc": 0.0,
+  "pct_def_ignore": 0.05,
+  "flat_def_ignore": 50,
+  "res_pen": 0.0,
+  "damage_mult": 1.0,
+  "cdr": 0.0,
+  "cdr_nonbasic": 0.0,
+  "stamina_cost_mult": 1.0,
+  "speed_mult": 1.0,
+  "heal_mult": 1.0,
+  "res_debuff": 0.0,
+  "stamina": 180
+ },
+ "stats_caps": {
+  "_help": "Cap của từng chỉ số. null = không cap. 'res' là cap giảm damage của Magic Resistance. 'cdr' là GIẢ ĐỊNH (tài liệu chưa có cap).",
+  "atk": 5000,
+  "hp": 50000,
+  "mc": 0.5,
+  "pct_def_ignore": 0.4,
+  "flat_def_ignore": 500,
+  "defense": null,
+  "res": 0.75,
+  "cdr": 0.5,
+  "damage_mult": null
+ },
+ "stamina": {
+  "regen": 2,
+  "regen_delay": 2,
+  "guard_cost": 30,
+  "block_res_bonus": 0.1,
+  "block_res_duration": 3,
+  "block_res_stacks": false
+ },
+ "skill_rules": {
+  "_help": "Luật chọn skill (theo thiết kế): 5 skill = 2 nhánh x 2 skill + 1 basic. Basic lấy từ BỂ BASIC của magic nhánh 1 (nhánh chọn trước). Không giới hạn tier ở các skill nhánh. 5 skill không được trùng nhau.",
+  "tiers": [
+   "Basic",
+   "Mid",
+   "High",
+   "Ultimate"
+  ],
+  "skills_per_branch": 2,
+  "basic_tier": "Basic",
+  "basic_magic_must_match_first_branch": true,
+  "distinct_skills": true,
+  "_tier_bands_help": "Tier KHÔNG khóa chỉ số. Nếu muốn tool cảnh báo skill lệch khỏi 'dải thiết kế' của tier, điền [min, max] cho base / cd / dps (dps = (ATK+base)*hits/cd, tính với ATK gốc). null = không kiểm tra.",
+  "tier_bands": {
+   "Basic": {
+    "base": [
+     null,
+     null
+    ],
+    "cd": [
+     null,
+     null
+    ],
+    "dps": [
+     null,
+     null
+    ]
+   },
+   "Mid": {
+    "base": [
+     null,
+     null
+    ],
+    "cd": [
+     null,
+     null
+    ],
+    "dps": [
+     null,
+     null
+    ]
+   },
+   "High": {
+    "base": [
+     null,
+     null
+    ],
+    "cd": [
+     null,
+     null
+    ],
+    "dps": [
+     null,
+     null
+    ]
+   },
+   "Ultimate": {
+    "base": [
+     null,
+     null
+    ],
+    "cd": [
+     null,
+     null
+    ],
+    "dps": [
+     null,
+     null
+    ]
+   }
+  }
+ },
+ "passive_system": {
+  "_help": "HỆ THỐNG NỘI TẠI/RELIC. Nội tại có thể đến từ (1) magic mang theo (nếu magic_grants_passive) và/hoặc (2) relic có khóa 'grants'. Một nội tại chỉ tính MỘT lần dù có nhiều nguồn. relic_slots = số relic tối đa mỗi người/trận.",
+  "magic_grants_passive": true,
+  "relic_slots": 1,
+  "relic_unique": true,
+  "magic_passive_map": {
+   "Amgar": [
+    "molten_core"
+   ],
+   "Gale": [
+    "zephyr_core"
+   ],
+   "Fulgur": [
+    "fulgur_chain"
+   ],
+   "Sable": [
+    "shadow_screep"
+   ],
+   "Glacia": [
+    "frigid_core"
+   ],
+   "Ether": [
+    "vague_drain"
+   ],
+   "Cruor": [
+    "blood_loss"
+   ],
+   "Entropy": [
+    "eruptive_core"
+   ],
+   "TimeFlow": [
+    "chronomancy"
+   ],
+   "Agenet": [
+    "break"
+   ]
+  },
+  "_hosts_help": "Dùng cho lệnh 'passives'. host = build tự nhiên của nội tại (có skill đúng magic để kích hoạt); generic = nội tại có tác dụng với mọi build (không cần skill đúng magic).",
+  "passive_hosts": {
+   "molten_core": {
+    "host": "amgar",
+    "generic": true
+   },
+   "zephyr_core": {
+    "host": "gale",
+    "generic": true
+   },
+   "chronomancy": {
+    "host": "timeflow",
+    "generic": true
+   },
+   "eruptive_core": {
+    "host": "entropy",
+    "generic": true
+   },
+   "blood_loss": {
+    "host": "cruor_2nd",
+    "generic": true
+   },
+   "shadow_screep": {
+    "host": "sable_rapid",
+    "generic": false
+   },
+   "frigid_core": {
+    "host": "glacia_rapid",
+    "generic": false
+   },
+   "vague_drain": {
+    "host": "ether_rapid",
+    "generic": false
+   },
+   "fulgur_chain": {
+    "host": null,
+    "generic": false
+   },
+   "break": {
+    "host": null,
+    "generic": false
+   }
+  }
+ },
+ "movement": {
+  "_help": "Sàn/cap tốc độ. Bảng trong tài liệu ghi cap 35 m/s nhưng FlightBoost = 40 m/s: tool để cap tách riêng để bạn thử.",
+  "floor": 3.5,
+  "cap": 100,
+  "locomotion": {
+   "Run": 6.5,
+   "Sprint": 12,
+   "BasicFlight": 25,
+   "FlightBoost": 40
+  }
+ },
+ "mc": {
+  "_help": "Có áp MagicCapacity vào hiệu ứng của skill/relic (buff, slow, dot, heal, shield, stun...) không. Với passive thì chỉnh 'mc_scales' trong từng passive.",
+  "skill_effects_scale": true
+ },
+ "switches": {
+  "_help": "Các điểm tài liệu CHƯA CHỐT/mơ hồ. Mỗi cái có giá trị mặc định (cách hiểu mình chọn). Lệnh 'check' sẽ liệt kê.",
+  "wet_on_players": {
+   "value": true,
+   "doc": "Wet.md chỉ nói 'vật thể', nhưng Frigid Core/Break nói cả nhân vật. true = nhân vật cũng bị Wet."
+  },
+  "frozen_retrigger_on_wet": {
+   "value": true,
+   "doc": "Mỗi lần NHẬN Wet khi đang Freezing có tạo lại Frozen không? false = chỉ 1 lần mỗi đợt Freezing."
+  },
+  "frigid_icd_per_source": {
+   "value": true,
+   "doc": "ICD 1,5s của Frigid Core tính theo từng nguồn Glacia (true) hay chung trên mục tiêu (false)."
+  },
+  "slow_stacking": {
+   "value": "multiplicative",
+   "doc": "Nhiều nguồn slow: 'multiplicative' (nhân) hoặc 'additive' (cộng)."
+  },
+  "max_slow": {
+   "value": 1.0,
+   "doc": "Giới hạn tổng slow (1.0 = 100%)."
+  },
+  "break_uses_reaction_icd": {
+   "value": false,
+   "doc": "Break có chịu Reaction ICD 3s (Reaction Resolver) không, thay vì ICD 2s riêng."
+  },
+  "trigger_on_zero_damage": {
+   "value": true,
+   "doc": "Đòn gây 0 damage (vd Kim miễn Thủy) vẫn kích hoạt hiệu ứng (Wet...) không."
+  },
+  "eruptive_clears_undispellable": {
+   "value": false,
+   "doc": "Eruptive Core có xóa cả Vague/Drained (vốn không giải trừ được) không."
+  },
+  "blood_loss_any_source": {
+   "value": true,
+   "doc": "Sát thương từ đồng đội/mọi nguồn đều cho tầng Blood Loss (true) hay chỉ từ người mang Cruor (false)."
+  },
+  "chain_hits_players": {
+   "value": false,
+   "doc": "Fulgur Chain lan sang cả người chơi (true) hay chỉ vật thể (false)."
+  },
+  "skill_dot_triggers_effects": {
+   "value": false,
+   "doc": "DoT của skill có kích hoạt passive (Frigid, Blood Loss...) không."
+  }
+ },
+ "damage_formula": {
+  "_help": "Công thức tính sát thương (có thể tinh chỉnh trong tab Advanced)",
+  "raw_expr": "(atk + base) * damage_mult",
+  "def_k": 100.0,
+  "def_expr": "d / (def_k + d)",
+  "res_expr": "1 - min(r, caps_res) if r >= 0 else 1 - r / 2"
+ },
+ "passives": {
+  "_help": "Số liệu từng passive/hiệu ứng. mc_scales=true nghĩa là MagicCapacity nhân vào giá trị (theo MagicCapacity.md).",
+  "molten_core": {
+   "_doc": "Molten Core.md (Amgar)",
+   "def_pct": 0.1,
+   "flat_ignore": 50,
+   "pct_ignore": 0.08,
+   "mc_scales": true
+  },
+  "zephyr_core": {
+   "_doc": "Zephyr Core.md (Gale)",
+   "stamina_cost_reduction": 0.3,
+   "speed_bonus": 0.3,
+   "extra_dodge": 1,
+   "mc_scales": true
+  },
+  "fulgur_chain": {
+   "_doc": "Fulgur Chain.md",
+   "bonus_pct": 0.2,
+   "max_secondary": 4,
+   "trigger_magics": [
+    "Aqua",
+    "Agenet"
+   ],
+   "mc_scales": true
+  },
+  "shadow_screep": {
+   "_doc": "Shadow Screep.md (stack_duration: tài liệu chưa ghi -> GIẢ ĐỊNH 6s)",
+   "slow_per_stack": 0.05,
+   "max_stacks": 6,
+   "icd": 1.5,
+   "stack_duration": 6.0,
+   "mc_scales": true
+  },
+  "frigid_core": {
+   "_doc": "Frigid Core.md. stack_duration null = tồn tại cả round",
+   "icd": 1.5,
+   "max_stacks": 10,
+   "slow_per_stack": 0.04,
+   "decay_interval": 0.5,
+   "frozen_duration": 2.5,
+   "frozen_immunity": 0.0,
+   "stack_duration": null,
+   "mc_scales": true
+  },
+  "vague_drain": {
+   "_doc": "Vague Drain.md. stack_duration null = cả round",
+   "icd": 2.0,
+   "max_stacks": 10,
+   "stack_duration": null,
+   "drained_per_stack": 1.0,
+   "drained_cap": 10,
+   "mc_scales": true,
+   "mc_scales_cap": false
+  },
+  "blood_loss": {
+   "_doc": "Blood Loss.md. heal_clears: 'all' | số tầng bị xóa mỗi lần heal | 'none'",
+   "pct_per_stack": 0.003,
+   "max_stacks": 10,
+   "duration": 5.0,
+   "icd": 0.5,
+   "lifesteal": 0.2,
+   "bypass_def": true,
+   "res_applies": true,
+   "heal_clears": "all",
+   "mc_scales": true
+  },
+  "eruptive_core": {
+   "_doc": "Eruptive Core.md",
+   "heal_pct": 0.3,
+   "iframe": 0.75,
+   "cooldown": 120,
+   "mc_scales": true
+  },
+  "chronomancy": {
+   "_doc": "Chronomancy.md. scope: 'all' (kể cả basic) | 'non_basic'",
+   "cd_reduction": 0.3,
+   "scope": "all",
+   "lifetime_bonus": 0.35,
+   "mc_scales": true
+  },
+  "pure_type": {
+   "_doc": "PureType.md (không bị MC khuếch đại)",
+   "damage_bonus": 0.15,
+   "res_pen": 0.05,
+   "mc_scales": false
+  },
+  "sturd": {
+   "_doc": "Sturd.md (vật thể Kim)",
+   "immune_magics": [
+    "Aqua",
+    "Gale",
+    "Petra",
+    "Sable"
+   ],
+   "immune_res": 1.0,
+   "def_debuff": 0.3,
+   "ignis_bonus": 0.3,
+   "duration": 3.0
+  },
+  "break": {
+   "_doc": "Sturd.md - Break (Kim)",
+   "bonus_pct": 0.2,
+   "true_pct_max_hp": 0.04,
+   "icd": 2.0
+  },
+  "wet": {
+   "_doc": "Wet.md + Buried",
+   "duration": 5.0,
+   "objects": [
+    "Petra",
+    "Agenet",
+    "Sylva",
+    "Sable"
+   ],
+   "buried_def_debuff": 0.3,
+   "buried_duration": 5.0,
+   "buried_radius_reduction": 0.1
+  },
+  "exothermal": {
+   "_doc": "Exothermal.md (bán kính chỉ để ghi nhớ; tool dùng cờ in_exothermal của mục tiêu)",
+   "radius": 7
+  },
+  "genesis": {
+   "_doc": "Genesis.md",
+   "extra_charges": 1
+  },
+  "reaction": {
+   "_doc": "Reaction Resolver.md",
+   "icd": 3.0
+  }
+ }
+}
