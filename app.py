@@ -103,6 +103,22 @@ class IOMGymMonoApp(tk.Tk):
         self.scen_player_vars = {"team_a": {}, "team_b": {}}
         self.editing_scenario_key = None
 
+        # Hệ thống Build Preset (Tùy biến & Lưu trữ Preset)
+        self.build_presets_path = os.path.join(HERE, "config", "build_presets.json")
+        self.build_presets = self.load_build_presets()
+        self.selected_relics_a = []
+        self.selected_relics_b = []
+        self.current_preset_key_a = tk.StringVar(value="(Tùy chỉnh)")
+        self.current_preset_key_b = tk.StringVar(value="(Tùy chỉnh)")
+        self.editing_preset_key = None
+        self.preset_form_vars = {}
+        self.preset_form_relics = set()
+
+        # Hệ thống Relic & Nội Tại Custom
+        self.editing_relic_key = None
+        self.relic_search_var = tk.StringVar()
+        self.relic_filter_type = tk.StringVar(value="all")
+
         self.setup_styles()
         self.build_ui()
         self.update_diff_status()
@@ -225,6 +241,16 @@ class IOMGymMonoApp(tk.Tk):
         self.notebook.add(tab_scen, text="  📋  KỊCH BẢN 1v1 (SCENARIOS)  ")
         self.build_scenario_tab(tab_scen)
 
+        # TAB 6: PRESET BUILDS (TÙY BIẾN & LƯU TRỮ PRESET)
+        tab_presets = ttk.Frame(self.notebook)
+        self.notebook.add(tab_presets, text="  📦  PRESET BUILDS  ")
+        self.build_preset_tab(tab_presets)
+
+        # TAB 7: CUSTOM RELICS & NỘI TẠI
+        tab_relics = ttk.Frame(self.notebook)
+        self.notebook.add(tab_relics, text="  💎  CUSTOM RELICS & NỘI TẠI  ")
+        self.build_relics_tab(tab_relics)
+
     # -------------------------------------------------------------------------
     # TAB 1: THỬ NGHIỆM ĐẤU (CHỌN CHẾ ĐỘ TRƯỚC, DPS TỐI ĐA 6 DUMMY VÀ CUSTOM ĐƯỢC HẾT)
     # -------------------------------------------------------------------------
@@ -252,13 +278,22 @@ class IOMGymMonoApp(tk.Tk):
         rb_dps.pack(side="left", padx=8)
 
         # Match params
-        tk.Label(mode_bar, text="|  Thời gian:", bg=self.c_surface, fg=self.c_muted).pack(side="left", padx=(12, 4))
-        self.sp_time = ttk.Spinbox(mode_bar, from_=10, to=180, width=5)
+        self.frame_time_dps = tk.Frame(mode_bar, bg=self.c_surface)
+
+        self.lbl_time_desc = tk.Label(self.frame_time_dps, text="|  Thời gian:", bg=self.c_surface, fg=self.c_muted)
+        self.lbl_time_desc.pack(side="left", padx=(0, 4))
+        self.sp_time = ttk.Spinbox(self.frame_time_dps, from_=10, to=300, width=5)
         self.sp_time.set("60")
         self.sp_time.pack(side="left")
-        tk.Label(mode_bar, text="giây", bg=self.c_surface, fg=self.c_dim, font=("Segoe UI", 8)).pack(side="left", padx=(2, 8))
+        self.lbl_time_unit = tk.Label(self.frame_time_dps, text="giây", bg=self.c_surface, fg=self.c_dim, font=("Segoe UI", 8))
+        self.lbl_time_unit.pack(side="left", padx=(2, 6))
 
-        tk.Label(mode_bar, text="Số trận (runs):", bg=self.c_surface, fg=self.c_muted).pack(side="left", padx=(8, 4))
+        self.lbl_fight_mode_notice = tk.Label(mode_bar, text="|  Thời gian: Sinh tử (Đến khi có bên thua)",
+                                              bg=self.c_surface, fg="#00e676", font=("Segoe UI", 9, "bold"))
+        self.lbl_fight_mode_notice.pack(side="left", padx=(8, 8))
+
+        self.lbl_runs_desc = tk.Label(mode_bar, text="Số trận (runs):", bg=self.c_surface, fg=self.c_muted)
+        self.lbl_runs_desc.pack(side="left", padx=(8, 4))
         self.sp_runs = ttk.Spinbox(mode_bar, from_=5, to=300, width=5)
         self.sp_runs.set("50")
         self.sp_runs.pack(side="left")
@@ -324,6 +359,28 @@ class IOMGymMonoApp(tk.Tk):
             tk.Button(status_row_a, text=p_name, font=("Segoe UI", 7),
                       bg="#262626", fg="#dddddd", relief="solid", bd=1, padx=4,
                       command=lambda k=p_key: self.apply_preset_a(k)).pack(side="left", padx=2)
+
+        # Hàng Preset & Relics cho Đội A
+        p_row_a = tk.Frame(self.frame_a, bg="#1e1e1e", padx=6, pady=3, relief="solid", bd=1)
+        p_row_a.pack(fill="x", pady=(2, 3))
+
+        tk.Label(p_row_a, text="📦 Preset:", font=("Segoe UI", 8, "bold"),
+                 bg="#1e1e1e", fg="#ffffff").pack(side="left", padx=(0, 4))
+        p_names_init_a = ["(Tùy chỉnh)"] + [p.get("name", pid) for pid, p in self.build_presets.items()]
+        self.cb_preset_a = ttk.Combobox(p_row_a, values=p_names_init_a, width=13, state="readonly")
+        self.cb_preset_a.set("(Tùy chỉnh)")
+        self.cb_preset_a.pack(side="left", padx=2)
+        self.cb_preset_a.bind("<<ComboboxSelected>>", lambda e: self.on_select_preset_a())
+
+        self.btn_relics_a = tk.Button(p_row_a, text="🛡 Relics: 0", font=("Segoe UI", 7, "bold"),
+                                      bg="#2a2a2a", fg="#00e676", relief="solid", bd=1, padx=5,
+                                      cursor="hand2", command=self.open_relics_dialog_a)
+        self.btn_relics_a.pack(side="left", padx=3)
+
+        btn_save_p_a = tk.Button(p_row_a, text="💾 Lưu Preset...", font=("Segoe UI", 7),
+                                 bg="#242424", fg="#dddddd", relief="solid", bd=1, padx=4,
+                                 cursor="hand2", command=self.save_current_as_preset_a)
+        btn_save_p_a.pack(side="right", padx=2)
 
         # KHUNG LOADOUT KỸ NĂNG (5 SKILLS)
         self.box_loadout_a = tk.LabelFrame(self.frame_a, text=" [ LOADOUT KỸ NĂNG (5 SKILLS) ] ",
@@ -584,6 +641,28 @@ class IOMGymMonoApp(tk.Tk):
             tk.Button(status_row_b, text=p_name, font=("Segoe UI", 7), bg="#262626", fg="#dddddd", relief="solid", bd=1, padx=4,
                       command=lambda v=p_val: self.apply_tank_preset_b(v)).pack(side="left", padx=2)
 
+        # Hàng Preset & Relics cho Đội B
+        self.preset_row_b = tk.Frame(self.frame_b_fight, bg="#1e1e1e", padx=6, pady=3, relief="solid", bd=1)
+        self.preset_row_b.pack(fill="x", pady=(2, 3))
+
+        tk.Label(self.preset_row_b, text="📦 Preset:", font=("Segoe UI", 8, "bold"),
+                 bg="#1e1e1e", fg="#ffffff").pack(side="left", padx=(0, 4))
+        p_names_init_b = ["(Tùy chỉnh)"] + [p.get("name", pid) for pid, p in self.build_presets.items()]
+        self.cb_preset_b = ttk.Combobox(self.preset_row_b, values=p_names_init_b, width=13, state="readonly")
+        self.cb_preset_b.set("(Tùy chỉnh)")
+        self.cb_preset_b.pack(side="left", padx=2)
+        self.cb_preset_b.bind("<<ComboboxSelected>>", lambda e: self.on_select_preset_b())
+
+        self.btn_relics_b = tk.Button(self.preset_row_b, text="🛡 Relics: 0", font=("Segoe UI", 7, "bold"),
+                                      bg="#2a2a2a", fg="#00e676", relief="solid", bd=1, padx=5,
+                                      cursor="hand2", command=self.open_relics_dialog_b)
+        self.btn_relics_b.pack(side="left", padx=3)
+
+        btn_save_p_b = tk.Button(self.preset_row_b, text="💾 Lưu Preset...", font=("Segoe UI", 7),
+                                 bg="#242424", fg="#dddddd", relief="solid", bd=1, padx=4,
+                                 cursor="hand2", command=self.save_current_as_preset_b)
+        btn_save_p_b.pack(side="right", padx=2)
+
         # KHUNG LOADOUT KỸ NĂNG CHO ĐỘI B (1v1)
         self.box_loadout_b = tk.LabelFrame(self.frame_b_fight, text=" [ LOADOUT KỸ NĂNG (5 SKILLS) ] ",
                                            font=("Segoe UI", 8, "bold"), fg=self.c_fg, bg=self.c_surface,
@@ -685,6 +764,10 @@ class IOMGymMonoApp(tk.Tk):
             tk.Button(sub_dps, text=p_name, font=("Segoe UI", 7), bg="#262626", fg="#cccccc", relief="solid", bd=1,
                       command=lambda v=p_def: self.apply_dps_dummy_preset(v)).pack(side="left", padx=1)
 
+        tk.Button(sub_dps, text="📦 Từ Preset...", font=("Segoe UI", 7, "bold"),
+                  bg="#2a2a2a", fg="#ffffff", relief="solid", bd=1, padx=4,
+                  command=self.apply_preset_to_current_dps_dummy).pack(side="left", padx=2)
+
         tk.Button(sub_dps, text="📋 Áp dụng cho ALL", font=("Segoe UI", 7, "bold"),
                   bg="#333333", fg="#ffffff", relief="solid", bd=1, padx=4,
                   command=self.copy_dps_stats_to_all).pack(side="left", padx=(6, 2))
@@ -708,11 +791,17 @@ class IOMGymMonoApp(tk.Tk):
         if mode == "fight":
             if hasattr(self, "scenario_bar"):
                 self.scenario_bar.pack(fill="x", side="top", padx=8, pady=(0, 6), before=self.combat_split)
+            if hasattr(self, "frame_time_dps") and hasattr(self, "lbl_fight_mode_notice"):
+                self.frame_time_dps.pack_forget()
+                self.lbl_fight_mode_notice.pack(side="left", padx=(8, 8), before=self.lbl_runs_desc)
             self.frame_b_dps.pack_forget()
             self.frame_b_fight.pack(fill="both", expand=True)
         else:
             if hasattr(self, "scenario_bar"):
                 self.scenario_bar.pack_forget()
+            if hasattr(self, "frame_time_dps") and hasattr(self, "lbl_fight_mode_notice"):
+                self.lbl_fight_mode_notice.pack_forget()
+                self.frame_time_dps.pack(side="left", padx=(8, 4), before=self.lbl_runs_desc)
             self.frame_b_fight.pack_forget()
             self.frame_b_dps.pack(fill="both", expand=True)
 
@@ -1112,6 +1201,8 @@ class IOMGymMonoApp(tk.Tk):
             self.cb_elem1_b.config(state="readonly")
             self.cb_elem2_b.config(state="readonly")
             self.cb_dummy_b.config(state="disabled")
+            if hasattr(self, "preset_row_b"):
+                self.preset_row_b.pack(fill="x", pady=(2, 3), before=self.box_loadout_b)
             if hasattr(self, "box_loadout_b"):
                 self.box_loadout_b.pack(fill="x", pady=2, before=self.box_sliders_b)
             self.on_elem_change_b()
@@ -1119,6 +1210,8 @@ class IOMGymMonoApp(tk.Tk):
             self.cb_elem1_b.config(state="disabled")
             self.cb_elem2_b.config(state="disabled")
             self.cb_dummy_b.config(state="readonly")
+            if hasattr(self, "preset_row_b"):
+                self.preset_row_b.pack_forget()
             if hasattr(self, "box_loadout_b"):
                 self.box_loadout_b.pack_forget()
             self.on_select_dummy_b()
@@ -1181,13 +1274,19 @@ class IOMGymMonoApp(tk.Tk):
     # --- CHẠY MÔ PHỎNG (HỖ TRỢ FIGHT VÀ DPS NHIỀU DUMMY TỰ CHỈNH) ---
     def run_simulation(self):
         mode = self.mode_var.get()
-        time_limit = float(self.sp_time.get() or 60)
+        if mode == "fight":
+            time_limit = 1800.0  # Chế độ sinh tử 1v1: không giới hạn 60s, đánh đến khi một bên thua (tối đa 1800s an toàn)
+        else:
+            time_limit = float(self.sp_time.get() or 60)
         runs = int(self.sp_runs.get() or 50)
 
         custom_a = {k: v["var"].get() for k, v in self.team_a_vars.items()}
 
         self.txt_sim_result.delete("1.0", "end")
-        self.txt_sim_result.insert("1.0", f"Đang mô phỏng ({mode.upper()}) với {runs} lượt, thời gian {time_limit}s...\n")
+        if mode == "fight":
+            self.txt_sim_result.insert("1.0", f"Đang mô phỏng 1v1 FIGHT (SINH TỬ) với {runs} lượt, đánh đến khi một bên ngã xuống (không giới hạn 60s)...\n")
+        else:
+            self.txt_sim_result.insert("1.0", f"Đang mô phỏng ({mode.upper()}) với {runs} lượt, thời gian {time_limit:.0f}s...\n")
         self.update_idletasks()
 
         try:
@@ -1214,7 +1313,8 @@ class IOMGymMonoApp(tk.Tk):
                 "basic": basic_a,
                 "branch_a": {"magic": elem1_a, "skills": skills_a},
                 "branch_b": {"magic": elem2_a, "skills": skills_b},
-                "relic": None
+                "relic": None,
+                "relics": list(getattr(self, "selected_relics_a", []))
             }
 
             b_a.setdefault("stats", {})
@@ -1260,7 +1360,8 @@ class IOMGymMonoApp(tk.Tk):
                         "basic": basic_b,
                         "branch_a": {"magic": elem1_b, "skills": skills_b1},
                         "branch_b": {"magic": elem2_b, "skills": skills_b2},
-                        "relic": None
+                        "relic": None,
+                        "relics": list(getattr(self, "selected_relics_b", []))
                     }
 
                     b_b.setdefault("stats", {})
@@ -1328,12 +1429,21 @@ class IOMGymMonoApp(tk.Tk):
             n = max(1, agg.n)
 
             # Báo cáo kết quả
+            preset_a_lbl = f" (Preset: {self.cb_preset_a.get()})" if hasattr(self, "cb_preset_a") and self.cb_preset_a.get() not in ("(Tùy chỉnh)", "") else ""
             out_text = "═" * 78 + "\n"
-            out_text += f" KẾT QUẢ MÔ PHỎNG: {desc_a} vs {target_desc}\n"
+            out_text += f" KẾT QUẢ MÔ PHỎNG: {desc_a}{preset_a_lbl} vs {target_desc}\n"
             out_text += f" Loadout Đội A: [{basic_a} | {', '.join(skills_a)} | {', '.join(skills_b)}]\n"
+            if self.selected_relics_a:
+                out_text += f" Relics Đội A : [{', '.join(self.selected_relics_a)}]\n"
             if mode == "fight" and target_type == "build":
-                out_text += f" Loadout Đội B: [{basic_b} | {', '.join(skills_b1)} | {', '.join(skills_b2)}]\n"
-            out_text += f" Chế độ: {mode.upper()}  |  Số lượt: {runs}  |  Thời gian giới hạn: {time_limit:.0f}s\n"
+                preset_b_lbl = f" (Preset: {self.cb_preset_b.get()})" if hasattr(self, "cb_preset_b") and self.cb_preset_b.get() not in ("(Tùy chỉnh)", "") else ""
+                out_text += f" Loadout Đội B{preset_b_lbl}: [{basic_b} | {', '.join(skills_b1)} | {', '.join(skills_b2)}]\n"
+                if self.selected_relics_b:
+                    out_text += f" Relics Đội B : [{', '.join(self.selected_relics_b)}]\n"
+            if mode == "fight":
+                out_text += f" Chế độ: 1v1 FIGHT (SINH TỬ - ĐÁNH ĐẾN KHI CÓ BÊN THUA)  |  Số trận: {runs}\n"
+            else:
+                out_text += f" Chế độ: DPS MODE  |  Số trận: {runs}  |  Thời gian: {time_limit:.0f}s\n"
 
             if mode == "fight" and active_scenario:
                 scen_name = active_scenario.get("name", "Custom")
@@ -1350,8 +1460,16 @@ class IOMGymMonoApp(tk.Tk):
 
             if mode == "fight":
                 wa, wb, wd = agg.wins["A"], agg.wins["B"], agg.wins[None]
-                out_text += f" Tỉ Lệ Thắng  : Đội A: {pct(wa / n, 1)} ({wa})  |  Đội B: {pct(wb / n, 1)} ({wb})  |  Hòa/Hết giờ: {pct(wd / n, 1)} ({wd})\n"
-                out_text += f" Thời Gian TB : {sum(agg.t_end) / n:.1f} giây\n"
+                if wd > 0:
+                    out_text += f" Tỉ Lệ Thắng  : Đội A: {pct(wa / n, 1)} ({wa} trận)  |  Đội B: {pct(wb / n, 1)} ({wb} trận)  |  Hòa: {pct(wd / n, 1)} ({wd})\n"
+                else:
+                    out_text += f" Tỉ Lệ Thắng  : Đội A: {pct(wa / n, 1)} ({wa} trận thắng)  |  Đội B: {pct(wb / n, 1)} ({wb} trận thắng)\n"
+                
+                t_ends = agg.t_end if agg.t_end else [0.0]
+                avg_t = sum(t_ends) / n
+                min_t = min(t_ends)
+                max_t = max(t_ends)
+                out_text += f" Thời Gian Đấu: Trung bình {avg_t:.1f}s / trận  (Nhanh nhất: {min_t:.1f}s  |  Lâu nhất: {max_t:.1f}s)\n"
             else:
                 out_text += f" Tổng Sát Thương Đội A Gây Ra (TB): {agg.dmg['A'] / n:.0f} dmg  |  DPS Trung Bình: {(agg.dmg['A'] / n) / time_limit:.0f}\n"
 
@@ -1633,6 +1751,7 @@ class IOMGymMonoApp(tk.Tk):
         inputs_grid.pack(fill="x", pady=4)
 
         self.sb_atk = self.create_sb_input(inputs_grid, "ATK (Công):", "200")
+        self.sb_scale = self.create_sb_input(inputs_grid, "% Scale ATK:", "1.0")
         self.sb_base = self.create_sb_input(inputs_grid, "Base Skill:", "150")
         self.sb_dmg_mult = self.create_sb_input(inputs_grid, "Dmg Mult:", "1.0")
         self.sb_def = self.create_sb_input(inputs_grid, "DEF (Thủ):", "300")
@@ -1702,6 +1821,8 @@ class IOMGymMonoApp(tk.Tk):
     def eval_formula_sandbox(self):
         try:
             atk = float(self.sb_atk.get())
+            scale_raw = self.sb_scale.get().strip()
+            atk_scale = float(scale_raw[:-1]) / 100.0 if scale_raw.endswith("%") else float(scale_raw)
             base = float(self.sb_base.get())
             dmg_mult = float(self.sb_dmg_mult.get())
             dfn = float(self.sb_def.get())
@@ -1709,9 +1830,10 @@ class IOMGymMonoApp(tk.Tk):
             flat_ig = float(self.sb_flat_ignore.get())
             r = float(self.sb_res.get())
 
+            scaled_atk = atk * atk_scale
             raw_code = compile(self.ent_raw_expr.get().strip(), "<raw>", "eval")
             raw = eval(raw_code, {"__builtins__": None, "max": max, "min": min},
-                       {"atk": atk, "base": base, "damage_mult": dmg_mult})
+                       {"atk": scaled_atk, "base": base, "damage_mult": dmg_mult, "raw_atk": atk, "atk_scale": atk_scale})
 
             d = max(0.0, dfn * (1.0 - pct_ig) - flat_ig)
             def_k = float(self.ent_def_k.get().strip())
@@ -1727,7 +1849,7 @@ class IOMGymMonoApp(tk.Tk):
             final_dmg = raw * (1.0 - red) * mult
 
             res_txt = f"► KẾT QUẢ TÍNH TOÁN:\n"
-            res_txt += f" • Sát thương thô (Raw)        : ({atk} + {base}) * {dmg_mult} = {raw:.1f}\n"
+            res_txt += f" • Sát thương thô (Raw)        : ({atk} * {atk_scale:.2f} + {base}) * {dmg_mult} = {raw:.1f}\n"
             res_txt += f" • Giáp sau xuyên giáp (d)     : max(0, {dfn} * (1 - {pct_ig}) - {flat_ig}) = {d:.1f}\n"
             res_txt += f" • Tỉ lệ giảm do giáp (red)    : {red * 100:.2f}%\n"
             res_txt += f" • Hệ số kháng phép (mult)     : {mult:.3f}\n"
@@ -1790,21 +1912,23 @@ class IOMGymMonoApp(tk.Tk):
         tree_container = tk.Frame(left_frame, bg=self.c_bg)
         tree_container.pack(fill="both", expand=True, padx=6, pady=6)
 
-        columns = ("id", "name", "magic", "tier", "base", "cd")
+        columns = ("id", "name", "magic", "tier", "base", "scale", "cd")
         self.skills_tree = ttk.Treeview(tree_container, columns=columns, show="headings", selectmode="browse")
         self.skills_tree.heading("id", text="ID", anchor="w")
         self.skills_tree.heading("name", text="Tên Skill", anchor="w")
         self.skills_tree.heading("magic", text="Hệ", anchor="center")
         self.skills_tree.heading("tier", text="Bậc", anchor="center")
-        self.skills_tree.heading("base", text="Dmg", anchor="e")
+        self.skills_tree.heading("base", text="Base", anchor="e")
+        self.skills_tree.heading("scale", text="% ATK", anchor="e")
         self.skills_tree.heading("cd", text="CD (s)", anchor="e")
 
-        self.skills_tree.column("id", width=95, minwidth=70)
-        self.skills_tree.column("name", width=130, minwidth=90)
-        self.skills_tree.column("magic", width=65, minwidth=55, anchor="center")
-        self.skills_tree.column("tier", width=55, minwidth=45, anchor="center")
-        self.skills_tree.column("base", width=45, minwidth=40, anchor="e")
-        self.skills_tree.column("cd", width=45, minwidth=40, anchor="e")
+        self.skills_tree.column("id", width=85, minwidth=65)
+        self.skills_tree.column("name", width=120, minwidth=85)
+        self.skills_tree.column("magic", width=60, minwidth=50, anchor="center")
+        self.skills_tree.column("tier", width=50, minwidth=40, anchor="center")
+        self.skills_tree.column("base", width=45, minwidth=35, anchor="e")
+        self.skills_tree.column("scale", width=55, minwidth=40, anchor="e")
+        self.skills_tree.column("cd", width=45, minwidth=35, anchor="e")
 
         tree_sb = ttk.Scrollbar(tree_container, orient="vertical", command=self.skills_tree.yview)
         self.skills_tree.configure(yscrollcommand=tree_sb.set)
@@ -1817,6 +1941,16 @@ class IOMGymMonoApp(tk.Tk):
         # Thanh nút thao tác bên dưới Treeview
         btn_action_bar = tk.Frame(left_frame, bg=self.c_sub, padx=8, pady=8)
         btn_action_bar.pack(fill="x", side="bottom")
+
+        # Khung xem nhanh mô tả kỹ năng đang chọn
+        desc_preview_box = tk.Frame(left_frame, bg=self.c_sub, padx=8, pady=4)
+        desc_preview_box.pack(fill="x", side="bottom", padx=6, pady=(0, 4))
+
+        tk.Label(desc_preview_box, text="Mô tả kỹ năng:", font=("Segoe UI", 8, "bold"),
+                 fg=self.c_muted, bg=self.c_sub).pack(anchor="w")
+        self.lbl_sk_quick_desc = tk.Label(desc_preview_box, text="(Chọn một kỹ năng để xem mô tả)", font=("Segoe UI", 8),
+                                          fg="#cccccc", bg=self.c_sub, wraplength=440, justify="left")
+        self.lbl_sk_quick_desc.pack(anchor="w", pady=(1, 2))
 
         btn_new = tk.Button(btn_action_bar, text="+ Tạo Mới", bg="#2a2a2a", fg="#ffffff",
                             font=("Segoe UI", 9, "bold"), relief="solid", bd=1, padx=8, pady=4,
@@ -1911,25 +2045,44 @@ class IOMGymMonoApp(tk.Tk):
                                        state="readonly", font=("Segoe UI", 9))
         self.cb_sk_tier.pack(fill="x")
 
+        # 2.5. Mô tả kỹ năng (Skill Description)
+        desc_frame = tk.Frame(ed_form, bg=self.c_surface)
+        desc_frame.pack(fill="x", pady=(0, 8))
+
+        tk.Label(desc_frame, text="Mô tả kỹ năng (Skill Description):", font=("Segoe UI", 8, "bold"),
+                 fg=self.c_muted, bg=self.c_surface).pack(anchor="w", pady=(0, 2))
+        self.txt_sk_desc = tk.Text(desc_frame, height=3, wrap="word", bg="#121212", fg="#ffffff",
+                                   insertbackground="#ffffff", relief="solid", bd=1,
+                                   font=("Segoe UI", 9))
+        self.txt_sk_desc.pack(fill="x")
+
         # 3. Thông số số học (Grid 2 cột)
         stat_box = tk.LabelFrame(ed_form, text=" CHỈ SỐ CƠ BẢN (NUMERIC STATS) ",
                                  font=("Segoe UI", 8, "bold"), fg=self.c_fg, bg=self.c_surface,
                                  padx=10, pady=8, bd=1, relief="solid")
         stat_box.pack(fill="x", pady=(0, 8))
 
-        # Row 1: base & true_base
+        # Row 1: base & atk_scale & true_base
         r1 = tk.Frame(stat_box, bg=self.c_surface)
         r1.pack(fill="x", pady=2)
         f_base = tk.Frame(r1, bg=self.c_surface)
-        f_base.pack(side="left", fill="x", expand=True, padx=(0, 4))
-        tk.Label(f_base, text="Sát thương cơ bản (base):", font=("Segoe UI", 8),
+        f_base.pack(side="left", fill="x", expand=True, padx=(0, 3))
+        tk.Label(f_base, text="Sát thương gốc (base):", font=("Segoe UI", 8),
                  fg=self.c_muted, bg=self.c_surface).pack(anchor="w")
         self.ent_sk_base = tk.Entry(f_base, bg="#121212", fg="#ffffff", insertbackground="#ffffff",
                                     relief="solid", bd=1, font=("Segoe UI", 9))
         self.ent_sk_base.pack(fill="x")
 
+        f_scale = tk.Frame(r1, bg=self.c_surface)
+        f_scale.pack(side="left", fill="x", expand=True, padx=(3, 3))
+        tk.Label(f_scale, text="Scale % ATK (vd: 1.0 = 100%):", font=("Segoe UI", 8),
+                 fg=self.c_muted, bg=self.c_surface).pack(anchor="w")
+        self.ent_sk_atk_scale = tk.Entry(f_scale, bg="#121212", fg="#ffffff", insertbackground="#ffffff",
+                                         relief="solid", bd=1, font=("Segoe UI", 9))
+        self.ent_sk_atk_scale.pack(fill="x")
+
         f_true = tk.Frame(r1, bg=self.c_surface)
-        f_true.pack(side="left", fill="x", expand=True, padx=(4, 0))
+        f_true.pack(side="left", fill="x", expand=True, padx=(3, 0))
         tk.Label(f_true, text="Sát thương chuẩn (true_base):", font=("Segoe UI", 8),
                  fg=self.c_muted, bg=self.c_surface).pack(anchor="w")
         self.ent_sk_true_base = tk.Entry(f_true, bg="#121212", fg="#ffffff", insertbackground="#ffffff",
@@ -2111,11 +2264,18 @@ class IOMGymMonoApp(tk.Tk):
             if tier_f != "Tất cả" and sk_tier != tier_f:
                 continue
 
+            sk_desc = str(sk.get("desc", sk.get("description", ""))).lower()
             if query:
-                if query not in sk_id.lower() and query not in sk_name.lower():
+                if query not in sk_id.lower() and query not in sk_name.lower() and query not in sk_desc:
                     continue
 
-            self.skills_tree.insert("", "end", iid=sk_id, values=(sk_id, sk_name, sk_magic, sk_tier, sk_base, sk_cd))
+            sk_scale_val = sk.get("atk_scale", sk.get("atk_pct", sk.get("scale_atk", 1.0)))
+            try:
+                sk_scale = f"{round(float(sk_scale_val) * 100)}%"
+            except Exception:
+                sk_scale = "100%"
+
+            self.skills_tree.insert("", "end", iid=sk_id, values=(sk_id, sk_name, sk_magic, sk_tier, sk_base, sk_scale, sk_cd))
             displayed_count += 1
 
         self.lbl_skill_count.config(text=f"Hiển thị: {displayed_count}/{total_count}")
@@ -2129,8 +2289,18 @@ class IOMGymMonoApp(tk.Tk):
         if not isinstance(sk, dict):
             return
 
+        desc = sk.get("desc", sk.get("description", ""))
+        scale_val = sk.get("atk_scale", sk.get("atk_pct", sk.get("scale_atk", 1.0)))
+        try:
+            scale_pct = f"{round(float(scale_val) * 100)}%"
+        except Exception:
+            scale_pct = "100%"
+        preview_text = f"• [Hệ: {sk.get('magic', '')} | Tier: {sk.get('tier', '')} | Dame: {sk.get('base', 0)} + {scale_pct} ATK | CD: {sk.get('cd', 0)}s]\n" + (desc if desc else "(Chưa có mô tả)")
+
         self.editing_skill_id = sk_id
         self.lbl_editor_status.config(text=f"[ CHỈNH SỬA KỸ NĂNG: {sk_id} ]")
+        if hasattr(self, "lbl_sk_quick_desc"):
+            self.lbl_sk_quick_desc.config(text=preview_text)
 
         self.ent_sk_id.delete(0, "end")
         self.ent_sk_id.insert(0, sk_id)
@@ -2143,6 +2313,9 @@ class IOMGymMonoApp(tk.Tk):
 
         self.ent_sk_base.delete(0, "end")
         self.ent_sk_base.insert(0, str(sk.get("base", 0)))
+
+        self.ent_sk_atk_scale.delete(0, "end")
+        self.ent_sk_atk_scale.insert(0, str(scale_val))
 
         self.ent_sk_true_base.delete(0, "end")
         self.ent_sk_true_base.insert(0, str(sk.get("true_base", 0)))
@@ -2169,6 +2342,12 @@ class IOMGymMonoApp(tk.Tk):
         self.ent_sk_lifetime.delete(0, "end")
         if sk.get("lifetime") is not None:
             self.ent_sk_lifetime.insert(0, str(sk.get("lifetime")))
+
+        desc = sk.get("desc", sk.get("description", ""))
+        self.txt_sk_desc.delete("1.0", "end")
+        self.txt_sk_desc.insert("1.0", desc)
+        if hasattr(self, "lbl_sk_quick_desc"):
+            self.lbl_sk_quick_desc.config(text=desc if desc else "(Chưa có mô tả)")
 
         self.txt_sk_effects.delete("1.0", "end")
         effs = sk.get("effects", [])
@@ -2199,6 +2378,9 @@ class IOMGymMonoApp(tk.Tk):
         self.ent_sk_base.delete(0, "end")
         self.ent_sk_base.insert(0, "80")
 
+        self.ent_sk_atk_scale.delete(0, "end")
+        self.ent_sk_atk_scale.insert(0, "1.0")
+
         self.ent_sk_true_base.delete(0, "end")
         self.ent_sk_true_base.insert(0, "0")
 
@@ -2219,6 +2401,10 @@ class IOMGymMonoApp(tk.Tk):
 
         self.ent_sk_hit_chance.delete(0, "end")
         self.ent_sk_lifetime.delete(0, "end")
+
+        self.txt_sk_desc.delete("1.0", "end")
+        if hasattr(self, "lbl_sk_quick_desc"):
+            self.lbl_sk_quick_desc.config(text="(Chưa có mô tả)")
 
         self.txt_sk_effects.delete("1.0", "end")
         self.txt_sk_effects.insert("1.0", "[]")
@@ -2258,6 +2444,9 @@ class IOMGymMonoApp(tk.Tk):
         self.ent_sk_base.delete(0, "end")
         self.ent_sk_base.insert(0, str(sk.get("base", 0)))
 
+        self.ent_sk_atk_scale.delete(0, "end")
+        self.ent_sk_atk_scale.insert(0, str(sk.get("atk_scale", sk.get("atk_pct", sk.get("scale_atk", 1.0)))))
+
         self.ent_sk_true_base.delete(0, "end")
         self.ent_sk_true_base.insert(0, str(sk.get("true_base", 0)))
 
@@ -2283,6 +2472,12 @@ class IOMGymMonoApp(tk.Tk):
         self.ent_sk_lifetime.delete(0, "end")
         if sk.get("lifetime") is not None:
             self.ent_sk_lifetime.insert(0, str(sk.get("lifetime")))
+
+        desc = sk.get("desc", sk.get("description", ""))
+        self.txt_sk_desc.delete("1.0", "end")
+        self.txt_sk_desc.insert("1.0", desc)
+        if hasattr(self, "lbl_sk_quick_desc"):
+            self.lbl_sk_quick_desc.config(text=desc if desc else "(Chưa có mô tả)")
 
         self.txt_sk_effects.delete("1.0", "end")
         effs = copy.deepcopy(sk.get("effects", []))
@@ -2352,6 +2547,22 @@ class IOMGymMonoApp(tk.Tk):
             messagebox.showerror("Lỗi dữ liệu", "Sát thương cơ bản (base) phải là số!")
             return
 
+        scale_raw = self.ent_sk_atk_scale.get().strip()
+        atk_scale = 1.0
+        if scale_raw:
+            if scale_raw.endswith("%"):
+                try:
+                    atk_scale = float(scale_raw[:-1].strip()) / 100.0
+                except ValueError:
+                    messagebox.showerror("Lỗi dữ liệu", "Hệ số scale theo % ATK không hợp lệ (vd: 1.0 hoặc 100%)!")
+                    return
+            else:
+                try:
+                    atk_scale = float(scale_raw)
+                except ValueError:
+                    messagebox.showerror("Lỗi dữ liệu", "Hệ số scale theo % ATK phải là số (vd: 1.0 hoặc 1.2)!")
+                    return
+
         try:
             true_val = float(self.ent_sk_true_base.get() or 0)
             true_base = int(true_val) if true_val == int(true_val) else true_val
@@ -2407,6 +2618,8 @@ class IOMGymMonoApp(tk.Tk):
                 messagebox.showerror("Lỗi dữ liệu", "Thời gian tồn tại (lifetime) phải là số giây!")
                 return
 
+        desc = self.txt_sk_desc.get("1.0", "end").strip()
+
         eff_raw = self.txt_sk_effects.get("1.0", "end").strip()
         effects = []
         if eff_raw:
@@ -2424,8 +2637,11 @@ class IOMGymMonoApp(tk.Tk):
             "magic": magic,
             "tier": tier,
             "base": base,
+            "atk_scale": atk_scale,
             "cd": cd,
         }
+        if desc:
+            sk_dict["desc"] = desc
         if true_base > 0:
             sk_dict["true_base"] = true_base
         if cast_time > 0:
@@ -2456,6 +2672,10 @@ class IOMGymMonoApp(tk.Tk):
 
         self.editing_skill_id = sk_id
         self.lbl_editor_status.config(text=f"[ CHỈNH SỬA KỸ NĂNG: {sk_id} ]")
+        if hasattr(self, "lbl_sk_quick_desc"):
+            scale_pct = f"{round(atk_scale * 100)}%"
+            preview_text = f"• [Hệ: {magic} | Tier: {tier} | Dame: {base} + {scale_pct} ATK | CD: {cd}s]\n" + (desc if desc else "(Chưa có mô tả)")
+            self.lbl_sk_quick_desc.config(text=preview_text)
 
         # Cập nhật lại UI
         self.filter_skills_tree()
@@ -2956,6 +3176,2418 @@ class IOMGymMonoApp(tk.Tk):
                 json.dump(self.cfg["scenarios"], f, ensure_ascii=False, indent=2)
         except Exception as e:
             messagebox.showerror("Lỗi lưu file", f"Không thể ghi config/scenarios.json:\n{e}")
+
+    # =========================================================================
+    # HỆ THỐNG BUILD PRESET & RELICS (TÙY BIẾN, LƯU TRỮ VÀ ÁP DỤNG PRESET)
+    # =========================================================================
+    def load_build_presets(self):
+        try:
+            if hasattr(self, "build_presets_path") and os.path.exists(self.build_presets_path):
+                with open(self.build_presets_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, dict):
+                        return data
+        except Exception as e:
+            print(f"Lỗi đọc build_presets.json: {e}")
+        return {}
+
+    def save_build_presets_to_disk(self):
+        try:
+            with open(self.build_presets_path, "w", encoding="utf-8") as f:
+                json.dump(self.build_presets, f, ensure_ascii=False, indent=2)
+            self.refresh_preset_comboboxes()
+            if hasattr(self, "refresh_presets_tree"):
+                self.refresh_presets_tree()
+        except Exception as e:
+            messagebox.showerror("Lỗi lưu file", f"Không thể ghi config/build_presets.json:\n{e}")
+
+    def refresh_preset_comboboxes(self):
+        p_names = ["(Tùy chỉnh)"] + [p.get("name", pid) for pid, p in self.build_presets.items()]
+        if hasattr(self, "cb_preset_a"):
+            cur_a = self.cb_preset_a.get()
+            self.cb_preset_a["values"] = p_names
+            if cur_a in p_names:
+                self.cb_preset_a.set(cur_a)
+            else:
+                self.cb_preset_a.set("(Tùy chỉnh)")
+        if hasattr(self, "cb_preset_b"):
+            cur_b = self.cb_preset_b.get()
+            self.cb_preset_b["values"] = p_names
+            if cur_b in p_names:
+                self.cb_preset_b.set(cur_b)
+            else:
+                self.cb_preset_b.set("(Tùy chỉnh)")
+
+    def get_all_relics_info(self):
+        relics = []
+        for k, v in self.cfg.get("relics", {}).items():
+            if k.startswith("_"):
+                continue
+            name = v.get("name", k)
+            desc_parts = []
+            for m in v.get("mods", []):
+                st = m.get("stat")
+                mode = m.get("mode", "add")
+                val = m.get("value", 0)
+                if mode == "pct":
+                    desc_parts.append(f"{st} +{val*100:.0f}%")
+                else:
+                    desc_parts.append(f"{st} +{val}")
+            if v.get("grants"):
+                desc_parts.append("Nội tại: " + ", ".join(v.get("grants")))
+            if v.get("triggers"):
+                desc_parts.append("Trigger chiến đấu")
+            detail = " | ".join(desc_parts) if desc_parts else ""
+            relics.append({
+                "id": k,
+                "name": name,
+                "detail": detail,
+                "is_passive": k.startswith("passive_")
+            })
+        return relics
+
+    def open_relic_selector(self, current_selection, on_confirm_callback, title="CHỌN RELICS / NỘI TẠI"):
+        win = tk.Toplevel(self)
+        win.title(title)
+        win.geometry("540x640")
+        win.minsize(480, 500)
+        win.configure(bg=self.c_bg)
+        win.transient(self)
+        win.grab_set()
+
+        top_bar = tk.Frame(win, bg=self.c_sub, padx=12, pady=8)
+        top_bar.pack(fill="x")
+        tk.Label(top_bar, text=title, font=("Segoe UI", 10, "bold"), fg=self.c_fg, bg=self.c_sub).pack(side="left")
+
+        lbl_count = tk.Label(top_bar, text="", font=("Segoe UI", 8, "bold"), fg="#00e676", bg=self.c_sub)
+        lbl_count.pack(side="right")
+
+        quick_bar = tk.Frame(win, bg=self.c_surface, padx=8, pady=5)
+        quick_bar.pack(fill="x")
+
+        canv_frame = tk.Frame(win, bg=self.c_bg)
+        canv_frame.pack(fill="both", expand=True, padx=8, pady=6)
+
+        canvas = tk.Canvas(canv_frame, bg=self.c_surface, highlightthickness=0)
+        sb = ttk.Scrollbar(canv_frame, orient="vertical", command=canvas.yview)
+        scroll_content = tk.Frame(canvas, bg=self.c_surface, padx=8, pady=6)
+
+        scroll_content.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        c_win = canvas.create_window((0, 0), window=scroll_content, anchor="nw")
+        canvas.configure(yscrollcommand=sb.set)
+
+        def _on_cv_conf(e):
+            canvas.itemconfig(c_win, width=e.width)
+        canvas.bind("<Configure>", _on_cv_conf)
+
+        def _on_mousewheel(e):
+            canvas.yview_scroll(int(-1 * (e.delta / 120)), "units")
+        canvas.bind("<Enter>", lambda e: canvas.bind_all("<MouseWheel>", _on_mousewheel))
+        canvas.bind("<Leave>", lambda e: canvas.unbind_all("<MouseWheel>"))
+
+        canvas.pack(side="left", fill="both", expand=True)
+        sb.pack(side="right", fill="y")
+
+        relics_info = self.get_all_relics_info()
+        check_vars = {}
+
+        def update_count():
+            cnt = sum(1 for v in check_vars.values() if v.get())
+            lbl_count.config(text=f"Đã chọn: {cnt} Relics")
+
+        def select_all():
+            for v in check_vars.values():
+                v.set(True)
+            update_count()
+
+        def clear_all():
+            for v in check_vars.values():
+                v.set(False)
+            update_count()
+
+        def select_mods():
+            for r in relics_info:
+                check_vars[r["id"]].set(not r["is_passive"])
+            update_count()
+
+        def select_passives():
+            for r in relics_info:
+                check_vars[r["id"]].set(r["is_passive"])
+            update_count()
+
+        tk.Button(quick_bar, text="Chọn Tất Cả", font=("Segoe UI", 8), bg="#282828", fg="#ffffff",
+                  relief="solid", bd=1, padx=6, command=select_all).pack(side="left", padx=2)
+        tk.Button(quick_bar, text="Bỏ Chọn Hết", font=("Segoe UI", 8), bg="#282828", fg="#ffffff",
+                  relief="solid", bd=1, padx=6, command=clear_all).pack(side="left", padx=2)
+        tk.Button(quick_bar, text="Chỉ Stat Mods", font=("Segoe UI", 8), bg="#282828", fg="#ffffff",
+                  relief="solid", bd=1, padx=6, command=select_mods).pack(side="left", padx=2)
+        tk.Button(quick_bar, text="Chỉ Passives", font=("Segoe UI", 8), bg="#282828", fg="#ffffff",
+                  relief="solid", bd=1, padx=6, command=select_passives).pack(side="left", padx=2)
+
+        cur_set = set(current_selection or [])
+
+        for r in relics_info:
+            rid = r["id"]
+            var = tk.BooleanVar(value=(rid in cur_set))
+            check_vars[rid] = var
+
+            item_card = tk.Frame(scroll_content, bg="#202020", pady=4, padx=6, relief="solid", bd=1)
+            item_card.pack(fill="x", pady=2)
+
+            cb = tk.Checkbutton(item_card, text=r["name"], variable=var, font=("Segoe UI", 9, "bold"),
+                                fg="#ffffff", bg="#202020", selectcolor="#000000",
+                                activebackground="#202020", activeforeground="#ffffff",
+                                command=update_count)
+            cb.pack(anchor="w")
+
+            sub_txt = f"[{rid}]" + (f"  -  {r['detail']}" if r['detail'] else "")
+            tk.Label(item_card, text=sub_txt, font=("Consolas", 8), fg="#999999", bg="#202020",
+                     wraplength=480, justify="left").pack(anchor="w", padx=22)
+
+        update_count()
+
+        bottom_bar = tk.Frame(win, bg=self.c_sub, padx=12, pady=8)
+        bottom_bar.pack(fill="x", side="bottom")
+
+        def on_confirm():
+            chosen = [rid for rid, v in check_vars.items() if v.get()]
+            on_confirm_callback(chosen)
+            win.destroy()
+
+        btn_ok = tk.Button(bottom_bar, text="✓  ĐỒNG Ý VÀ ÁP DỤNG", font=("Segoe UI", 9, "bold"),
+                           bg="#ffffff", fg="#000000", relief="flat", padx=16, pady=4,
+                           cursor="hand2", command=on_confirm)
+        btn_ok.pack(side="right", padx=4)
+
+        btn_cancel = tk.Button(bottom_bar, text="Hủy", font=("Segoe UI", 9),
+                               bg="#282828", fg="#ffffff", relief="solid", bd=1, padx=12, pady=4,
+                               cursor="hand2", command=win.destroy)
+        btn_cancel.pack(side="right", padx=4)
+
+    def open_relics_dialog_a(self):
+        def cb(chosen):
+            self.selected_relics_a = chosen
+            self.btn_relics_a.config(text=f"🛡 Relics: {len(chosen)}")
+        self.open_relic_selector(self.selected_relics_a, cb, title="CHỌN RELICS CHO ĐỘI A")
+
+    def open_relics_dialog_b(self):
+        def cb(chosen):
+            self.selected_relics_b = chosen
+            self.btn_relics_b.config(text=f"🛡 Relics: {len(chosen)}")
+        self.open_relic_selector(self.selected_relics_b, cb, title="CHỌN RELICS CHO ĐỘI B")
+
+    def prompt_save_preset(self, default_id, default_name, on_save_callback):
+        win = tk.Toplevel(self)
+        win.title("LƯU THÀNH BUILD PRESET")
+        win.geometry("420x240")
+        win.configure(bg=self.c_bg)
+        win.transient(self)
+        win.grab_set()
+
+        top = tk.Frame(win, bg=self.c_sub, padx=12, pady=8)
+        top.pack(fill="x")
+        tk.Label(top, text="💾 LƯU CẤU HÌNH THÀNH PRESET MỚI", font=("Segoe UI", 9, "bold"),
+                 fg=self.c_fg, bg=self.c_sub).pack(anchor="w")
+
+        body = tk.Frame(win, bg=self.c_surface, padx=16, pady=12)
+        body.pack(fill="both", expand=True)
+
+        tk.Label(body, text="Mã Preset (Key ID, chữ thường, không dấu):", font=("Segoe UI", 8),
+                 fg=self.c_muted, bg=self.c_surface).pack(anchor="w")
+        ent_id = tk.Entry(body, bg="#111111", fg="#ffffff", insertbackground="#ffffff",
+                          relief="solid", bd=1, font=("Consolas", 9))
+        ent_id.pack(fill="x", pady=(2, 8))
+        ent_id.insert(0, default_id)
+
+        tk.Label(body, text="Tên Preset Hiển Thị:", font=("Segoe UI", 8),
+                 fg=self.c_muted, bg=self.c_surface).pack(anchor="w")
+        ent_name = tk.Entry(body, bg="#111111", fg="#ffffff", insertbackground="#ffffff",
+                            relief="solid", bd=1, font=("Segoe UI", 9))
+        ent_name.pack(fill="x", pady=(2, 8))
+        ent_name.insert(0, default_name)
+
+        tk.Label(body, text="Mô tả tóm tắt (tùy chọn):", font=("Segoe UI", 8),
+                 fg=self.c_muted, bg=self.c_surface).pack(anchor="w")
+        ent_desc = tk.Entry(body, bg="#111111", fg="#ffffff", insertbackground="#ffffff",
+                            relief="solid", bd=1, font=("Segoe UI", 9))
+        ent_desc.pack(fill="x", pady=(2, 8))
+
+        bottom = tk.Frame(win, bg=self.c_sub, padx=12, pady=8)
+        bottom.pack(fill="x", side="bottom")
+
+        def on_ok():
+            p_id = ent_id.get().strip()
+            p_name = ent_name.get().strip() or p_id
+            p_desc = ent_desc.get().strip()
+            if not p_id:
+                messagebox.showwarning("Thiếu dữ liệu", "Vui lòng nhập Mã Preset!", parent=win)
+                return
+            if p_id in self.build_presets:
+                if not messagebox.askyesno("Ghi đè?", f"Preset '{p_id}' đã tồn tại! Bạn có muốn ghi đè không?", parent=win):
+                    return
+            win.destroy()
+            on_save_callback(p_id, p_name, p_desc)
+
+        tk.Button(bottom, text="💾 Lưu Preset", font=("Segoe UI", 9, "bold"), bg="#ffffff", fg="#000000",
+                  relief="flat", padx=12, pady=3, cursor="hand2", command=on_ok).pack(side="right", padx=4)
+        tk.Button(bottom, text="Hủy", font=("Segoe UI", 9), bg="#282828", fg="#ffffff",
+                  relief="solid", bd=1, padx=10, pady=3, cursor="hand2", command=win.destroy).pack(side="right", padx=4)
+
+    def save_current_as_preset_a(self):
+        e1 = self.cb_elem1_a.get()
+        e2 = self.cb_elem2_a.get()
+        def_id = f"{e1.lower()}_{e2.lower()}_preset"
+        def_name = f"Build {e1} + {e2}" if e1 != e2 else f"PureType {e1}"
+
+        def do_save(pid, pname, pdesc):
+            skills_b = [self.cb_s3_a.get(), self.cb_s4_a.get()]
+            s5 = self.cb_s5_a.get()
+            if s5 and s5 not in ("(Không dùng)", "(Hết skill)"):
+                skills_b.append(s5)
+
+            stats_dict = {k: v["var"].get() for k, v in self.team_a_vars.items()}
+            self.build_presets[pid] = {
+                "name": pname,
+                "desc": pdesc,
+                "branch_a": {"magic": e1, "skills": [self.cb_s1_a.get(), self.cb_s2_a.get()]},
+                "branch_b": {"magic": e2, "skills": skills_b},
+                "basic": self.cb_basic_a.get(),
+                "stats": stats_dict,
+                "relics": list(self.selected_relics_a)
+            }
+            self.save_build_presets_to_disk()
+            self.cb_preset_a.set(pname)
+            messagebox.showinfo("Đã lưu", f"Đã lưu preset '{pname}' [{pid}] thành công!")
+
+        self.prompt_save_preset(def_id, def_name, do_save)
+
+    def save_current_as_preset_b(self):
+        e1 = self.cb_elem1_b.get()
+        e2 = self.cb_elem2_b.get()
+        def_id = f"{e1.lower()}_{e2.lower()}_b"
+        def_name = f"Build {e1} + {e2} (B)" if e1 != e2 else f"PureType {e1} (B)"
+
+        def do_save(pid, pname, pdesc):
+            skills_b2 = [self.cb_s3_b.get(), self.cb_s4_b.get()]
+            s5 = self.cb_s5_b.get()
+            if s5 and s5 not in ("(Không dùng)", "(Hết skill)"):
+                skills_b2.append(s5)
+
+            stats_dict = {k: v["var"].get() for k, v in self.team_b_fight_vars.items()}
+            self.build_presets[pid] = {
+                "name": pname,
+                "desc": pdesc,
+                "branch_a": {"magic": e1, "skills": [self.cb_s1_b.get(), self.cb_s2_b.get()]},
+                "branch_b": {"magic": e2, "skills": skills_b2},
+                "basic": self.cb_basic_b.get(),
+                "stats": stats_dict,
+                "relics": list(self.selected_relics_b)
+            }
+            self.save_build_presets_to_disk()
+            self.cb_preset_b.set(pname)
+            messagebox.showinfo("Đã lưu", f"Đã lưu preset '{pname}' [{pid}] thành công!")
+
+        self.prompt_save_preset(def_id, def_name, do_save)
+
+    def on_select_preset_a(self):
+        val = self.cb_preset_a.get()
+        if val == "(Tùy chỉnh)" or not val:
+            return
+        p_obj = None
+        for pid, p in self.build_presets.items():
+            if p.get("name") == val or pid == val:
+                p_obj = p
+                break
+        if not p_obj:
+            return
+        self.apply_preset_to_team("a", p_obj)
+
+    def on_select_preset_b(self):
+        val = self.cb_preset_b.get()
+        if val == "(Tùy chỉnh)" or not val:
+            return
+        p_obj = None
+        for pid, p in self.build_presets.items():
+            if p.get("name") == val or pid == val:
+                p_obj = p
+                break
+        if not p_obj:
+            return
+        self.apply_preset_to_team("b", p_obj)
+
+    def apply_preset_to_team(self, team_tag, p_obj):
+        e1 = p_obj.get("branch_a", {}).get("magic", "Amgar")
+        e2 = p_obj.get("branch_b", {}).get("magic", "Gale")
+        basic = p_obj.get("basic", "")
+        skills_a = p_obj.get("branch_a", {}).get("skills", [])
+        skills_b = p_obj.get("branch_b", {}).get("skills", [])
+        stats = p_obj.get("stats", {})
+        relics = p_obj.get("relics", [])
+
+        if team_tag == "a":
+            self.cb_elem1_a.set(e1)
+            self.cb_elem2_a.set(e2)
+            self.on_elem_change_a()
+
+            if basic:
+                self.cb_basic_a.set(basic)
+            if len(skills_a) > 0:
+                self.cb_s1_a.set(skills_a[0])
+            if len(skills_a) > 1:
+                self.cb_s2_a.set(skills_a[1])
+            if len(skills_b) > 0:
+                self.cb_s3_a.set(skills_b[0])
+            if len(skills_b) > 1:
+                self.cb_s4_a.set(skills_b[1])
+            if len(skills_b) > 2:
+                self.cb_s5_a.set(skills_b[2])
+            else:
+                self.cb_s5_a.set("(Không dùng)")
+            self.refresh_loadout_dropdowns_a()
+
+            for k, info in self.team_a_vars.items():
+                if k in stats:
+                    val = stats[k]
+                    info["var"].set(val)
+                    info["entry"].delete(0, "end")
+                    info["entry"].insert(0, str(val))
+
+            self.selected_relics_a = list(relics)
+            self.btn_relics_a.config(text=f"🛡 Relics: {len(self.selected_relics_a)}")
+            self.cb_preset_a.set(p_obj.get("name", ""))
+
+        elif team_tag == "b":
+            self.target_type_b.set("build")
+            self.on_toggle_b_type()
+            self.cb_elem1_b.set(e1)
+            self.cb_elem2_b.set(e2)
+            self.on_elem_change_b()
+
+            if basic:
+                self.cb_basic_b.set(basic)
+            if len(skills_a) > 0:
+                self.cb_s1_b.set(skills_a[0])
+            if len(skills_a) > 1:
+                self.cb_s2_b.set(skills_a[1])
+            if len(skills_b) > 0:
+                self.cb_s3_b.set(skills_b[0])
+            if len(skills_b) > 1:
+                self.cb_s4_b.set(skills_b[1])
+            if len(skills_b) > 2:
+                self.cb_s5_b.set(skills_b[2])
+            else:
+                self.cb_s5_b.set("(Không dùng)")
+            self.refresh_loadout_dropdowns_b()
+
+            for k, info in self.team_b_fight_vars.items():
+                if k in stats:
+                    val = stats[k]
+                    info["var"].set(val)
+                    info["entry"].delete(0, "end")
+                    info["entry"].insert(0, str(val))
+
+            self.selected_relics_b = list(relics)
+            self.btn_relics_b.config(text=f"🛡 Relics: {len(self.selected_relics_b)}")
+            self.cb_preset_b.set(p_obj.get("name", ""))
+
+    def apply_preset_to_current_dps_dummy(self):
+        if not self.build_presets:
+            messagebox.showinfo("Thông báo", "Chưa có Preset nào được lưu! Bạn có thể tạo preset ở Tab PRESET BUILDS.")
+            return
+
+        win = tk.Toplevel(self)
+        win.title("ÁP DỤNG STATS TỪ PRESET VÀO DUMMY")
+        win.geometry("380x200")
+        win.configure(bg=self.c_bg)
+        win.transient(self)
+        win.grab_set()
+
+        top = tk.Frame(win, bg=self.c_sub, padx=12, pady=8)
+        top.pack(fill="x")
+        tk.Label(top, text="CHỌN PRESET ĐỂ SAO CHÉP CHỈ SỐ", font=("Segoe UI", 9, "bold"),
+                 fg=self.c_fg, bg=self.c_sub).pack(anchor="w")
+
+        body = tk.Frame(win, bg=self.c_surface, padx=16, pady=16)
+        body.pack(fill="both", expand=True)
+
+        tk.Label(body, text="Chọn Preset cần lấy chỉ số:", font=("Segoe UI", 8),
+                 fg=self.c_muted, bg=self.c_surface).pack(anchor="w")
+
+        p_names = [p.get("name", pid) for pid, p in self.build_presets.items()]
+        cb_p = ttk.Combobox(body, values=p_names, state="readonly", width=30)
+        cb_p.set(p_names[0])
+        cb_p.pack(fill="x", pady=6)
+
+        bottom = tk.Frame(win, bg=self.c_sub, padx=12, pady=8)
+        bottom.pack(fill="x", side="bottom")
+
+        def on_apply():
+            chosen_name = cb_p.get()
+            target_p = None
+            for pid, p in self.build_presets.items():
+                if p.get("name") == chosen_name or pid == chosen_name:
+                    target_p = p
+                    break
+            if target_p and "stats" in target_p:
+                st = target_p["stats"]
+                cur_dummy = self.dps_dummies[self.current_dps_idx]
+                for k in ["hp", "atk", "defense", "mc", "pct_def_ignore", "flat_def_ignore", "damage_mult", "cdr", "guard_q", "res"]:
+                    if k in st:
+                        cur_dummy["stats"][k] = float(st[k])
+                self.load_dps_dummy_to_sliders(self.current_dps_idx)
+                self.render_dps_dummy_tabs()
+                win.destroy()
+                messagebox.showinfo("Thành công", f"Đã sao chép toàn bộ chỉ số từ Preset '{chosen_name}' vào Dummy #{self.current_dps_idx + 1}!")
+
+        tk.Button(bottom, text="✓ Áp dụng", font=("Segoe UI", 9, "bold"), bg="#ffffff", fg="#000000",
+                  relief="flat", padx=12, pady=3, cursor="hand2", command=on_apply).pack(side="right", padx=4)
+        tk.Button(bottom, text="Hủy", font=("Segoe UI", 9), bg="#282828", fg="#ffffff",
+                  relief="solid", bd=1, padx=10, pady=3, cursor="hand2", command=win.destroy).pack(side="right", padx=4)
+
+    # -------------------------------------------------------------------------
+    # TAB 6: PRESET BUILDS (QUẢN LÝ, TẠO MỚI, TÙY BIẾN & LƯU TRỮ PRESET)
+    # -------------------------------------------------------------------------
+    def build_preset_tab(self, parent):
+        main_box = tk.Frame(parent, bg=self.c_bg)
+        main_box.pack(fill="both", expand=True, padx=8, pady=8)
+
+        # CỘT TRÁI: DANH SÁCH PRESET (330px)
+        left_frame = tk.Frame(main_box, bg=self.c_surface, width=330, bd=1, relief="solid")
+        left_frame.pack(side="left", fill="both", padx=(0, 6), pady=0)
+        left_frame.pack_propagate(False)
+
+        top_l = tk.Frame(left_frame, bg=self.c_sub, padx=10, pady=8)
+        top_l.pack(fill="x")
+        tk.Label(top_l, text="DANH SÁCH PRESET BUILD", font=("Segoe UI", 10, "bold"),
+                 fg=self.c_fg, bg=self.c_sub).pack(anchor="w")
+
+        # Tìm kiếm Preset
+        search_box = tk.Frame(left_frame, bg=self.c_surface, padx=8, pady=4)
+        search_box.pack(fill="x")
+        tk.Label(search_box, text="🔍 Tìm:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.ent_search_preset = tk.Entry(search_box, bg="#111111", fg="#ffffff", insertbackground="#ffffff",
+                                          relief="solid", bd=1, font=("Segoe UI", 9))
+        self.ent_search_preset.pack(side="left", fill="x", expand=True, padx=(4, 0))
+        self.ent_search_preset.bind("<KeyRelease>", lambda e: self.refresh_presets_tree())
+
+        # Treeview danh sách Preset
+        tree_frame = tk.Frame(left_frame, bg=self.c_bg)
+        tree_frame.pack(fill="both", expand=True, padx=6, pady=4)
+
+        tree_cols = ("name", "elem", "relics")
+        self.tree_presets = ttk.Treeview(tree_frame, columns=tree_cols, show="headings", selectmode="browse")
+        self.tree_presets.heading("name", text="Tên Preset")
+        self.tree_presets.heading("elem", text="Nguyên Tố")
+        self.tree_presets.heading("relics", text="Relics")
+
+        self.tree_presets.column("name", width=130, anchor="w")
+        self.tree_presets.column("elem", width=105, anchor="center")
+        self.tree_presets.column("relics", width=50, anchor="center")
+
+        tree_sb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree_presets.yview)
+        self.tree_presets.configure(yscrollcommand=tree_sb.set)
+
+        self.tree_presets.pack(side="left", fill="both", expand=True)
+        tree_sb.pack(side="right", fill="y")
+        self.tree_presets.bind("<<TreeviewSelect>>", self.on_preset_tree_select)
+
+        # Hộp tóm tắt preset đang chọn
+        card_box = tk.Frame(left_frame, bg="#181818", padx=8, pady=6, relief="solid", bd=1)
+        card_box.pack(fill="x", padx=6, pady=(0, 6))
+
+        tk.Label(card_box, text="TÓM TẮT PRESET:", font=("Segoe UI", 8, "bold"), fg=self.c_muted, bg="#181818").pack(anchor="w")
+        self.lbl_preset_card = tk.Label(card_box, text="(Chọn hoặc tạo mới preset để xem)", font=("Segoe UI", 8),
+                                        fg="#cccccc", bg="#181818", wraplength=300, justify="left")
+        self.lbl_preset_card.pack(anchor="w", pady=(2, 0))
+
+        # Thanh nút thao tác preset
+        btn_bar = tk.Frame(left_frame, bg=self.c_sub, padx=6, pady=6)
+        btn_bar.pack(fill="x", side="bottom")
+
+        r_btn1 = tk.Frame(btn_bar, bg=self.c_sub)
+        r_btn1.pack(fill="x", pady=1)
+
+        tk.Button(r_btn1, text="+ Tạo Mới", bg="#2a2a2a", fg="#ffffff", font=("Segoe UI", 8, "bold"),
+                  relief="solid", bd=1, padx=6, pady=3, cursor="hand2", command=self.new_preset_form).pack(side="left", padx=2)
+        tk.Button(r_btn1, text="📋 Nhân Bản", bg="#2a2a2a", fg="#ffffff", font=("Segoe UI", 8),
+                  relief="solid", bd=1, padx=6, pady=3, cursor="hand2", command=self.clone_preset_action).pack(side="left", padx=2)
+        tk.Button(r_btn1, text="🗑 Xóa", bg="#2a2a2a", fg="#ff6666", font=("Segoe UI", 8),
+                  relief="solid", bd=1, padx=6, pady=3, cursor="hand2", command=self.delete_preset_action).pack(side="left", padx=2)
+
+        r_btn2 = tk.Frame(btn_bar, bg=self.c_sub)
+        r_btn2.pack(fill="x", pady=(4, 1))
+
+        tk.Button(r_btn2, text="➔ Đội A", bg="#242424", fg="#00e676", font=("Segoe UI", 8, "bold"),
+                  relief="solid", bd=1, padx=4, pady=2, cursor="hand2", command=self.apply_pform_and_switch_a).pack(side="left", padx=1, fill="x", expand=True)
+        tk.Button(r_btn2, text="➔ Đội B", bg="#242424", fg="#00e676", font=("Segoe UI", 8, "bold"),
+                  relief="solid", bd=1, padx=4, pady=2, cursor="hand2", command=self.apply_pform_and_switch_b).pack(side="left", padx=1, fill="x", expand=True)
+        tk.Button(r_btn2, text="➔ Dummy DPS", bg="#242424", fg="#00e676", font=("Segoe UI", 8, "bold"),
+                  relief="solid", bd=1, padx=4, pady=2, cursor="hand2", command=self.apply_pform_and_switch_dps).pack(side="left", padx=1, fill="x", expand=True)
+
+        # CỘT PHẢI: FORM TÙY CHỈNH PRESET (SCROLLABLE CANVAS)
+        right_frame = tk.Frame(main_box, bg=self.c_surface, bd=1, relief="solid")
+        right_frame.pack(side="left", fill="both", expand=True, padx=(6, 0), pady=0)
+
+        ed_top = tk.Frame(right_frame, bg=self.c_sub, padx=12, pady=8)
+        ed_top.pack(fill="x")
+        self.lbl_pform_editor_title = tk.Label(ed_top, text="[ THIẾT LẬP PRESET BUILD ]",
+                                               font=("Segoe UI", 10, "bold"), fg=self.c_fg, bg=self.c_sub)
+        self.lbl_pform_editor_title.pack(side="left")
+
+        p_canvas = tk.Canvas(right_frame, bg=self.c_surface, highlightthickness=0)
+        p_sb = ttk.Scrollbar(right_frame, orient="vertical", command=p_canvas.yview)
+        p_form = tk.Frame(p_canvas, bg=self.c_surface, padx=12, pady=8)
+
+        p_form.bind("<Configure>", lambda e: p_canvas.configure(scrollregion=p_canvas.bbox("all")))
+        p_win = p_canvas.create_window((0, 0), window=p_form, anchor="nw")
+        p_canvas.configure(yscrollcommand=p_sb.set)
+
+        def _on_p_canvas_configure(e):
+            p_canvas.itemconfig(p_win, width=e.width)
+        p_canvas.bind("<Configure>", _on_p_canvas_configure)
+
+        def _on_p_mousewheel(event):
+            p_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        p_canvas.bind("<Enter>", lambda e: p_canvas.bind_all("<MouseWheel>", _on_p_mousewheel))
+        p_canvas.bind("<Leave>", lambda e: p_canvas.unbind_all("<MouseWheel>"))
+
+        p_canvas.pack(side="left", fill="both", expand=True)
+        p_sb.pack(side="right", fill="y")
+
+        # 1. Thông tin chung Preset (Key ID, Name, Desc)
+        meta_box = tk.LabelFrame(p_form, text=" 1. THÔNG TIN PRESET ", font=("Segoe UI", 8, "bold"),
+                                 fg=self.c_fg, bg=self.c_surface, padx=10, pady=6, bd=1, relief="solid")
+        meta_box.pack(fill="x", pady=(0, 6))
+
+        m_r1 = tk.Frame(meta_box, bg=self.c_surface)
+        m_r1.pack(fill="x", pady=2)
+
+        f_k = tk.Frame(m_r1, bg=self.c_surface)
+        f_k.pack(side="left", fill="x", expand=True, padx=(0, 6))
+        tk.Label(f_k, text="Mã Preset (Key ID):", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(anchor="w")
+        self.ent_pform_key = tk.Entry(f_k, bg="#121212", fg="#ffffff", insertbackground="#ffffff",
+                                      relief="solid", bd=1, font=("Consolas", 9))
+        self.ent_pform_key.pack(fill="x")
+
+        f_n = tk.Frame(m_r1, bg=self.c_surface)
+        f_n.pack(side="left", fill="x", expand=True, padx=(6, 0))
+        tk.Label(f_n, text="Tên Preset Hiển Thị:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(anchor="w")
+        self.ent_pform_name = tk.Entry(f_n, bg="#121212", fg="#ffffff", insertbackground="#ffffff",
+                                       relief="solid", bd=1, font=("Segoe UI", 9))
+        self.ent_pform_name.pack(fill="x")
+
+        m_r2 = tk.Frame(meta_box, bg=self.c_surface)
+        m_r2.pack(fill="x", pady=(4, 2))
+        tk.Label(m_r2, text="Mô tả tóm tắt phong cách build:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(anchor="w")
+        self.ent_pform_desc = tk.Entry(m_r2, bg="#121212", fg="#ffffff", insertbackground="#ffffff",
+                                       relief="solid", bd=1, font=("Segoe UI", 9))
+        self.ent_pform_desc.pack(fill="x")
+
+        # 2. Tổ hợp 2 Nguyên Tố
+        elem_box = tk.LabelFrame(p_form, text=" 2. TỔ HỢP NGUYÊN TỐ (BUILD) ", font=("Segoe UI", 8, "bold"),
+                                 fg=self.c_fg, bg=self.c_surface, padx=10, pady=6, bd=1, relief="solid")
+        elem_box.pack(fill="x", pady=(0, 6))
+
+        el_r = tk.Frame(elem_box, bg=self.c_surface)
+        el_r.pack(fill="x", pady=2)
+
+        tk.Label(el_r, text="Nhánh 1:", bg=self.c_surface, fg=self.c_muted, font=("Segoe UI", 8, "bold")).pack(side="left")
+        self.cb_pform_elem1 = ttk.Combobox(el_r, values=ELEMENTS_LIST, width=10, state="readonly")
+        self.cb_pform_elem1.set("Amgar")
+        self.cb_pform_elem1.pack(side="left", padx=2)
+        self.cb_pform_elem1.bind("<<ComboboxSelected>>", lambda e: self.on_pform_elem_change())
+
+        tk.Button(el_r, text="⇄", font=("Segoe UI", 8, "bold"), bg="#262626", fg="#ffffff",
+                  relief="solid", bd=1, padx=4, cursor="hand2", command=self.swap_pform_elements).pack(side="left", padx=2)
+
+        tk.Label(el_r, text="Nhánh 2:", bg=self.c_surface, fg=self.c_muted, font=("Segoe UI", 8, "bold")).pack(side="left", padx=(4, 0))
+        self.cb_pform_elem2 = ttk.Combobox(el_r, values=ELEMENTS_LIST, width=10, state="readonly")
+        self.cb_pform_elem2.set("Gale")
+        self.cb_pform_elem2.pack(side="left", padx=2)
+        self.cb_pform_elem2.bind("<<ComboboxSelected>>", lambda e: self.on_pform_elem_change())
+
+        tk.Button(el_r, text="★ Pure", font=("Segoe UI", 7, "bold"), bg="#333333", fg="#ffffff",
+                  relief="solid", bd=1, padx=4, cursor="hand2", command=self.make_pform_pure).pack(side="left", padx=2)
+
+        self.lbl_pform_elem_status = tk.Label(el_r, text="", font=("Segoe UI", 8, "bold"),
+                                              bg="#222222", fg="#ffffff", padx=6, pady=1, relief="solid", bd=1)
+        self.lbl_pform_elem_status.pack(side="left", padx=(6, 0))
+
+        # 3. Loadout Kỹ Năng (5 Skills)
+        loadout_box = tk.LabelFrame(p_form, text=" 3. LOADOUT KỸ NĂNG (5 SKILLS) ", font=("Segoe UI", 8, "bold"),
+                                    fg=self.c_fg, bg=self.c_surface, padx=10, pady=6, bd=1, relief="solid")
+        loadout_box.pack(fill="x", pady=(0, 6))
+
+        lr1 = tk.Frame(loadout_box, bg=self.c_surface)
+        lr1.pack(fill="x", pady=1)
+
+        self.lbl_pform_l1 = tk.Label(lr1, text="Nhánh 1:", width=9, anchor="w",
+                                     bg=self.c_surface, fg=self.c_muted, font=("Segoe UI", 7, "bold"))
+        self.lbl_pform_l1.pack(side="left")
+
+        tk.Label(lr1, text="Basic:", bg=self.c_surface, fg=self.c_dim, font=("Segoe UI", 7, "bold")).pack(side="left")
+        self.cb_pform_basic = ttk.Combobox(lr1, width=12, state="readonly")
+        self.cb_pform_basic.pack(side="left", padx=(1, 4))
+        self.cb_pform_basic.bind("<<ComboboxSelected>>", lambda e: self.on_pform_skill_change())
+
+        tk.Label(lr1, text="S1:", bg=self.c_surface, fg=self.c_dim, font=("Segoe UI", 7, "bold")).pack(side="left")
+        self.cb_pform_s1 = ttk.Combobox(lr1, width=11, state="readonly")
+        self.cb_pform_s1.pack(side="left", padx=(1, 4))
+        self.cb_pform_s1.bind("<<ComboboxSelected>>", lambda e: self.on_pform_skill_change())
+
+        tk.Label(lr1, text="S2:", bg=self.c_surface, fg=self.c_dim, font=("Segoe UI", 7, "bold")).pack(side="left")
+        self.cb_pform_s2 = ttk.Combobox(lr1, width=11, state="readonly")
+        self.cb_pform_s2.pack(side="left", padx=(1, 4))
+        self.cb_pform_s2.bind("<<ComboboxSelected>>", lambda e: self.on_pform_skill_change())
+
+        lr2 = tk.Frame(loadout_box, bg=self.c_surface)
+        lr2.pack(fill="x", pady=1)
+
+        self.lbl_pform_l2 = tk.Label(lr2, text="Nhánh 2:", width=9, anchor="w",
+                                     bg=self.c_surface, fg=self.c_muted, font=("Segoe UI", 7, "bold"))
+        self.lbl_pform_l2.pack(side="left")
+
+        tk.Label(lr2, text="S3:", bg=self.c_surface, fg=self.c_dim, font=("Segoe UI", 7, "bold")).pack(side="left")
+        self.cb_pform_s3 = ttk.Combobox(lr2, width=11, state="readonly")
+        self.cb_pform_s3.pack(side="left", padx=(1, 4))
+        self.cb_pform_s3.bind("<<ComboboxSelected>>", lambda e: self.on_pform_skill_change())
+
+        tk.Label(lr2, text="S4:", bg=self.c_surface, fg=self.c_dim, font=("Segoe UI", 7, "bold")).pack(side="left")
+        self.cb_pform_s4 = ttk.Combobox(lr2, width=11, state="readonly")
+        self.cb_pform_s4.pack(side="left", padx=(1, 4))
+        self.cb_pform_s4.bind("<<ComboboxSelected>>", lambda e: self.on_pform_skill_change())
+
+        tk.Label(lr2, text="S5:", bg=self.c_surface, fg=self.c_dim, font=("Segoe UI", 7, "bold")).pack(side="left")
+        self.cb_pform_s5 = ttk.Combobox(lr2, width=11, state="readonly")
+        self.cb_pform_s5.pack(side="left", padx=(1, 4))
+        self.cb_pform_s5.bind("<<ComboboxSelected>>", lambda e: self.on_pform_skill_change())
+
+        tk.Button(lr2, text="↺", font=("Segoe UI", 7), bg="#242424", fg="#aaaaaa",
+                  relief="solid", bd=1, padx=3, cursor="hand2", command=self.reset_pform_loadout).pack(side="left", padx=2)
+
+        # 4. Lựa chọn Relics (Cổ vật & Nội tại tự chọn)
+        relic_box = tk.LabelFrame(p_form, text=" 4. RELICS & NỘI TẠI TỰ CHỌN ", font=("Segoe UI", 8, "bold"),
+                                  fg=self.c_fg, bg=self.c_surface, padx=10, pady=6, bd=1, relief="solid")
+        relic_box.pack(fill="x", pady=(0, 6))
+
+        r_top = tk.Frame(relic_box, bg=self.c_surface)
+        r_top.pack(fill="x", pady=(0, 4))
+
+        self.btn_pform_pick_relics = tk.Button(r_top, text="🛡 Chọn Relics (0 đã chọn)...", font=("Segoe UI", 8, "bold"),
+                                               bg="#262626", fg="#00e676", relief="solid", bd=1, padx=8, pady=3,
+                                               cursor="hand2", command=self.open_pform_relic_selector)
+        self.btn_pform_pick_relics.pack(side="left")
+
+        tk.Button(r_top, text="✕ Bỏ chọn hết", font=("Segoe UI", 7), bg="#202020", fg="#aaaaaa",
+                  relief="solid", bd=1, padx=6, command=self.clear_pform_relics).pack(side="left", padx=6)
+
+        self.frame_pform_chips = tk.Frame(relic_box, bg=self.c_surface)
+        self.frame_pform_chips.pack(fill="x", pady=2)
+        self.render_pform_relic_chips()
+
+        # 5. Tùy chỉnh Chỉ Số (Custom Stats)
+        stats_box = tk.LabelFrame(p_form, text=" 5. CHỈ SỐ NHÂN VẬT (STATS) ", font=("Segoe UI", 8, "bold"),
+                                  fg=self.c_fg, bg=self.c_surface, padx=10, pady=6, bd=1, relief="solid")
+        stats_box.pack(fill="x", pady=(0, 6))
+
+        st_presets_row = tk.Frame(stats_box, bg=self.c_surface)
+        st_presets_row.pack(fill="x", pady=(0, 4))
+        tk.Label(st_presets_row, text="Chỉ số mẫu:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(0, 4))
+
+        for p_name, p_k in [("↺ Gốc", "base"), ("Dồn Dame", "dps"), ("Pháp Sư", "caster"), ("Đỡ Đòn", "tank")]:
+            tk.Button(st_presets_row, text=p_name, font=("Segoe UI", 7), bg="#262626", fg="#dddddd",
+                      relief="solid", bd=1, padx=5, command=lambda k=p_k: self.apply_pform_stat_preset(k)).pack(side="left", padx=2)
+
+        self.box_pform_sliders = tk.Frame(stats_box, bg=self.c_surface)
+        self.box_pform_sliders.pack(fill="both", expand=True, pady=2)
+        self.populate_team_sliders("preset_form", self.box_pform_sliders, self.preset_form_vars)
+
+        # 6. Thanh Lưu & Phản Hồi
+        save_box = tk.Frame(p_form, bg=self.c_surface, pady=8)
+        save_box.pack(fill="x", pady=(4, 8))
+
+        btn_save_p = tk.Button(save_box, text="💾 LƯU PRESET BUILD", font=("Segoe UI", 9, "bold"),
+                               bg="#ffffff", fg="#000000", relief="flat", padx=18, pady=5,
+                               cursor="hand2", activebackground="#dddddd", command=self.save_preset_action)
+        btn_save_p.pack(side="left")
+
+        btn_save_use = tk.Button(save_box, text="➔ Lưu & Sử dụng Đội A ngay", font=("Segoe UI", 8, "bold"),
+                                 bg="#262626", fg="#00e676", relief="solid", bd=1, padx=12, pady=5,
+                                 cursor="hand2", command=self.save_and_apply_to_team_a)
+        btn_save_use.pack(side="left", padx=8)
+
+        self.lbl_pform_msg = tk.Label(save_box, text="", font=("Segoe UI", 8, "bold"),
+                                      bg=self.c_surface, fg="#00e676")
+        self.lbl_pform_msg.pack(side="left", padx=8)
+
+        self.on_pform_elem_change()
+        self.refresh_presets_tree()
+
+    # --- Các phương thức xử lý Tab 6 (Preset Builds) ---
+    def refresh_presets_tree(self):
+        for item in self.tree_presets.get_children():
+            self.tree_presets.delete(item)
+
+        filter_txt = (self.ent_search_preset.get() if hasattr(self, "ent_search_preset") else "").lower().strip()
+
+        for pid, p in sorted(self.build_presets.items()):
+            name = p.get("name", pid)
+            e1 = p.get("branch_a", {}).get("magic", "-")
+            e2 = p.get("branch_b", {}).get("magic", "-")
+            elem_str = f"Pure {e1}" if e1 == e2 else f"{e1}+{e2}"
+            relics_cnt = str(len(p.get("relics", [])))
+
+            if filter_txt and (filter_txt not in pid.lower() and filter_txt not in name.lower() and filter_txt not in elem_str.lower()):
+                continue
+
+            self.tree_presets.insert("", "end", iid=pid, values=(name, elem_str, relics_cnt))
+
+    def on_preset_tree_select(self, event=None):
+        sel = self.tree_presets.selection()
+        if not sel:
+            return
+        pid = sel[0]
+        p = self.build_presets.get(pid)
+        if not p:
+            return
+
+        self.editing_preset_key = pid
+        self.ent_pform_key.delete(0, "end")
+        self.ent_pform_key.insert(0, pid)
+
+        self.ent_pform_name.delete(0, "end")
+        self.ent_pform_name.insert(0, p.get("name", pid))
+
+        self.ent_pform_desc.delete(0, "end")
+        self.ent_pform_desc.insert(0, p.get("desc", ""))
+
+        e1 = p.get("branch_a", {}).get("magic", "Amgar")
+        e2 = p.get("branch_b", {}).get("magic", "Gale")
+        self.cb_pform_elem1.set(e1)
+        self.cb_pform_elem2.set(e2)
+        self.on_pform_elem_change()
+
+        basic = p.get("basic", "")
+        if basic:
+            self.cb_pform_basic.set(basic)
+        s_a = p.get("branch_a", {}).get("skills", [])
+        s_b = p.get("branch_b", {}).get("skills", [])
+        if len(s_a) > 0:
+            self.cb_pform_s1.set(s_a[0])
+        if len(s_a) > 1:
+            self.cb_pform_s2.set(s_a[1])
+        if len(s_b) > 0:
+            self.cb_pform_s3.set(s_b[0])
+        if len(s_b) > 1:
+            self.cb_pform_s4.set(s_b[1])
+        if len(s_b) > 2:
+            self.cb_pform_s5.set(s_b[2])
+        else:
+            self.cb_pform_s5.set("(Không dùng)")
+        self.refresh_pform_loadout_dropdowns()
+
+        self.preset_form_relics = set(p.get("relics", []))
+        self.render_pform_relic_chips()
+
+        st = p.get("stats", {})
+        for k, info in self.preset_form_vars.items():
+            val = st.get(k, info["meta"]["min"])
+            info["var"].set(val)
+            info["entry"].delete(0, "end")
+            info["entry"].insert(0, str(val))
+
+        # Cập nhật thẻ tóm tắt
+        sks = [basic] + s_a + s_b
+        sks_str = ", ".join(s for s in sks if s and s != "(Không dùng)")
+        relics_str = ", ".join(self.preset_form_relics) if self.preset_form_relics else "(Không)"
+        card_text = f"• Mã: {pid}\n• Tên: {p.get('name', pid)}\n• Nhánh: {e1} + {e2}\n• Kỹ năng: {sks_str}\n• Relics ({len(self.preset_form_relics)}): {relics_str}\n• Chỉ số: {st.get('hp', 2000):.0f}HP | {st.get('atk', 200):.0f}ATK | {st.get('defense', 300):.0f}DEF | MC {st.get('mc', 0)*100:.0f}%"
+        self.lbl_preset_card.config(text=card_text)
+        self.lbl_pform_msg.config(text=f"Đang xem [{pid}]", fg="#cccccc")
+
+    def new_preset_form(self):
+        self.editing_preset_key = None
+        idx = 1
+        while f"preset_{idx}" in self.build_presets:
+            idx += 1
+        new_id = f"preset_{idx}"
+        new_name = f"Build Preset {idx}"
+
+        self.ent_pform_key.delete(0, "end")
+        self.ent_pform_key.insert(0, new_id)
+
+        self.ent_pform_name.delete(0, "end")
+        self.ent_pform_name.insert(0, new_name)
+
+        self.ent_pform_desc.delete(0, "end")
+
+        self.cb_pform_elem1.set("Amgar")
+        self.cb_pform_elem2.set("Gale")
+        self.on_pform_elem_change()
+
+        self.preset_form_relics = set()
+        self.render_pform_relic_chips()
+
+        self.apply_pform_stat_preset("base")
+        self.lbl_preset_card.config(text=f"Đang soạn thảo Preset mới [{new_id}]. Nhấn 'LƯU PRESET' khi hoàn tất.")
+        self.lbl_pform_msg.config(text="Đang soạn Preset mới", fg="#cccccc")
+
+    def clone_preset_action(self):
+        sel = self.tree_presets.selection()
+        if not sel:
+            messagebox.showinfo("Thông báo", "Vui lòng chọn 1 Preset để nhân bản!")
+            return
+        pid = sel[0]
+        orig = self.build_presets.get(pid)
+        if not orig:
+            return
+
+        new_pid = f"{pid}_copy"
+        idx = 2
+        while new_pid in self.build_presets:
+            new_pid = f"{pid}_copy_{idx}"
+            idx += 1
+
+        cloned = copy.deepcopy(orig)
+        cloned["name"] = f"{orig.get('name', pid)} (Bản sao)"
+        self.build_presets[new_pid] = cloned
+        self.save_build_presets_to_disk()
+        self.refresh_presets_tree()
+        self.tree_presets.selection_set(new_pid)
+        self.on_preset_tree_select()
+        self.lbl_pform_msg.config(text=f"✓ Đã nhân bản thành [{new_pid}]!", fg="#00e676")
+
+    def delete_preset_action(self):
+        sel = self.tree_presets.selection()
+        if not sel:
+            messagebox.showinfo("Thông báo", "Vui lòng chọn 1 Preset để xóa!")
+            return
+        pid = sel[0]
+        if not messagebox.askyesno("Xác nhận xóa", f"Bạn có chắc muốn xóa Preset '{pid}' không?"):
+            return
+        if pid in self.build_presets:
+            del self.build_presets[pid]
+            self.save_build_presets_to_disk()
+            self.refresh_presets_tree()
+            self.new_preset_form()
+            self.lbl_pform_msg.config(text=f"✓ Đã xóa preset [{pid}].", fg="#ff6666")
+
+    def save_preset_action(self):
+        pid = self.ent_pform_key.get().strip()
+        if not pid:
+            messagebox.showwarning("Thiếu dữ liệu", "Vui lòng nhập Mã Preset (Key ID)!")
+            return
+        pname = self.ent_pform_name.get().strip() or pid
+        pdesc = self.ent_pform_desc.get().strip()
+
+        e1 = self.cb_pform_elem1.get()
+        e2 = self.cb_pform_elem2.get()
+        basic = self.cb_pform_basic.get()
+
+        s_a = [self.cb_pform_s1.get(), self.cb_pform_s2.get()]
+        s_b = [self.cb_pform_s3.get(), self.cb_pform_s4.get()]
+        extra_s = self.cb_pform_s5.get()
+        if extra_s and extra_s not in ("(Không dùng)", "(Hết skill)"):
+            s_b.append(extra_s)
+
+        stats_dict = {k: v["var"].get() for k, v in self.preset_form_vars.items()}
+
+        preset_obj = {
+            "name": pname,
+            "desc": pdesc,
+            "branch_a": {"magic": e1, "skills": s_a},
+            "branch_b": {"magic": e2, "skills": s_b},
+            "basic": basic,
+            "stats": stats_dict,
+            "relics": sorted(list(self.preset_form_relics))
+        }
+
+        if self.editing_preset_key and self.editing_preset_key != pid:
+            if pid in self.build_presets:
+                if not messagebox.askyesno("Ghi đè?", f"Preset '{pid}' đã tồn tại! Bạn có muốn ghi đè?"):
+                    return
+            if self.editing_preset_key in self.build_presets:
+                del self.build_presets[self.editing_preset_key]
+
+        self.build_presets[pid] = preset_obj
+        self.editing_preset_key = pid
+        self.save_build_presets_to_disk()
+        self.refresh_presets_tree()
+        self.tree_presets.selection_set(pid)
+        self.on_preset_tree_select()
+
+        self.lbl_pform_msg.config(text=f"✓ Đã lưu preset [{pid}] vào config/build_presets.json!", fg="#00e676")
+        return preset_obj
+
+    def save_and_apply_to_team_a(self):
+        p_obj = self.save_preset_action()
+        if p_obj:
+            self.apply_preset_to_team("a", p_obj)
+            self.notebook.select(0)
+
+    def apply_pform_and_switch_a(self):
+        pid = self.ent_pform_key.get().strip()
+        p = self.build_presets.get(pid)
+        if not p:
+            self.save_preset_action()
+            p = self.build_presets.get(pid)
+        if p:
+            self.apply_preset_to_team("a", p)
+            self.notebook.select(0)
+
+    def apply_pform_and_switch_b(self):
+        pid = self.ent_pform_key.get().strip()
+        p = self.build_presets.get(pid)
+        if not p:
+            self.save_preset_action()
+            p = self.build_presets.get(pid)
+        if p:
+            self.apply_preset_to_team("b", p)
+            self.mode_var.set("fight")
+            self.on_mode_change()
+            self.notebook.select(0)
+
+    def apply_pform_and_switch_dps(self):
+        pid = self.ent_pform_key.get().strip()
+        p = self.build_presets.get(pid)
+        if not p:
+            self.save_preset_action()
+            p = self.build_presets.get(pid)
+        if p and "stats" in p:
+            st = p["stats"]
+            cur_dummy = self.dps_dummies[self.current_dps_idx]
+            for k in ["hp", "atk", "defense", "mc", "pct_def_ignore", "flat_def_ignore", "damage_mult", "cdr", "guard_q", "res"]:
+                if k in st:
+                    cur_dummy["stats"][k] = float(st[k])
+            self.load_dps_dummy_to_sliders(self.current_dps_idx)
+            self.render_dps_dummy_tabs()
+            self.mode_var.set("dps")
+            self.on_mode_change()
+            self.notebook.select(0)
+
+    def on_pform_elem_change(self):
+        e1 = self.cb_pform_elem1.get()
+        e2 = self.cb_pform_elem2.get()
+        if e1 == e2:
+            self.lbl_pform_elem_status.config(text=f"★ PURETYPE: Thuần {e1}", bg="#ffffff", fg="#000000")
+        else:
+            self.lbl_pform_elem_status.config(text=f"⚡ TỔ HỢP: {e1} + {e2}", bg="#242424", fg="#ffffff")
+        if hasattr(self, "lbl_pform_l1"):
+            self.lbl_pform_l1.config(text=f"Nhánh 1 ({e1}):")
+            self.lbl_pform_l2.config(text=f"Nhánh 2 ({e2}):")
+            self.reset_pform_loadout()
+
+    def swap_pform_elements(self):
+        e1 = self.cb_pform_elem1.get()
+        e2 = self.cb_pform_elem2.get()
+        self.cb_pform_elem1.set(e2)
+        self.cb_pform_elem2.set(e1)
+        self.on_pform_elem_change()
+
+    def make_pform_pure(self):
+        e1 = self.cb_pform_elem1.get()
+        self.cb_pform_elem2.set(e1)
+        self.on_pform_elem_change()
+
+    def reset_pform_loadout(self):
+        e1 = self.cb_pform_elem1.get()
+        e2 = self.cb_pform_elem2.get()
+        b1, a1 = self.get_magic_skills(e1)
+        b2, a2 = self.get_magic_skills(e2)
+
+        self.cb_pform_basic["values"] = b1
+        self.cb_pform_basic.set(b1[0] if b1 else "")
+
+        if e1 == e2:
+            s1 = a1[0] if len(a1) > 0 else ""
+            s2 = a1[1] if len(a1) > 1 else s1
+            s3 = a1[2] if len(a1) > 2 else s1
+            s4 = a1[3] if len(a1) > 3 else s1
+        else:
+            s1 = a1[0] if len(a1) > 0 else ""
+            s2 = a1[1] if len(a1) > 1 else s1
+            s3 = a2[2] if len(a2) > 2 else (a2[0] if a2 else "")
+            s4 = a2[3] if len(a2) > 3 else (a2[1] if len(a2) > 1 else s3)
+
+        self.cb_pform_s1.set(s1)
+        self.cb_pform_s2.set(s2)
+        self.cb_pform_s3.set(s3)
+        self.cb_pform_s4.set(s4)
+        self.cb_pform_s5.set("(Không dùng)")
+        self.refresh_pform_loadout_dropdowns()
+
+    def refresh_pform_loadout_dropdowns(self):
+        e1 = self.cb_pform_elem1.get()
+        e2 = self.cb_pform_elem2.get()
+        b1, a1 = self.get_magic_skills(e1)
+        b2, a2 = self.get_magic_skills(e2)
+
+        self.cb_pform_basic["values"] = b1
+        s1 = self.cb_pform_s1.get()
+        s2 = self.cb_pform_s2.get()
+        s3 = self.cb_pform_s3.get()
+        s4 = self.cb_pform_s4.get()
+
+        self.cb_pform_s1["values"] = a1
+
+        opt_s2 = [s for s in a1 if s != s1]
+        self.cb_pform_s2["values"] = opt_s2 if opt_s2 else a1
+        if self.cb_pform_s2.get() not in self.cb_pform_s2["values"] and opt_s2:
+            self.cb_pform_s2.set(opt_s2[0])
+
+        if e1 == e2:
+            used_branch1 = {s1, self.cb_pform_s2.get()}
+            opt_s3 = [s for s in a1 if s not in used_branch1]
+            self.cb_pform_s3["values"] = opt_s3 if opt_s3 else a1
+            if self.cb_pform_s3.get() not in self.cb_pform_s3["values"] and opt_s3:
+                self.cb_pform_s3.set(opt_s3[0])
+
+            used_so_far = used_branch1 | {self.cb_pform_s3.get()}
+            opt_s4 = [s for s in a1 if s not in used_so_far]
+            self.cb_pform_s4["values"] = opt_s4 if opt_s4 else a1
+            if self.cb_pform_s4.get() not in self.cb_pform_s4["values"] and opt_s4:
+                self.cb_pform_s4.set(opt_s4[0])
+
+            used_all = used_so_far | {self.cb_pform_s4.get()}
+            rem_s5 = [s for s in a1 if s not in used_all]
+            self.cb_pform_s5["values"] = ["(Không dùng)"] + rem_s5
+            if self.cb_pform_s5.get() not in self.cb_pform_s5["values"]:
+                self.cb_pform_s5.set("(Không dùng)")
+        else:
+            self.cb_pform_s3["values"] = a2
+            opt_s4 = [s for s in a2 if s != s3]
+            self.cb_pform_s4["values"] = opt_s4 if opt_s4 else a2
+            if self.cb_pform_s4.get() not in self.cb_pform_s4["values"] and opt_s4:
+                self.cb_pform_s4.set(opt_s4[0])
+
+            used_b = {self.cb_pform_s3.get(), self.cb_pform_s4.get()}
+            rem_s5 = [s for s in a2 if s not in used_b]
+            self.cb_pform_s5["values"] = ["(Không dùng)"] + rem_s5
+            if self.cb_pform_s5.get() not in self.cb_pform_s5["values"]:
+                self.cb_pform_s5.set("(Không dùng)")
+
+    def on_pform_skill_change(self):
+        self.refresh_pform_loadout_dropdowns()
+
+    def open_pform_relic_selector(self):
+        def cb(chosen):
+            self.preset_form_relics = set(chosen)
+            self.render_pform_relic_chips()
+        self.open_relic_selector(list(self.preset_form_relics), cb, title="CHỌN RELICS CHO PRESET BUILD")
+
+    def render_pform_relic_chips(self):
+        if not hasattr(self, "frame_pform_chips"):
+            return
+        for w in self.frame_pform_chips.winfo_children():
+            w.destroy()
+
+        cnt = len(self.preset_form_relics)
+        if hasattr(self, "btn_pform_pick_relics"):
+            self.btn_pform_pick_relics.config(text=f"🛡 Chọn Relics ({cnt} đã chọn)...")
+
+        if not self.preset_form_relics:
+            tk.Label(self.frame_pform_chips, text="(Chưa chọn relic nào. Nhấn nút phía trên để chọn)",
+                     font=("Segoe UI", 8, "italic"), fg="#777777", bg=self.c_surface).pack(anchor="w", padx=2, pady=2)
+            return
+
+        flow = tk.Frame(self.frame_pform_chips, bg=self.c_surface)
+        flow.pack(fill="x", pady=2)
+
+        for rid in sorted(self.preset_form_relics):
+            r_info = self.cfg.get("relics", {}).get(rid, {})
+            name = r_info.get("name", rid)
+            chip = tk.Frame(flow, bg="#262626", relief="solid", bd=1, padx=4, pady=2)
+            chip.pack(side="left", padx=2, pady=2)
+
+            tk.Label(chip, text=name, font=("Segoe UI", 8), fg="#ffffff", bg="#262626").pack(side="left")
+            btn_del = tk.Button(chip, text="✕", font=("Segoe UI", 7, "bold"), fg="#ff6666", bg="#262626",
+                                relief="flat", padx=2, cursor="hand2", command=lambda r=rid: self.remove_pform_relic(r))
+            btn_del.pack(side="left", padx=(2, 0))
+
+    def remove_pform_relic(self, rid):
+        if rid in self.preset_form_relics:
+            self.preset_form_relics.remove(rid)
+            self.render_pform_relic_chips()
+
+    def clear_pform_relics(self):
+        self.preset_form_relics.clear()
+        self.render_pform_relic_chips()
+
+    def apply_pform_stat_preset(self, preset_key):
+        base_defs = {
+            "hp": 2000, "atk": 200, "defense": 300, "mc": 0.0,
+            "pct_def_ignore": 0.05, "flat_def_ignore": 50, "damage_mult": 1.0,
+            "cdr": 0.0, "guard_q": 0.35, "res": 0.0
+        }
+        if preset_key == "base":
+            target = base_defs
+        elif preset_key == "dps":
+            target = dict(base_defs, hp=1800, atk=450, damage_mult=1.35, pct_def_ignore=0.20)
+        elif preset_key == "caster":
+            target = dict(base_defs, atk=240, mc=0.35, cdr=0.30)
+        elif preset_key == "tank":
+            target = dict(base_defs, hp=8000, defense=1200, guard_q=0.60, res=0.15)
+        else:
+            target = base_defs
+
+        for k, info in self.preset_form_vars.items():
+            val = target.get(k, info["meta"]["min"])
+            info["var"].set(val)
+            info["entry"].delete(0, "end")
+            info["entry"].insert(0, str(val))
+
+    # =========================================================================
+    # TAB 7: CUSTOM RELICS & NỘI TẠI (QUẢN LÝ, TẠO MỚI & SỬA RELICS THEO TRIGGER)
+    # =========================================================================
+    def save_relics_to_disk(self):
+        try:
+            p = os.path.join(HERE, "config", "relics.json")
+            with open(p, "w", encoding="utf-8") as f:
+                json.dump(self.cfg["relics"], f, ensure_ascii=False, indent=2)
+            if hasattr(self, "refresh_relics_tree"):
+                self.refresh_relics_tree()
+        except Exception as e:
+            messagebox.showerror("Lỗi lưu file", f"Không thể ghi config/relics.json:\n{e}")
+
+    def build_relics_tab(self, parent):
+        main_box = tk.Frame(parent, bg=self.c_bg)
+        main_box.pack(fill="both", expand=True, padx=8, pady=8)
+
+        # CỘT TRÁI: DANH SÁCH RELICS (330px)
+        left_frame = tk.Frame(main_box, bg=self.c_surface, width=330, bd=1, relief="solid")
+        left_frame.pack(side="left", fill="both", padx=(0, 6), pady=0)
+        left_frame.pack_propagate(False)
+
+        top_l = tk.Frame(left_frame, bg=self.c_sub, padx=10, pady=8)
+        top_l.pack(fill="x")
+        tk.Label(top_l, text="DANH SÁCH RELICS & NỘI TẠI", font=("Segoe UI", 10, "bold"),
+                 fg=self.c_fg, bg=self.c_sub).pack(anchor="w")
+
+        # Tìm kiếm & Phân loại
+        search_box = tk.Frame(left_frame, bg=self.c_surface, padx=8, pady=4)
+        search_box.pack(fill="x")
+        tk.Label(search_box, text="🔍 Tìm:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.ent_search_relic = tk.Entry(search_box, bg="#111111", fg="#ffffff", insertbackground="#ffffff",
+                                         relief="solid", bd=1, font=("Segoe UI", 9))
+        self.ent_search_relic.pack(side="left", fill="x", expand=True, padx=(4, 0))
+        self.ent_search_relic.bind("<KeyRelease>", lambda e: self.refresh_relics_tree())
+
+        cat_box = tk.Frame(left_frame, bg=self.c_surface, padx=8, pady=2)
+        cat_box.pack(fill="x")
+        self.cb_relic_cat = ttk.Combobox(cat_box, values=["Tất cả", "Nội tại kích hoạt (Triggers)", "Chỉ số tĩnh (Mods)", "Nội tại nguyên tố"], state="readonly", font=("Segoe UI", 8))
+        self.cb_relic_cat.set("Tất cả")
+        self.cb_relic_cat.pack(fill="x", pady=2)
+        self.cb_relic_cat.bind("<<ComboboxSelected>>", lambda e: self.refresh_relics_tree())
+
+        # Treeview danh sách Relic
+        tree_frame = tk.Frame(left_frame, bg=self.c_bg)
+        tree_frame.pack(fill="both", expand=True, padx=6, pady=4)
+
+        tree_cols = ("name", "kind")
+        self.tree_relics = ttk.Treeview(tree_frame, columns=tree_cols, show="headings", selectmode="browse")
+        self.tree_relics.heading("name", text="Tên Relic / Nội Tại")
+        self.tree_relics.heading("kind", text="Loại")
+        self.tree_relics.column("name", width=190, anchor="w")
+        self.tree_relics.column("kind", width=100, anchor="center")
+
+        tree_sb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree_relics.yview)
+        self.tree_relics.configure(yscrollcommand=tree_sb.set)
+
+        self.tree_relics.pack(side="left", fill="both", expand=True)
+        tree_sb.pack(side="right", fill="y")
+        self.tree_relics.bind("<<TreeviewSelect>>", self.on_relic_tree_select)
+
+        # Card tóm tắt Relic đang chọn
+        card_box = tk.Frame(left_frame, bg="#181818", padx=8, pady=6, relief="solid", bd=1)
+        card_box.pack(fill="x", padx=6, pady=(0, 6))
+
+        tk.Label(card_box, text="TÓM TẮT RELIC:", font=("Segoe UI", 8, "bold"), fg=self.c_muted, bg="#181818").pack(anchor="w")
+        self.lbl_relic_card = tk.Label(card_box, text="(Chọn một relic để xem tóm tắt)", font=("Segoe UI", 8),
+                                       fg="#cccccc", bg="#181818", wraplength=300, justify="left")
+        self.lbl_relic_card.pack(anchor="w", pady=(2, 0))
+
+        # Nút thao tác nhanh
+        btn_bar = tk.Frame(left_frame, bg=self.c_sub, padx=6, pady=6)
+        btn_bar.pack(fill="x", side="bottom")
+
+        tk.Button(btn_bar, text="+ Tạo Mới", bg="#2a2a2a", fg="#ffffff", font=("Segoe UI", 8, "bold"),
+                  relief="solid", bd=1, padx=8, pady=4, cursor="hand2", command=self.new_relic_form).pack(side="left", padx=2)
+        tk.Button(btn_bar, text="📋 Nhân Bản", bg="#2a2a2a", fg="#ffffff", font=("Segoe UI", 8),
+                  relief="solid", bd=1, padx=8, pady=4, cursor="hand2", command=self.clone_relic_action).pack(side="left", padx=2)
+        tk.Button(btn_bar, text="🗑 Xóa", bg="#2a2a2a", fg="#ff6666", font=("Segoe UI", 8),
+                  relief="solid", bd=1, padx=8, pady=4, cursor="hand2", command=self.delete_relic_action).pack(side="left", padx=2)
+
+        # CỘT PHẢI: FORM THIẾT LẬP RELIC (SCROLLABLE CANVAS)
+        right_frame = tk.Frame(main_box, bg=self.c_surface, bd=1, relief="solid")
+        right_frame.pack(side="left", fill="both", expand=True, padx=(6, 0), pady=0)
+
+        r_top = tk.Frame(right_frame, bg=self.c_sub, padx=12, pady=8)
+        r_top.pack(fill="x")
+        self.lbl_relic_editor_title = tk.Label(r_top, text="[ THIẾT LẬP RELIC & NỘI TẠI TỰ DO ]",
+                                               font=("Segoe UI", 10, "bold"), fg=self.c_fg, bg=self.c_sub)
+        self.lbl_relic_editor_title.pack(side="left")
+
+        r_canvas = tk.Canvas(right_frame, bg=self.c_surface, highlightthickness=0)
+        r_sb = ttk.Scrollbar(right_frame, orient="vertical", command=r_canvas.yview)
+        r_form = tk.Frame(r_canvas, bg=self.c_surface, padx=12, pady=8)
+
+        r_form.bind("<Configure>", lambda e: r_canvas.configure(scrollregion=r_canvas.bbox("all")))
+        r_win = r_canvas.create_window((0, 0), window=r_form, anchor="nw")
+        r_canvas.configure(yscrollcommand=r_sb.set)
+
+        def _on_r_canvas_configure(e):
+            r_canvas.itemconfig(r_win, width=e.width)
+        r_canvas.bind("<Configure>", _on_r_canvas_configure)
+
+        def _on_r_mousewheel(event):
+            r_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        r_canvas.bind("<Enter>", lambda e: r_canvas.bind_all("<MouseWheel>", _on_r_mousewheel))
+        r_canvas.bind("<Leave>", lambda e: r_canvas.unbind_all("<MouseWheel>"))
+
+        r_canvas.pack(side="left", fill="both", expand=True)
+        r_sb.pack(side="right", fill="y")
+
+        # 1. Thông tin chung Relic
+        meta_box = tk.LabelFrame(r_form, text=" 1. THÔNG TIN RELIC / NỘI TẠI ", font=("Segoe UI", 8, "bold"),
+                                 fg=self.c_fg, bg=self.c_surface, padx=10, pady=6, bd=1, relief="solid")
+        meta_box.pack(fill="x", pady=(0, 6))
+
+        m_r1 = tk.Frame(meta_box, bg=self.c_surface)
+        m_r1.pack(fill="x", pady=2)
+
+        f_k = tk.Frame(m_r1, bg=self.c_surface)
+        f_k.pack(side="left", fill="x", expand=True, padx=(0, 6))
+        tk.Label(f_k, text="Mã Relic (Key ID, chữ thường không dấu):", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(anchor="w")
+        self.ent_relic_key = tk.Entry(f_k, bg="#121212", fg="#ffffff", insertbackground="#ffffff",
+                                      relief="solid", bd=1, font=("Consolas", 9))
+        self.ent_relic_key.pack(fill="x")
+
+        f_n = tk.Frame(m_r1, bg=self.c_surface)
+        f_n.pack(side="left", fill="x", expand=True, padx=(6, 0))
+        tk.Label(f_n, text="Tên Relic Hiển Thị:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(anchor="w")
+        self.ent_relic_name = tk.Entry(f_n, bg="#121212", fg="#ffffff", insertbackground="#ffffff",
+                                       relief="solid", bd=1, font=("Segoe UI", 9))
+        self.ent_relic_name.pack(fill="x")
+
+        m_r2 = tk.Frame(meta_box, bg=self.c_surface)
+        m_r2.pack(fill="x", pady=(4, 2))
+        tk.Label(m_r2, text="Mô tả cơ chế / hiệu ứng của Relic:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(anchor="w")
+        self.ent_relic_desc = tk.Entry(m_r2, bg="#121212", fg="#ffffff", insertbackground="#ffffff",
+                                       relief="solid", bd=1, font=("Segoe UI", 9))
+        self.ent_relic_desc.pack(fill="x")
+
+        # 2. Cấu hình Kích Hoạt (Event Trigger)
+        trig_box = tk.LabelFrame(r_form, text=" 2. CƠ CHẾ KÍCH HOẠT (EVENT TRIGGER) ", font=("Segoe UI", 8, "bold"),
+                                 fg=self.c_fg, bg=self.c_surface, padx=10, pady=6, bd=1, relief="solid")
+        trig_box.pack(fill="x", pady=(0, 6))
+
+        self.var_r_has_trigger = tk.BooleanVar(value=True)
+        cb_has_trig = tk.Checkbutton(trig_box, text="Kích hoạt theo hành động chiến đấu (Event Trigger)",
+                                     variable=self.var_r_has_trigger, font=("Segoe UI", 8, "bold"),
+                                     fg="#ffffff", bg=self.c_surface, selectcolor="#000000",
+                                     activebackground=self.c_surface, activeforeground="#ffffff",
+                                     command=self.toggle_r_trigger_view)
+        cb_has_trig.pack(anchor="w")
+
+        self.frame_trig_settings = tk.Frame(trig_box, bg=self.c_surface)
+        self.frame_trig_settings.pack(fill="x", pady=4)
+
+        t_r1 = tk.Frame(self.frame_trig_settings, bg=self.c_surface)
+        t_r1.pack(fill="x", pady=2)
+
+        tk.Label(t_r1, text="Hành Động Kích Hoạt (Event):", font=("Segoe UI", 8, "bold"),
+                 fg=self.c_fg, bg=self.c_surface).pack(side="left", padx=(0, 6))
+
+        self.TRIGGER_EVENT_MAP = {
+            # 1. Cơ Động & Phòng Ngự Thể Lực
+            "on_dodge": "on_dodge (Lướt né đòn thành công)",
+            "on_perfect_dodge": "on_perfect_dodge (Lướt né hoàn hảo)",
+            "on_parry": "on_parry (Đỡ gạt Parry thành công)",
+            "on_block": "on_block (Chặn Block đòn thành công)",
+            "on_guard_break": "on_guard_break (Thế thủ bị đánh vỡ)",
+            "on_exhausted": "on_exhausted (Kiệt sức - Thể lực về 0)",
+            "on_stamina_full": "on_stamina_full (Thể lực hồi đầy 100%)",
+            "on_stamina_low": "on_stamina_low (Thể lực xuống dưới 25%)",
+            "on_heavy_stamina_spent": "on_heavy_stamina_spent (Tiêu hao nhiều thể lực)",
+
+            # 2. Tấn Công & Tung Chiêu
+            "on_hit": "on_hit (Đòn đánh / kỹ năng trúng đích)",
+            "on_cast_any": "on_cast_any (Tung bất kỳ kỹ năng nào)",
+            "on_cast_basic": "on_cast_basic (Tung chiêu Basic)",
+            "on_cast_magic_1": "on_cast_magic_1 (Tung chiêu Nhánh 1)",
+            "on_cast_magic_2": "on_cast_magic_2 (Tung chiêu Nhánh 2)",
+            "on_cast_cd_skill": "on_cast_cd_skill (Tung chiêu có hồi chiêu)",
+            "on_deal_true_dmg": "on_deal_true_dmg (Gây sát thương chuẩn)",
+            "on_combo_hits": "on_combo_hits (Đánh trúng chuỗi liên hoàn)",
+            "on_finisher_hit": "on_finisher_hit (Đòn kết liễu chuỗi combo)",
+            "on_counter_attack": "on_counter_attack (Phản đòn sau khi bị đánh)",
+            "on_skill_depleted": "on_skill_depleted (Kỹ năng cạn kiệt lần dùng)",
+
+            # 3. Nhận Sát Thương & Máu
+            "on_take_hit": "on_take_hit (Bị kẻ địch đánh trúng)",
+            "on_take_heavy_hit": "on_take_heavy_hit (Nhận đòn đánh nặng >=15% HP)",
+            "on_take_dot_tick": "on_take_dot_tick (Nhận sát thương DoT)",
+            "on_shield_broken": "on_shield_broken (Lớp khiên bị đánh vỡ)",
+            "on_shield_expired": "on_shield_expired (Khiên hết thời gian tồn tại)",
+            "on_hp_below": "on_hp_below (Máu tụt dưới ngưỡng % HP)",
+            "on_hp_above": "on_hp_above (Máu duy trì trên ngưỡng % HP)",
+            "on_fatal_damage": "on_fatal_damage (Nhận đòn chí tử)",
+            "on_healed": "on_healed (Khi được hồi máu)",
+            "on_overheal": "on_overheal (Hồi máu vượt trần Max HP)",
+
+            # 4. Trạng Thái Mục Tiêu
+            "on_target_hp_below": "on_target_hp_below (Đánh địch dưới % HP)",
+            "on_target_hp_full": "on_target_hp_full (Đánh địch còn 100% HP)",
+            "on_target_underdog": "on_target_underdog (Đánh địch có HP cao hơn ta)",
+            "on_target_exhausted": "on_target_exhausted (Đánh địch kiệt sức)",
+            "on_target_shielded": "on_target_shielded (Đánh địch đang có khiên)",
+            "on_target_shieldless": "on_target_shieldless (Đánh địch không có khiên)",
+            "on_target_multi_debuff": "on_target_multi_debuff (Đánh địch dính >=2 debuff)",
+
+            # 5. Hiệu Ứng Trạng Thái & Nguyên Tố
+            "on_apply_cc": "on_apply_cc (Gây khống chế thành công)",
+            "on_hit_frozen": "on_hit_frozen (Đánh trúng mục tiêu Băng)",
+            "on_hit_wet": "on_hit_wet (Đánh trúng mục tiêu Wet)",
+            "on_trigger_reaction": "on_trigger_reaction (Kích hoạt phản ứng)",
+            "on_cleanse": "on_cleanse (Tự giải trừ debuff)",
+            "on_receive_debuff": "on_receive_debuff (Bị trúng hiệu ứng xấu)",
+
+            # 6. Thời Gian & Nhịp Độ Trận Đấu
+            "periodic": "periodic (Định kỳ mỗi X giây)",
+            "on_combat_start": "on_combat_start (Mở màn trận đấu)",
+            "on_combat_time_elapsed": "on_combat_time_elapsed (Trận đấu kéo dài qua X giây)"
+        }
+        self.TRIGGER_EVENT_REVERSE = {v: k for k, v in self.TRIGGER_EVENT_MAP.items()}
+
+        self.cb_r_event = ttk.Combobox(t_r1, values=list(self.TRIGGER_EVENT_MAP.values()), width=42, state="readonly")
+        self.cb_r_event.set(self.TRIGGER_EVENT_MAP["on_dodge"])
+        self.cb_r_event.pack(side="left", padx=2)
+
+        t_r2 = tk.Frame(self.frame_trig_settings, bg=self.c_surface)
+        t_r2.pack(fill="x", pady=4)
+
+        tk.Label(t_r2, text="Hồi chiêu nội tại (ICD):", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_icd = ttk.Spinbox(t_r2, from_=0.0, to=60.0, increment=0.5, width=5)
+        self.sp_r_icd.set("1.5")
+        self.sp_r_icd.pack(side="left", padx=3)
+        tk.Label(t_r2, text="s", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left", padx=(0, 8))
+
+        tk.Label(t_r2, text="Tỉ lệ kích hoạt:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_chance = ttk.Spinbox(t_r2, from_=5, to=100, increment=5, width=4)
+        self.sp_r_chance.set("100")
+        self.sp_r_chance.pack(side="left", padx=3)
+        tk.Label(t_r2, text="%", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left", padx=(0, 8))
+
+        tk.Label(t_r2, text="Ngưỡng HP:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_hp_thresh = ttk.Spinbox(t_r2, from_=5, to=95, increment=5, width=4)
+        self.sp_r_hp_thresh.set("50")
+        self.sp_r_hp_thresh.pack(side="left", padx=3)
+        tk.Label(t_r2, text="%", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left", padx=(0, 8))
+
+        tk.Label(t_r2, text="Đòn nặng:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_heavy_thresh = ttk.Spinbox(t_r2, from_=5, to=50, increment=5, width=4)
+        self.sp_r_heavy_thresh.set("15")
+        self.sp_r_heavy_thresh.pack(side="left", padx=3)
+        tk.Label(t_r2, text="%", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left", padx=(0, 8))
+
+        tk.Label(t_r2, text="Combo:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_combo_req = ttk.Spinbox(t_r2, from_=2, to=20, increment=1, width=3)
+        self.sp_r_combo_req.set("3")
+        self.sp_r_combo_req.pack(side="left", padx=3)
+        tk.Label(t_r2, text="hit", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left", padx=(0, 8))
+
+        tk.Label(t_r2, text="Thời gian:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_combat_t = ttk.Spinbox(t_r2, from_=1.0, to=120.0, increment=1.0, width=5)
+        self.sp_r_combat_t.set("10.0")
+        self.sp_r_combat_t.pack(side="left", padx=3)
+        tk.Label(t_r2, text="s", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 3. Cấu hình Phần Thưởng (Reward Action)
+        rew_box = tk.LabelFrame(r_form, text=" 3. PHẦN THƯỞNG / HIỆU ỨNG SAU KÍCH HOẠT (REWARD ACTION) ",
+                                font=("Segoe UI", 8, "bold"), fg=self.c_fg, bg=self.c_surface, padx=10, pady=6, bd=1, relief="solid")
+        rew_box.pack(fill="x", pady=(0, 6))
+
+        self.REWARD_ACTION_MAP = {
+            # Hồi Chiêu & Tài Nguyên Kỹ Năng
+            "reduce_cd": "Giảm % Hồi chiêu Kỹ năng (reduce_cd)",
+            "reset_cd": "Làm mới Hồi chiêu Lập tức (reset_cd)",
+            "gain_charge": "Tăng thêm Charge tích trữ (gain_charge)",
+            "free_cast": "Tung chiêu miễn phí (free_cast)",
+            "echo_strike": "Vọng kích phụ gây thêm dmg (echo_strike)",
+
+            # Sát Thương & Chỉ Số Tấn Công
+            "buff_stat": "Tăng Chỉ Số tạm thời (buff_stat)",
+            "stacking_atk": "Tích tầng tăng ATK cộng dồn (stacking_atk)",
+            "true_damage": "Gây thêm Sát thương Chuẩn (true_damage)",
+            "execute_damage": "Sát thương kết liễu theo % máu mất (execute_damage)",
+            "lifesteal": "Hút máu Lifesteal trong T giây (lifesteal)",
+            "stamina_leech": "Hút Thể lực đối thủ (stamina_leech)",
+            "dot_detonation": "Kích nổ toàn bộ DoT còn lại (dot_detonation)",
+            "aoe_shockwave": "Sóng xung kích nổ diện rộng (aoe_shockwave)",
+            "def_to_atk": "Chuyển Giáp DEF thành Sức mạnh ATK (def_to_atk)",
+            "berserk_scaling": "Cuồng nộ tăng dmg khi mất máu (berserk_scaling)",
+
+            # Sinh Tồn & Phòng Ngự
+            "heal": "Hồi phục Máu tức thì (heal)",
+            "hot": "Hồi máu theo thời gian (hot)",
+            "shield": "Nhận Khiên chống đòn (shield)",
+            "reflective_shield": "Khiên phản kích sát thương (reflective_shield)",
+            "damage_reflection": "Gai phản đòn sát thương nhận vào (damage_reflection)",
+            "iframes": "Khung hình Bất tử miễn nhiễm dmg (iframes)",
+            "damage_to_heal": "Chuyển sát thương thành Hồi Máu (damage_to_heal)",
+            "death_defiance": "Cứu tử khẩn cấp khi nhận đòn chí mạng (death_defiance)",
+            "auto_cleanse": "Tự động thanh tẩy mọi Debuff (auto_cleanse)",
+            "super_armor": "Trọng giáp bất động kháng khống chế (super_armor)",
+
+            # Thể Lực & Cơ Động
+            "restore_stamina": "Hồi phục Thể lực tức thì (+Stamina)",
+            "stamina_regen": "Tăng tốc độ hồi Thể lực (stamina_regen)",
+            "zero_stamina_cost": "Lướt/Đỡ không tốn Thể lực (zero_stamina_cost)",
+            "reset_dodge_cd": "Xóa thời gian chờ Lướt Né (reset_dodge_cd)",
+            "extended_evasion": "Tăng thời gian bất tử khi Lướt (extended_evasion)",
+            "cast_speed_buff": "Tăng tốc độ tung kỹ năng (cast_speed_buff)",
+
+            # Gây Hại Lên Kẻ Địch (Debuffs)
+            "apply_cc": "Gây Choáng (Stun) / Làm chậm (Slow)",
+            "stamina_drain": "Tiêu hao Thể lực của kẻ địch (stamina_drain)",
+            "stamina_freeze": "Đóng băng Thể lực không thể hồi (stamina_freeze)",
+            "evasion_lock": "Khóa Lướt Né của kẻ địch (evasion_lock)",
+            "cooldown_silence": "Kéo dài thời gian hồi chiêu của địch (cooldown_silence)",
+            "apply_elemental_status": "Gán trạng thái nguyên tố (apply_elemental_status)",
+            "anti_heal": "Giảm 50% hồi máu của địch (anti_heal)",
+            "shred_def_res": "Bào mòn Giáp hoặc Kháng của địch (shred_def_res)",
+            "contagion": "Phát tán lây lan Debuff sang kẻ địch khác (contagion)"
+        }
+        self.REWARD_ACTION_REVERSE = {v: k for k, v in self.REWARD_ACTION_MAP.items()}
+
+        act_r1 = tk.Frame(rew_box, bg=self.c_surface)
+        act_r1.pack(fill="x", pady=2)
+
+        tk.Label(act_r1, text="Loại Phần Thưởng:", font=("Segoe UI", 8, "bold"), fg=self.c_fg, bg=self.c_surface).pack(side="left", padx=(0, 6))
+        self.cb_r_action = ttk.Combobox(act_r1, values=list(self.REWARD_ACTION_MAP.values()), width=42, state="readonly")
+        self.cb_r_action.set(self.REWARD_ACTION_MAP["reduce_cd"])
+        self.cb_r_action.pack(side="left", padx=2)
+        self.cb_r_action.bind("<<ComboboxSelected>>", self.on_r_action_change)
+
+        # Dynamic sub-frames cho từng action
+        self.frame_act_details = tk.Frame(rew_box, bg=self.c_surface, pady=4)
+        self.frame_act_details.pack(fill="x")
+
+        # Widget components for action parameters
+        self.act_sub_widgets = {}
+
+        # 1. CD
+        row_cd = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["cd"] = row_cd
+        tk.Label(row_cd, text="Mục tiêu chiêu:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.cb_r_cd_target = ttk.Combobox(row_cd, values=["Chiêu Basic (basic)", "Nhánh 1 (branch_a)", "Nhánh 2 (branch_b)", "Toàn bộ chiêu (all)"], width=22, state="readonly")
+        self.cb_r_cd_target.set("Chiêu Basic (basic)")
+        self.cb_r_cd_target.pack(side="left", padx=4)
+        tk.Label(row_cd, text="Giảm:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(8, 0))
+        self.sp_r_cd_pct = ttk.Spinbox(row_cd, from_=5, to=100, increment=5, width=5)
+        self.sp_r_cd_pct.set("50")
+        self.sp_r_cd_pct.pack(side="left", padx=2)
+        tk.Label(row_cd, text="% CD", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 2. Gain Charge
+        row_gc = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["gain_charge"] = row_gc
+        tk.Label(row_gc, text="Mục tiêu chiêu:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.cb_r_gc_target = ttk.Combobox(row_gc, values=["Chiêu Basic (basic)", "Nhánh 1 (branch_a)", "Nhánh 2 (branch_b)", "Toàn bộ chiêu (all)"], width=22, state="readonly")
+        self.cb_r_gc_target.set("Chiêu Basic (basic)")
+        self.cb_r_gc_target.pack(side="left", padx=4)
+        tk.Label(row_gc, text="+ Số Charge:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(8, 0))
+        self.sp_r_gc_num = ttk.Spinbox(row_gc, from_=1, to=5, increment=1, width=4)
+        self.sp_r_gc_num.set("1")
+        self.sp_r_gc_num.pack(side="left", padx=2)
+
+        # 3. Echo Strike
+        row_echo = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["echo"] = row_echo
+        tk.Label(row_echo, text="Tỉ lệ sát thương đòn vọng lại (Echo):", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_echo_pct = ttk.Spinbox(row_echo, from_=10, to=150, increment=10, width=5)
+        self.sp_r_echo_pct.set("50")
+        self.sp_r_echo_pct.pack(side="left", padx=4)
+        tk.Label(row_echo, text="% dmg", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 4. Buff Stat
+        row_buff = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["buff"] = row_buff
+        tk.Label(row_buff, text="Chỉ số buff:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.cb_r_buff_stat = ttk.Combobox(row_buff, values=["atk", "defense", "damage_mult", "cdr", "mc", "pct_def_ignore"], width=13, state="readonly")
+        self.cb_r_buff_stat.set("atk")
+        self.cb_r_buff_stat.pack(side="left", padx=4)
+        tk.Label(row_buff, text="Giá trị (%):", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_buff_val = ttk.Spinbox(row_buff, from_=5, to=200, increment=5, width=5)
+        self.sp_r_buff_val.set("20")
+        self.sp_r_buff_val.pack(side="left", padx=2)
+        tk.Label(row_buff, text="%   Duy trì:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_buff_dur = ttk.Spinbox(row_buff, from_=1.0, to=30.0, increment=0.5, width=5)
+        self.sp_r_buff_dur.set("4.0")
+        self.sp_r_buff_dur.pack(side="left", padx=2)
+        tk.Label(row_buff, text="s", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 5. Stacking ATK
+        row_stk = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["stacking_atk"] = row_stk
+        tk.Label(row_stk, text="+ Mỗi tầng:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_stk_val = ttk.Spinbox(row_stk, from_=1, to=50, increment=1, width=4)
+        self.sp_r_stk_val.set("5")
+        self.sp_r_stk_val.pack(side="left", padx=2)
+        tk.Label(row_stk, text="% ATK   Tối đa:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(4, 2))
+        self.sp_r_stk_max = ttk.Spinbox(row_stk, from_=2, to=30, increment=1, width=4)
+        self.sp_r_stk_max.set("5")
+        self.sp_r_stk_max.pack(side="left", padx=2)
+        tk.Label(row_stk, text="tầng   Duy trì:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(4, 2))
+        self.sp_r_stk_dur = ttk.Spinbox(row_stk, from_=1.0, to=30.0, increment=1.0, width=5)
+        self.sp_r_stk_dur.set("6.0")
+        self.sp_r_stk_dur.pack(side="left", padx=2)
+        tk.Label(row_stk, text="s", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 6. True Damage
+        row_td = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["true_dmg"] = row_td
+        tk.Label(row_td, text="Sát thương chuẩn phẳng:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_td_flat = ttk.Spinbox(row_td, from_=0, to=5000, increment=50, width=6)
+        self.sp_r_td_flat.set("150")
+        self.sp_r_td_flat.pack(side="left", padx=4)
+        tk.Label(row_td, text="+ % Max HP địch:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_td_pct = ttk.Spinbox(row_td, from_=0, to=50, increment=1, width=5)
+        self.sp_r_td_pct.set("0")
+        self.sp_r_td_pct.pack(side="left", padx=2)
+        tk.Label(row_td, text="%", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 7. Execute Damage
+        row_exec = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["execute"] = row_exec
+        tk.Label(row_exec, text="Sát thương cơ bản:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_exec_base = ttk.Spinbox(row_exec, from_=50, to=5000, increment=50, width=6)
+        self.sp_r_exec_base.set("200")
+        self.sp_r_exec_base.pack(side="left", padx=2)
+        tk.Label(row_exec, text="+ Hệ số nhân theo % máu mất:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_exec_mult = ttk.Spinbox(row_exec, from_=0.5, to=5.0, increment=0.25, width=5)
+        self.sp_r_exec_mult.set("1.5")
+        self.sp_r_exec_mult.pack(side="left", padx=2)
+        tk.Label(row_exec, text="x", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 8. Lifesteal
+        row_ls = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["lifesteal"] = row_ls
+        tk.Label(row_ls, text="Tỉ lệ Hút Máu (Lifesteal):", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_ls_pct = ttk.Spinbox(row_ls, from_=5, to=100, increment=5, width=5)
+        self.sp_r_ls_pct.set("30")
+        self.sp_r_ls_pct.pack(side="left", padx=2)
+        tk.Label(row_ls, text="%   Duy trì:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_ls_dur = ttk.Spinbox(row_ls, from_=1.0, to=30.0, increment=0.5, width=5)
+        self.sp_r_ls_dur.set("5.0")
+        self.sp_r_ls_dur.pack(side="left", padx=2)
+        tk.Label(row_ls, text="s", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 9. Stamina Leech
+        row_sleech = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["stamina_leech"] = row_sleech
+        tk.Label(row_sleech, text="Số Thể Lực cướp từ kẻ địch:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_sleech_amt = ttk.Spinbox(row_sleech, from_=10, to=150, increment=5, width=6)
+        self.sp_r_sleech_amt.set("30")
+        self.sp_r_sleech_amt.pack(side="left", padx=4)
+        tk.Label(row_sleech, text="điểm stamina", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 10. AoE Shockwave
+        row_wave = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["aoe_wave"] = row_wave
+        tk.Label(row_wave, text="Sát thương cơ bản:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_wave_base = ttk.Spinbox(row_wave, from_=50, to=5000, increment=50, width=6)
+        self.sp_r_wave_base.set("250")
+        self.sp_r_wave_base.pack(side="left", padx=2)
+        tk.Label(row_wave, text="+ Tỉ lệ theo ATK:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_wave_scale = ttk.Spinbox(row_wave, from_=10, to=200, increment=10, width=5)
+        self.sp_r_wave_scale.set("50")
+        self.sp_r_wave_scale.pack(side="left", padx=2)
+        tk.Label(row_wave, text="% ATK", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 11. Def to ATK
+        row_d2a = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["def_to_atk"] = row_d2a
+        tk.Label(row_d2a, text="Chuyển đổi Giáp thành ATK:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_d2a_pct = ttk.Spinbox(row_d2a, from_=10, to=100, increment=5, width=5)
+        self.sp_r_d2a_pct.set("25")
+        self.sp_r_d2a_pct.pack(side="left", padx=2)
+        tk.Label(row_d2a, text="% DEF   Duy trì:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_d2a_dur = ttk.Spinbox(row_d2a, from_=1.0, to=30.0, increment=0.5, width=5)
+        self.sp_r_d2a_dur.set("5.0")
+        self.sp_r_d2a_dur.pack(side="left", padx=2)
+        tk.Label(row_d2a, text="s", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 12. Berserk Scaling
+        row_ber = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["berserk"] = row_ber
+        tk.Label(row_ber, text="+ Sát thương mỗi 10% máu mất:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_berserk_mult = ttk.Spinbox(row_ber, from_=1, to=20, increment=1, width=4)
+        self.sp_r_berserk_mult.set("5")
+        self.sp_r_berserk_mult.pack(side="left", padx=2)
+        tk.Label(row_ber, text="% Mult   Duy trì:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_berserk_dur = ttk.Spinbox(row_ber, from_=1.0, to=30.0, increment=0.5, width=5)
+        self.sp_r_berserk_dur.set("5.0")
+        self.sp_r_berserk_dur.pack(side="left", padx=2)
+        tk.Label(row_ber, text="s", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 13. Heal / Shield
+        row_heal_sh = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["heal_sh"] = row_heal_sh
+        tk.Label(row_heal_sh, text="% Max HP:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_heal_pct = ttk.Spinbox(row_heal_sh, from_=0, to=100, increment=5, width=5)
+        self.sp_r_heal_pct.set("10")
+        self.sp_r_heal_pct.pack(side="left", padx=2)
+        tk.Label(row_heal_sh, text="%   + Điểm phẳng:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_heal_flat = ttk.Spinbox(row_heal_sh, from_=0, to=5000, increment=100, width=6)
+        self.sp_r_heal_flat.set("0")
+        self.sp_r_heal_flat.pack(side="left", padx=2)
+        tk.Label(row_heal_sh, text="Thời gian (khiên):", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(8, 2))
+        self.sp_r_sh_dur = ttk.Spinbox(row_heal_sh, from_=1.0, to=30.0, increment=1.0, width=5)
+        self.sp_r_sh_dur.set("5.0")
+        self.sp_r_sh_dur.pack(side="left", padx=2)
+        tk.Label(row_heal_sh, text="s", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 14. HoT
+        row_hot = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["hot"] = row_hot
+        tk.Label(row_hot, text="Tổng hồi % Max HP:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_hot_pct = ttk.Spinbox(row_hot, from_=5, to=100, increment=5, width=5)
+        self.sp_r_hot_pct.set("15")
+        self.sp_r_hot_pct.pack(side="left", padx=2)
+        tk.Label(row_hot, text="%   + Điểm phẳng:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_hot_flat = ttk.Spinbox(row_hot, from_=0, to=5000, increment=100, width=6)
+        self.sp_r_hot_flat.set("0")
+        self.sp_r_hot_flat.pack(side="left", padx=2)
+        tk.Label(row_hot, text="Thời gian:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_hot_dur = ttk.Spinbox(row_hot, from_=1.0, to=30.0, increment=1.0, width=5)
+        self.sp_r_hot_dur.set("5.0")
+        self.sp_r_hot_dur.pack(side="left", padx=2)
+        tk.Label(row_hot, text="s", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 15. Reflect
+        row_ref = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["reflect"] = row_ref
+        tk.Label(row_ref, text="Tỉ lệ Phản Sát Thương:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_ref_pct = ttk.Spinbox(row_ref, from_=10, to=100, increment=5, width=5)
+        self.sp_r_ref_pct.set("35")
+        self.sp_r_ref_pct.pack(side="left", padx=2)
+        tk.Label(row_ref, text="%   Duy trì:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_ref_dur = ttk.Spinbox(row_ref, from_=1.0, to=30.0, increment=0.5, width=5)
+        self.sp_r_ref_dur.set("5.0")
+        self.sp_r_ref_dur.pack(side="left", padx=2)
+        tk.Label(row_ref, text="s", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 16. Duration Only (iframes, damage_to_heal, super_armor, zero_stam, cast_speed, stamina_freeze, evasion_lock, anti_heal...)
+        row_dur = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["duration_only"] = row_dur
+        tk.Label(row_dur, text="Thời gian hiệu lực:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_dur_val = ttk.Spinbox(row_dur, from_=0.5, to=30.0, increment=0.5, width=5)
+        self.sp_r_dur_val.set("3.0")
+        self.sp_r_dur_val.pack(side="left", padx=4)
+        tk.Label(row_dur, text="giây", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 17. Death Defiance
+        row_dd = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["death_defiance"] = row_dd
+        tk.Label(row_dd, text="Máu giữ lại:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_dd_hp = ttk.Spinbox(row_dd, from_=5, to=50, increment=5, width=4)
+        self.sp_r_dd_hp.set("20")
+        self.sp_r_dd_hp.pack(side="left", padx=2)
+        tk.Label(row_dd, text="% HP   Bất tử:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(4, 2))
+        self.sp_r_dd_iframe = ttk.Spinbox(row_dd, from_=0.5, to=5.0, increment=0.5, width=4)
+        self.sp_r_dd_iframe.set("1.5")
+        self.sp_r_dd_iframe.pack(side="left", padx=2)
+        tk.Label(row_dd, text="s   Cấp khiên:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(4, 2))
+        self.sp_r_dd_shield = ttk.Spinbox(row_dd, from_=10, to=80, increment=5, width=4)
+        self.sp_r_dd_shield.set("35")
+        self.sp_r_dd_shield.pack(side="left", padx=2)
+        tk.Label(row_dd, text="% Max HP", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 18. Restore Stamina
+        row_stam = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["stam"] = row_stam
+        tk.Label(row_stam, text="Hồi Thể Lực:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_stam_amt = ttk.Spinbox(row_stam, from_=5, to=150, increment=5, width=6)
+        self.sp_r_stam_amt.set("30")
+        self.sp_r_stam_amt.pack(side="left", padx=4)
+        tk.Label(row_stam, text="điểm stamina", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 19. Stamina Regen
+        row_sreg = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["stam_regen"] = row_sreg
+        tk.Label(row_sreg, text="Tốc độ hồi Thể Lực:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_sreg_mult = ttk.Spinbox(row_sreg, from_=1.5, to=5.0, increment=0.5, width=4)
+        self.sp_r_sreg_mult.set("2.0")
+        self.sp_r_sreg_mult.pack(side="left", padx=2)
+        tk.Label(row_sreg, text="x   Duy trì:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_sreg_dur = ttk.Spinbox(row_sreg, from_=1.0, to=30.0, increment=0.5, width=5)
+        self.sp_r_sreg_dur.set("5.0")
+        self.sp_r_sreg_dur.pack(side="left", padx=2)
+        tk.Label(row_sreg, text="s", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 20. CC
+        row_cc = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["cc"] = row_cc
+        tk.Label(row_cc, text="Hiệu ứng CC:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.cb_r_cc_type = ttk.Combobox(row_cc, values=["Choáng (stun)", "Làm chậm (slow)"], width=16, state="readonly")
+        self.cb_r_cc_type.set("Choáng (stun)")
+        self.cb_r_cc_type.pack(side="left", padx=4)
+        tk.Label(row_cc, text="Thời gian:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_cc_dur = ttk.Spinbox(row_cc, from_=0.5, to=10.0, increment=0.5, width=5)
+        self.sp_r_cc_dur.set("1.5")
+        self.sp_r_cc_dur.pack(side="left", padx=2)
+        tk.Label(row_cc, text="s   (Nếu slow) Giảm:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_cc_slow = ttk.Spinbox(row_cc, from_=10, to=90, increment=5, width=5)
+        self.sp_r_cc_slow.set("30")
+        self.sp_r_cc_slow.pack(side="left", padx=2)
+        tk.Label(row_cc, text="%", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 21. Stamina Drain
+        row_sdrain = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["stamina_drain"] = row_sdrain
+        tk.Label(row_sdrain, text="Thể Lực bị trừ của địch:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_sdrain_amt = ttk.Spinbox(row_sdrain, from_=10, to=150, increment=5, width=6)
+        self.sp_r_sdrain_amt.set("40")
+        self.sp_r_sdrain_amt.pack(side="left", padx=4)
+        tk.Label(row_sdrain, text="điểm stamina", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 22. Cooldown Silence
+        row_silence = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["cd_silence"] = row_silence
+        tk.Label(row_silence, text="Kéo dài hồi chiêu kỹ năng của địch thêm:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_r_silence_amt = ttk.Spinbox(row_silence, from_=0.5, to=10.0, increment=0.5, width=5)
+        self.sp_r_silence_amt.set("2.0")
+        self.sp_r_silence_amt.pack(side="left", padx=4)
+        tk.Label(row_silence, text="giây", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 23. Element Status
+        row_elem = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["element"] = row_elem
+        tk.Label(row_elem, text="Trạng thái gán lên địch:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.cb_r_elem_choice = ttk.Combobox(row_elem, values=["Ẩm Ướt (wet)", "Lạnh Buốt (frigid)", "Mất Máu (blood_loss)", "Hư Vô (vague)"], width=20, state="readonly")
+        self.cb_r_elem_choice.set("Ẩm Ướt (wet)")
+        self.cb_r_elem_choice.pack(side="left", padx=4)
+        tk.Label(row_elem, text="Duy trì:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_elem_dur = ttk.Spinbox(row_elem, from_=1.0, to=30.0, increment=1.0, width=5)
+        self.sp_r_elem_dur.set("5.0")
+        self.sp_r_elem_dur.pack(side="left", padx=2)
+        tk.Label(row_elem, text="s", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 24. Shred DEF / RES
+        row_shred = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["shred"] = row_shred
+        tk.Label(row_shred, text="Chỉ số bào mòn:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.cb_r_shred_stat = ttk.Combobox(row_shred, values=["Giáp (defense)", "Toàn bộ kháng (res)"], width=18, state="readonly")
+        self.cb_r_shred_stat.set("Giáp (defense)")
+        self.cb_r_shred_stat.pack(side="left", padx=4)
+        tk.Label(row_shred, text="Giảm:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_shred_val = ttk.Spinbox(row_shred, from_=10, to=80, increment=5, width=4)
+        self.sp_r_shred_val.set("30")
+        self.sp_r_shred_val.pack(side="left", padx=2)
+        tk.Label(row_shred, text="%   Duy trì:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(6, 2))
+        self.sp_r_shred_dur = ttk.Spinbox(row_shred, from_=1.0, to=30.0, increment=0.5, width=5)
+        self.sp_r_shred_dur.set("4.0")
+        self.sp_r_shred_dur.pack(side="left", padx=2)
+        tk.Label(row_shred, text="s", font=("Segoe UI", 8), fg=self.c_dim, bg=self.c_surface).pack(side="left")
+
+        # 25. Instant Info
+        row_instant = tk.Frame(self.frame_act_details, bg=self.c_surface)
+        self.act_sub_widgets["instant_info"] = row_instant
+        self.lbl_r_instant_info = tk.Label(row_instant, text="✓ Hiệu ứng kích hoạt tức thì không cần thêm tham số.",
+                                           font=("Segoe UI", 8, "italic"), fg="#00e676", bg=self.c_surface)
+        self.lbl_r_instant_info.pack(side="left", padx=4)
+
+        self.on_r_action_change()
+
+        self.on_r_action_change()
+
+        # 4. Chỉ Số Tĩnh Cộng Thẳng (Passive Stat Mods)
+        mods_box = tk.LabelFrame(r_form, text=" 4. CHỈ SỐ TĨNH LIÊN TỤC (PASSIVE STAT MODS - TÙY CHỌN) ",
+                                 font=("Segoe UI", 8, "bold"), fg=self.c_fg, bg=self.c_surface, padx=10, pady=6, bd=1, relief="solid")
+        mods_box.pack(fill="x", pady=(0, 6))
+
+        self.var_r_has_mods = tk.BooleanVar(value=False)
+        cb_has_mods = tk.Checkbutton(mods_box, text="Cộng chỉ số tĩnh liên tục (Stat Mods)",
+                                     variable=self.var_r_has_mods, font=("Segoe UI", 8, "bold"),
+                                     fg="#ffffff", bg=self.c_surface, selectcolor="#000000",
+                                     activebackground=self.c_surface, activeforeground="#ffffff",
+                                     command=self.toggle_r_mods_view)
+        cb_has_mods.pack(anchor="w")
+
+        self.frame_mods_settings = tk.Frame(mods_box, bg=self.c_surface)
+        self.frame_mods_settings.pack(fill="x", pady=4)
+
+        mod_r1 = tk.Frame(self.frame_mods_settings, bg=self.c_surface)
+        mod_r1.pack(fill="x", pady=2)
+
+        tk.Label(mod_r1, text="ATK (+):", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_mod_atk = ttk.Spinbox(mod_r1, from_=0, to=2000, increment=50, width=6)
+        self.sp_mod_atk.set("0")
+        self.sp_mod_atk.pack(side="left", padx=4)
+
+        tk.Label(mod_r1, text="DEF (+):", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(8, 0))
+        self.sp_mod_def = ttk.Spinbox(mod_r1, from_=0, to=5000, increment=100, width=6)
+        self.sp_mod_def.set("0")
+        self.sp_mod_def.pack(side="left", padx=4)
+
+        tk.Label(mod_r1, text="HP (+):", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(8, 0))
+        self.sp_mod_hp = ttk.Spinbox(mod_r1, from_=0, to=20000, increment=500, width=7)
+        self.sp_mod_hp.set("0")
+        self.sp_mod_hp.pack(side="left", padx=4)
+
+        mod_r2 = tk.Frame(self.frame_mods_settings, bg=self.c_surface)
+        mod_r2.pack(fill="x", pady=2)
+
+        tk.Label(mod_r2, text="CDR (%):", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left")
+        self.sp_mod_cdr = ttk.Spinbox(mod_r2, from_=0, to=60, increment=5, width=5)
+        self.sp_mod_cdr.set("0")
+        self.sp_mod_cdr.pack(side="left", padx=4)
+
+        tk.Label(mod_r2, text="MC (%):", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(8, 0))
+        self.sp_mod_mc = ttk.Spinbox(mod_r2, from_=0, to=50, increment=5, width=5)
+        self.sp_mod_mc.set("0")
+        self.sp_mod_mc.pack(side="left", padx=4)
+
+        tk.Label(mod_r2, text="Xuyên giáp phẳng:", font=("Segoe UI", 8), fg=self.c_muted, bg=self.c_surface).pack(side="left", padx=(8, 0))
+        self.sp_mod_fignore = ttk.Spinbox(mod_r2, from_=0, to=500, increment=25, width=6)
+        self.sp_mod_fignore.set("0")
+        self.sp_mod_fignore.pack(side="left", padx=4)
+
+        self.toggle_r_mods_view()
+
+        # 5. Thanh Lưu & Phản Hồi
+        save_box = tk.Frame(r_form, bg=self.c_surface, pady=8)
+        save_box.pack(fill="x", pady=(4, 8))
+
+        btn_save_r = tk.Button(save_box, text="💾 LƯU RELIC VÀO HỆ THỐNG", font=("Segoe UI", 9, "bold"),
+                               bg="#ffffff", fg="#000000", relief="flat", padx=18, pady=5,
+                               cursor="hand2", activebackground="#dddddd", command=self.save_relic_action)
+        btn_save_r.pack(side="left")
+
+        self.lbl_relic_form_msg = tk.Label(save_box, text="", font=("Segoe UI", 8, "bold"),
+                                           bg=self.c_surface, fg="#00e676")
+        self.lbl_relic_form_msg.pack(side="left", padx=8)
+
+        self.refresh_relics_tree()
+
+    def toggle_r_trigger_view(self):
+        if self.var_r_has_trigger.get():
+            self.frame_trig_settings.pack(fill="x", pady=4)
+        else:
+            self.frame_trig_settings.pack_forget()
+
+    def toggle_r_mods_view(self):
+        if self.var_r_has_mods.get():
+            self.frame_mods_settings.pack(fill="x", pady=4)
+        else:
+            self.frame_mods_settings.pack_forget()
+
+    def on_r_action_change(self, event=None):
+        raw_choice = self.cb_r_action.get()
+        act_key = self.REWARD_ACTION_REVERSE.get(raw_choice, "reduce_cd")
+
+        for w in self.act_sub_widgets.values():
+            w.pack_forget()
+
+        if act_key in ("reduce_cd", "reset_cd"):
+            self.act_sub_widgets["cd"].pack(fill="x")
+        elif act_key == "gain_charge":
+            self.act_sub_widgets["gain_charge"].pack(fill="x")
+        elif act_key == "echo_strike":
+            self.act_sub_widgets["echo"].pack(fill="x")
+        elif act_key == "buff_stat":
+            self.act_sub_widgets["buff"].pack(fill="x")
+        elif act_key == "stacking_atk":
+            self.act_sub_widgets["stacking_atk"].pack(fill="x")
+        elif act_key == "true_damage":
+            self.act_sub_widgets["true_dmg"].pack(fill="x")
+        elif act_key == "execute_damage":
+            self.act_sub_widgets["execute"].pack(fill="x")
+        elif act_key == "lifesteal":
+            self.act_sub_widgets["lifesteal"].pack(fill="x")
+        elif act_key == "stamina_leech":
+            self.act_sub_widgets["stamina_leech"].pack(fill="x")
+        elif act_key == "aoe_shockwave":
+            self.act_sub_widgets["aoe_wave"].pack(fill="x")
+        elif act_key == "def_to_atk":
+            self.act_sub_widgets["def_to_atk"].pack(fill="x")
+        elif act_key == "berserk_scaling":
+            self.act_sub_widgets["berserk"].pack(fill="x")
+        elif act_key in ("heal", "shield"):
+            self.act_sub_widgets["heal_sh"].pack(fill="x")
+        elif act_key == "hot":
+            self.act_sub_widgets["hot"].pack(fill="x")
+        elif act_key in ("reflective_shield", "damage_reflection"):
+            self.act_sub_widgets["reflect"].pack(fill="x")
+        elif act_key in ("free_cast", "iframes", "damage_to_heal", "super_armor", "zero_stamina_cost",
+                         "extended_evasion", "cast_speed_buff", "stamina_freeze", "evasion_lock", "anti_heal"):
+            self.act_sub_widgets["duration_only"].pack(fill="x")
+        elif act_key == "death_defiance":
+            self.act_sub_widgets["death_defiance"].pack(fill="x")
+        elif act_key == "restore_stamina":
+            self.act_sub_widgets["stam"].pack(fill="x")
+        elif act_key == "stamina_regen":
+            self.act_sub_widgets["stam_regen"].pack(fill="x")
+        elif act_key == "apply_cc":
+            self.act_sub_widgets["cc"].pack(fill="x")
+        elif act_key == "stamina_drain":
+            self.act_sub_widgets["stamina_drain"].pack(fill="x")
+        elif act_key == "cooldown_silence":
+            self.act_sub_widgets["cd_silence"].pack(fill="x")
+        elif act_key == "apply_elemental_status":
+            self.act_sub_widgets["element"].pack(fill="x")
+        elif act_key == "shred_def_res":
+            self.act_sub_widgets["shred"].pack(fill="x")
+        elif act_key in ("reset_dodge_cd", "dot_detonation", "auto_cleanse", "contagion"):
+            self.act_sub_widgets["instant_info"].pack(fill="x")
+
+    def refresh_relics_tree(self):
+        for item in self.tree_relics.get_children():
+            self.tree_relics.delete(item)
+
+        filter_txt = (self.ent_search_relic.get() if hasattr(self, "ent_search_relic") else "").lower().strip()
+        cat = (self.cb_relic_cat.get() if hasattr(self, "cb_relic_cat") else "Tất cả")
+
+        for rid, r in sorted(self.cfg.get("relics", {}).items()):
+            if rid.startswith("_"):
+                continue
+            name = r.get("name", rid)
+            has_trig = bool(r.get("triggers"))
+            has_mods = bool(r.get("mods"))
+            has_grants = bool(r.get("grants"))
+
+            kind = "Trigger" if has_trig else ("Chỉ số" if has_mods else ("Nguyên tố" if has_grants else "Khác"))
+
+            if cat == "Nội tại kích hoạt (Triggers)" and not has_trig:
+                continue
+            elif cat == "Chỉ số tĩnh (Mods)" and not has_mods:
+                continue
+            elif cat == "Nội tại nguyên tố" and not has_grants:
+                continue
+
+            if filter_txt and (filter_txt not in rid.lower() and filter_txt not in name.lower()):
+                continue
+
+            self.tree_relics.insert("", "end", iid=rid, values=(name, kind))
+
+    def on_relic_tree_select(self, event=None):
+        sel = self.tree_relics.selection()
+        if not sel:
+            return
+        rid = sel[0]
+        r = self.cfg.get("relics", {}).get(rid)
+        if not r:
+            return
+
+        self.editing_relic_key = rid
+        self.ent_relic_key.delete(0, "end")
+        self.ent_relic_key.insert(0, rid)
+
+        self.ent_relic_name.delete(0, "end")
+        self.ent_relic_name.insert(0, r.get("name", rid))
+
+        self.ent_relic_desc.delete(0, "end")
+        self.ent_relic_desc.insert(0, r.get("desc", ""))
+
+        # Triggers
+        trigs = r.get("triggers", [])
+        if trigs:
+            self.var_r_has_trigger.set(True)
+            self.toggle_r_trigger_view()
+            tr0 = trigs[0]
+            ev = tr0.get("type", "on_dodge")
+            self.cb_r_event.set(self.TRIGGER_EVENT_MAP.get(ev, list(self.TRIGGER_EVENT_MAP.values())[0]))
+            self.sp_r_icd.set(str(tr0.get("icd", tr0.get("every", 1.5))))
+            self.sp_r_chance.set(str(int(tr0.get("chance", 1.0) * 100)))
+            self.sp_r_hp_thresh.set(str(int(tr0.get("hp_threshold", 0.5) * 100)))
+            self.sp_r_heavy_thresh.set(str(int(tr0.get("heavy_hit_pct", 0.15) * 100)))
+            self.sp_r_combo_req.set(str(tr0.get("min_combo", 3)))
+            self.sp_r_combat_t.set(str(tr0.get("combat_time", 10.0)))
+
+            act = tr0.get("action", "reduce_cd")
+            self.cb_r_action.set(self.REWARD_ACTION_MAP.get(act, list(self.REWARD_ACTION_MAP.values())[0]))
+            self.on_r_action_change()
+
+            if act in ("reduce_cd", "reset_cd"):
+                tsk = tr0.get("target_skill", "basic")
+                cd_map = {"basic": "Chiêu Basic (basic)", "branch_a": "Nhánh 1 (branch_a)", "branch_b": "Nhánh 2 (branch_b)", "all": "Toàn bộ chiêu (all)"}
+                self.cb_r_cd_target.set(cd_map.get(tsk, "Chiêu Basic (basic)"))
+                self.sp_r_cd_pct.set(str(int(tr0.get("value_pct", 0.5) * 100)))
+            elif act == "gain_charge":
+                tsk = tr0.get("target_skill", "basic")
+                cd_map = {"basic": "Chiêu Basic (basic)", "branch_a": "Nhánh 1 (branch_a)", "branch_b": "Nhánh 2 (branch_b)", "all": "Toàn bộ chiêu (all)"}
+                self.cb_r_gc_target.set(cd_map.get(tsk, "Chiêu Basic (basic)"))
+                self.sp_r_gc_num.set(str(tr0.get("charges", 1)))
+            elif act == "echo_strike":
+                self.sp_r_echo_pct.set(str(int(tr0.get("echo_pct", 0.5) * 100)))
+            elif act == "buff_stat":
+                self.cb_r_buff_stat.set(tr0.get("stat", "atk"))
+                self.sp_r_buff_val.set(str(int(tr0.get("value", 0.2) * 100) if tr0.get("mode") == "pct" else tr0.get("value", 20)))
+                self.sp_r_buff_dur.set(str(tr0.get("duration", 4.0)))
+            elif act == "stacking_atk":
+                self.sp_r_stk_val.set(str(int(tr0.get("value", 0.05) * 100)))
+                self.sp_r_stk_max.set(str(tr0.get("max_stacks", 5)))
+                self.sp_r_stk_dur.set(str(tr0.get("duration", 6.0)))
+            elif act == "true_damage":
+                self.sp_r_td_flat.set(str(tr0.get("amount", 150)))
+                self.sp_r_td_pct.set(str(int(tr0.get("pct_max", 0.0) * 100)))
+            elif act == "execute_damage":
+                self.sp_r_exec_base.set(str(tr0.get("amount", 200)))
+                self.sp_r_exec_mult.set(str(tr0.get("missing_scale", 1.5)))
+            elif act == "lifesteal":
+                self.sp_r_ls_pct.set(str(int(tr0.get("lifesteal_pct", 0.3) * 100)))
+                self.sp_r_ls_dur.set(str(tr0.get("duration", 5.0)))
+            elif act == "stamina_leech":
+                self.sp_r_sleech_amt.set(str(tr0.get("amount", 30)))
+            elif act == "aoe_shockwave":
+                self.sp_r_wave_base.set(str(tr0.get("amount", 250)))
+                self.sp_r_wave_scale.set(str(int(tr0.get("atk_scale", 0.5) * 100)))
+            elif act == "def_to_atk":
+                self.sp_r_d2a_pct.set(str(int(tr0.get("conversion_pct", 0.25) * 100)))
+                self.sp_r_d2a_dur.set(str(tr0.get("duration", 5.0)))
+            elif act == "berserk_scaling":
+                self.sp_r_berserk_mult.set(str(int(tr0.get("mult_per_10pct", 0.05) * 100)))
+                self.sp_r_berserk_dur.set(str(tr0.get("duration", 5.0)))
+            elif act in ("heal", "shield"):
+                self.sp_r_heal_pct.set(str(int(tr0.get("pct_max", 0.1) * 100)))
+                self.sp_r_heal_flat.set(str(tr0.get("amount", 0)))
+                self.sp_r_sh_dur.set(str(tr0.get("duration", 5.0)))
+            elif act == "hot":
+                self.sp_r_hot_pct.set(str(int(tr0.get("pct_max", 0.15) * 100)))
+                self.sp_r_hot_flat.set(str(tr0.get("amount", 0)))
+                self.sp_r_hot_dur.set(str(tr0.get("duration", 5.0)))
+            elif act in ("reflective_shield", "damage_reflection"):
+                self.sp_r_ref_pct.set(str(int(tr0.get("reflect_pct", 0.35) * 100)))
+                self.sp_r_ref_dur.set(str(tr0.get("duration", 5.0)))
+            elif act in ("free_cast", "iframes", "damage_to_heal", "super_armor", "zero_stamina_cost",
+                         "extended_evasion", "cast_speed_buff", "stamina_freeze", "evasion_lock", "anti_heal"):
+                self.sp_r_dur_val.set(str(tr0.get("duration", 3.0)))
+            elif act == "death_defiance":
+                self.sp_r_dd_hp.set(str(int(tr0.get("hp_pct", 0.20) * 100)))
+                self.sp_r_dd_iframe.set(str(tr0.get("duration", 1.5)))
+                self.sp_r_dd_shield.set(str(int(tr0.get("shield_pct", 0.35) * 100)))
+            elif act == "restore_stamina":
+                self.sp_r_stam_amt.set(str(tr0.get("amount", 30)))
+            elif act == "stamina_regen":
+                self.sp_r_sreg_mult.set(str(tr0.get("regen_mult", 2.0)))
+                self.sp_r_sreg_dur.set(str(tr0.get("duration", 5.0)))
+            elif act == "apply_cc":
+                eff = (tr0.get("effects") or [{}])[0]
+                cc_typ = tr0.get("cc_type") or eff.get("type", "stun")
+                self.cb_r_cc_type.set("Choáng (stun)" if cc_typ == "stun" else "Làm chậm (slow)")
+                self.sp_r_cc_dur.set(str(tr0.get("duration", eff.get("duration", 1.5))))
+                self.sp_r_cc_slow.set(str(int(tr0.get("slow_pct", eff.get("value", 0.3)) * 100)))
+            elif act == "stamina_drain":
+                self.sp_r_sdrain_amt.set(str(tr0.get("amount", 40)))
+            elif act == "cooldown_silence":
+                self.sp_r_silence_amt.set(str(tr0.get("amount", 2.0)))
+            elif act == "apply_elemental_status":
+                el = tr0.get("element", "wet")
+                el_map = {"wet": "Ẩm Ướt (wet)", "frigid": "Lạnh Buốt (frigid)", "blood_loss": "Mất Máu (blood_loss)", "vague": "Hư Vô (vague)"}
+                self.cb_r_elem_choice.set(el_map.get(el, "Ẩm Ướt (wet)"))
+                self.sp_r_elem_dur.set(str(tr0.get("duration", 5.0)))
+            elif act == "shred_def_res":
+                self.cb_r_shred_stat.set("Giáp (defense)" if tr0.get("stat") == "defense" else "Toàn bộ kháng (res)")
+                self.sp_r_shred_val.set(str(int(tr0.get("value", 0.3) * 100)))
+                self.sp_r_shred_dur.set(str(tr0.get("duration", 4.0)))
+        else:
+            self.var_r_has_trigger.set(False)
+            self.toggle_r_trigger_view()
+
+        # Mods
+        mods = r.get("mods", [])
+        if mods:
+            self.var_r_has_mods.set(True)
+            self.toggle_r_mods_view()
+            m_dict = {m.get("stat"): m.get("value", 0) for m in mods}
+            self.sp_mod_atk.set(str(int(m_dict.get("atk", 0))))
+            self.sp_mod_def.set(str(int(m_dict.get("defense", 0))))
+            self.sp_mod_hp.set(str(int(m_dict.get("hp", 0))))
+            self.sp_mod_cdr.set(str(int(m_dict.get("cdr", 0) * 100)))
+            self.sp_mod_mc.set(str(int(m_dict.get("mc", 0) * 100)))
+            self.sp_mod_fignore.set(str(int(m_dict.get("flat_def_ignore", 0))))
+        else:
+            self.var_r_has_mods.set(False)
+            self.toggle_r_mods_view()
+
+        # Update card
+        card_text = f"• Mã: {rid}\n• Tên: {r.get('name', rid)}\n• Mô tả: {r.get('desc', 'Không')}\n"
+        if trigs:
+            card_text += f"• Trigger: {tr0.get('type')} → {tr0.get('action')} (ICD {tr0.get('icd', 0)}s)\n"
+        if mods:
+            card_text += f"• Mods: " + ", ".join(f"{m.get('stat')} +{m.get('value')}" for m in mods) + "\n"
+        if r.get("grants"):
+            card_text += f"• Cấp nội tại: {', '.join(r.get('grants'))}"
+        self.lbl_relic_card.config(text=card_text)
+        self.lbl_relic_form_msg.config(text=f"Đang xem [{rid}]", fg="#cccccc")
+
+    def new_relic_form(self):
+        self.editing_relic_key = None
+        idx = 1
+        while f"relic_custom_{idx}" in self.cfg.get("relics", {}):
+            idx += 1
+        new_id = f"relic_custom_{idx}"
+
+        self.ent_relic_key.delete(0, "end")
+        self.ent_relic_key.insert(0, new_id)
+
+        self.ent_relic_name.delete(0, "end")
+        self.ent_relic_name.insert(0, f"Nội tại Tự Chọn #{idx}")
+
+        self.ent_relic_desc.delete(0, "end")
+        self.ent_relic_desc.insert(0, "Mô tả cơ chế kích hoạt của nội tại")
+
+        self.var_r_has_trigger.set(True)
+        self.toggle_r_trigger_view()
+        self.cb_r_event.set(self.TRIGGER_EVENT_MAP["on_dodge"])
+        self.sp_r_icd.set("1.5")
+        self.sp_r_chance.set("100")
+        self.sp_r_hp_thresh.set("50")
+        self.sp_r_heavy_thresh.set("15")
+        self.sp_r_combo_req.set("3")
+        self.sp_r_combat_t.set("10.0")
+        self.cb_r_action.set(self.REWARD_ACTION_MAP["reduce_cd"])
+        self.on_r_action_change()
+        self.cb_r_cd_target.set("Chiêu Basic (basic)")
+        self.sp_r_cd_pct.set("50")
+
+        self.var_r_has_mods.set(False)
+        self.toggle_r_mods_view()
+        self.sp_mod_atk.set("0")
+        self.sp_mod_def.set("0")
+        self.sp_mod_hp.set("0")
+        self.sp_mod_cdr.set("0")
+        self.sp_mod_mc.set("0")
+        self.sp_mod_fignore.set("0")
+
+        self.lbl_relic_card.config(text=f"Đang soạn thảo Relic mới [{new_id}].")
+        self.lbl_relic_form_msg.config(text="Đang soạn Relic mới", fg="#cccccc")
+
+    def clone_relic_action(self):
+        sel = self.tree_relics.selection()
+        if not sel:
+            messagebox.showinfo("Thông báo", "Vui lòng chọn 1 Relic để nhân bản!")
+            return
+        rid = sel[0]
+        orig = self.cfg.get("relics", {}).get(rid)
+        if not orig:
+            return
+
+        new_rid = f"{rid}_copy"
+        idx = 2
+        while new_rid in self.cfg.get("relics", {}):
+            new_rid = f"{rid}_copy_{idx}"
+            idx += 1
+
+        cloned = copy.deepcopy(orig)
+        cloned["name"] = f"{orig.get('name', rid)} (Bản sao)"
+        self.cfg["relics"][new_rid] = cloned
+        self.save_relics_to_disk()
+        self.refresh_relics_tree()
+        self.tree_relics.selection_set(new_rid)
+        self.on_relic_tree_select()
+        self.lbl_relic_form_msg.config(text=f"✓ Đã nhân bản thành [{new_rid}]!", fg="#00e676")
+
+    def delete_relic_action(self):
+        sel = self.tree_relics.selection()
+        if not sel:
+            messagebox.showinfo("Thông báo", "Vui lòng chọn 1 Relic để xóa!")
+            return
+        rid = sel[0]
+        if not messagebox.askyesno("Xác nhận xóa", f"Bạn có chắc muốn xóa Relic '{rid}' không?\nHành động này sẽ cập nhật config/relics.json."):
+            return
+        if rid in self.cfg.get("relics", {}):
+            del self.cfg["relics"][rid]
+            self.save_relics_to_disk()
+            self.refresh_relics_tree()
+            self.new_relic_form()
+            self.lbl_relic_form_msg.config(text=f"✓ Đã xóa relic [{rid}].", fg="#ff6666")
+
+    def save_relic_action(self):
+        rid = self.ent_relic_key.get().strip()
+        if not rid:
+            messagebox.showwarning("Thiếu dữ liệu", "Vui lòng nhập Mã Relic (Key ID)!")
+            return
+        rname = self.ent_relic_name.get().strip() or rid
+        rdesc = self.ent_relic_desc.get().strip()
+
+        relic_obj = {
+            "name": rname,
+            "desc": rdesc
+        }
+
+        # Triggers
+        if self.var_r_has_trigger.get():
+            ev_label = self.cb_r_event.get()
+            ev_key = self.TRIGGER_EVENT_REVERSE.get(ev_label, "on_dodge")
+            icd_val = float(self.sp_r_icd.get() or 1.5)
+            chance_val = float(self.sp_r_chance.get() or 100) / 100.0
+
+            act_label = self.cb_r_action.get()
+            act_key = self.REWARD_ACTION_REVERSE.get(act_label, "reduce_cd")
+
+            trig_dict = {
+                "type": ev_key,
+                "icd": icd_val,
+                "chance": chance_val,
+                "action": act_key
+            }
+
+            if ev_key in ("on_hp_below", "on_hp_above", "on_target_hp_below"):
+                trig_dict["hp_threshold"] = float(self.sp_r_hp_thresh.get() or 50) / 100.0
+            elif ev_key == "on_take_heavy_hit":
+                trig_dict["heavy_hit_pct"] = float(self.sp_r_heavy_thresh.get() or 15) / 100.0
+            elif ev_key == "on_combo_hits":
+                trig_dict["min_combo"] = int(self.sp_r_combo_req.get() or 3)
+            elif ev_key == "on_combat_time_elapsed":
+                trig_dict["combat_time"] = float(self.sp_r_combat_t.get() or 10.0)
+
+            target_map = {
+                "Chiêu Basic (basic)": "basic",
+                "Nhánh 1 (branch_a)": "branch_a",
+                "Nhánh 2 (branch_b)": "branch_b",
+                "Toàn bộ chiêu (all)": "all"
+            }
+
+            if act_key in ("reduce_cd", "reset_cd"):
+                trig_dict["target_skill"] = target_map.get(self.cb_r_cd_target.get(), "basic")
+                if act_key == "reduce_cd":
+                    trig_dict["value_pct"] = float(self.sp_r_cd_pct.get() or 50) / 100.0
+            elif act_key == "gain_charge":
+                trig_dict["target_skill"] = target_map.get(self.cb_r_gc_target.get(), "basic")
+                trig_dict["charges"] = int(self.sp_r_gc_num.get() or 1)
+            elif act_key == "echo_strike":
+                trig_dict["echo_pct"] = float(self.sp_r_echo_pct.get() or 50) / 100.0
+            elif act_key == "buff_stat":
+                st = self.cb_r_buff_stat.get()
+                v = float(self.sp_r_buff_val.get() or 20) / 100.0
+                dur = float(self.sp_r_buff_dur.get() or 4.0)
+                trig_dict["stat"] = st
+                trig_dict["mode"] = "pct"
+                trig_dict["value"] = v
+                trig_dict["duration"] = dur
+            elif act_key == "stacking_atk":
+                trig_dict["value"] = float(self.sp_r_stk_val.get() or 5) / 100.0
+                trig_dict["max_stacks"] = int(self.sp_r_stk_max.get() or 5)
+                trig_dict["duration"] = float(self.sp_r_stk_dur.get() or 6.0)
+            elif act_key == "true_damage":
+                trig_dict["amount"] = float(self.sp_r_td_flat.get() or 150)
+                trig_dict["pct_max"] = float(self.sp_r_td_pct.get() or 0) / 100.0
+            elif act_key == "execute_damage":
+                trig_dict["amount"] = float(self.sp_r_exec_base.get() or 200)
+                trig_dict["missing_scale"] = float(self.sp_r_exec_mult.get() or 1.5)
+            elif act_key == "lifesteal":
+                trig_dict["lifesteal_pct"] = float(self.sp_r_ls_pct.get() or 30) / 100.0
+                trig_dict["duration"] = float(self.sp_r_ls_dur.get() or 5.0)
+            elif act_key == "stamina_leech":
+                trig_dict["amount"] = float(self.sp_r_sleech_amt.get() or 30)
+            elif act_key == "aoe_shockwave":
+                trig_dict["amount"] = float(self.sp_r_wave_base.get() or 250)
+                trig_dict["atk_scale"] = float(self.sp_r_wave_scale.get() or 50) / 100.0
+            elif act_key == "def_to_atk":
+                trig_dict["conversion_pct"] = float(self.sp_r_d2a_pct.get() or 25) / 100.0
+                trig_dict["duration"] = float(self.sp_r_d2a_dur.get() or 5.0)
+            elif act_key == "berserk_scaling":
+                trig_dict["mult_per_10pct"] = float(self.sp_r_berserk_mult.get() or 5) / 100.0
+                trig_dict["duration"] = float(self.sp_r_berserk_dur.get() or 5.0)
+            elif act in ("heal", "shield"):
+                pct = float(self.sp_r_heal_pct.get() or 0) / 100.0
+                flat = float(self.sp_r_heal_flat.get() or 0)
+                dur = float(self.sp_r_sh_dur.get() or 5.0)
+                trig_dict["pct_max"] = pct
+                trig_dict["amount"] = flat
+                if act == "shield":
+                    trig_dict["duration"] = dur
+            elif act == "hot":
+                trig_dict["pct_max"] = float(self.sp_r_hot_pct.get() or 15) / 100.0
+                trig_dict["amount"] = float(self.sp_r_hot_flat.get() or 0)
+                trig_dict["duration"] = float(self.sp_r_hot_dur.get() or 5.0)
+            elif act in ("reflective_shield", "damage_reflection"):
+                trig_dict["reflect_pct"] = float(self.sp_r_ref_pct.get() or 35) / 100.0
+                trig_dict["duration"] = float(self.sp_r_ref_dur.get() or 5.0)
+                if act == "reflective_shield":
+                    trig_dict["pct_max"] = float(self.sp_r_heal_pct.get() or 20) / 100.0
+                    trig_dict["amount"] = float(self.sp_r_heal_flat.get() or 0)
+            elif act in ("free_cast", "iframes", "damage_to_heal", "super_armor", "zero_stamina_cost",
+                         "extended_evasion", "cast_speed_buff", "stamina_freeze", "evasion_lock", "anti_heal"):
+                trig_dict["duration"] = float(self.sp_r_dur_val.get() or 3.0)
+            elif act == "death_defiance":
+                trig_dict["hp_pct"] = float(self.sp_r_dd_hp.get() or 20) / 100.0
+                trig_dict["duration"] = float(self.sp_r_dd_iframe.get() or 1.5)
+                trig_dict["shield_pct"] = float(self.sp_r_dd_shield.get() or 35) / 100.0
+            elif act == "restore_stamina":
+                trig_dict["amount"] = float(self.sp_r_stam_amt.get() or 30)
+            elif act == "stamina_regen":
+                trig_dict["regen_mult"] = float(self.sp_r_sreg_mult.get() or 2.0)
+                trig_dict["duration"] = float(self.sp_r_sreg_dur.get() or 5.0)
+            elif act == "apply_cc":
+                c_raw = self.cb_r_cc_type.get()
+                cc_typ = "stun" if "stun" in c_raw else "slow"
+                dur = float(self.sp_r_cc_dur.get() or 1.5)
+                eff = {"type": cc_typ, "duration": dur}
+                trig_dict["cc_type"] = cc_typ
+                trig_dict["duration"] = dur
+                if cc_typ == "slow":
+                    slow_v = float(self.sp_r_cc_slow.get() or 30) / 100.0
+                    eff["value"] = slow_v
+                    trig_dict["slow_pct"] = slow_v
+                trig_dict["effects"] = [eff]
+            elif act == "stamina_drain":
+                trig_dict["amount"] = float(self.sp_r_sdrain_amt.get() or 40)
+            elif act == "cooldown_silence":
+                trig_dict["amount"] = float(self.sp_r_silence_amt.get() or 2.0)
+            elif act == "apply_elemental_status":
+                raw_el = self.cb_r_elem_choice.get()
+                elem = "wet" if "wet" in raw_el else ("frigid" if "frigid" in raw_el else ("blood_loss" if "blood_loss" in raw_el else "vague"))
+                trig_dict["element"] = elem
+                trig_dict["duration"] = float(self.sp_r_elem_dur.get() or 5.0)
+            elif act == "shred_def_res":
+                trig_dict["stat"] = "defense" if "defense" in self.cb_r_shred_stat.get() else "*"
+                trig_dict["value"] = float(self.sp_r_shred_val.get() or 30) / 100.0
+                trig_dict["duration"] = float(self.sp_r_shred_dur.get() or 4.0)
+
+            relic_obj["triggers"] = [trig_dict]
+
+        # Mods
+        if self.var_r_has_mods.get():
+            mods_list = []
+            atk = float(self.sp_mod_atk.get() or 0)
+            if atk > 0:
+                mods_list.append({"stat": "atk", "mode": "add", "value": atk})
+            defense = float(self.sp_mod_def.get() or 0)
+            if defense > 0:
+                mods_list.append({"stat": "defense", "mode": "add", "value": defense})
+            hp = float(self.sp_mod_hp.get() or 0)
+            if hp > 0:
+                mods_list.append({"stat": "hp", "mode": "add", "value": hp})
+            cdr = float(self.sp_mod_cdr.get() or 0) / 100.0
+            if cdr > 0:
+                mods_list.append({"stat": "cdr", "mode": "add", "value": cdr})
+            mc = float(self.sp_mod_mc.get() or 0) / 100.0
+            if mc > 0:
+                mods_list.append({"stat": "mc", "mode": "add", "value": mc})
+            fign = float(self.sp_mod_fignore.get() or 0)
+            if fign > 0:
+                mods_list.append({"stat": "flat_def_ignore", "mode": "add", "value": fign})
+
+            if mods_list:
+                relic_obj["mods"] = mods_list
+
+        if self.editing_relic_key and self.editing_relic_key != rid:
+            if rid in self.cfg.get("relics", {}):
+                if not messagebox.askyesno("Ghi đè?", f"Relic '{rid}' đã tồn tại! Bạn có muốn ghi đè không?"):
+                    return
+            if self.editing_relic_key in self.cfg.get("relics", {}):
+                del self.cfg["relics"][self.editing_relic_key]
+
+        self.cfg["relics"][rid] = relic_obj
+        self.editing_relic_key = rid
+        self.save_relics_to_disk()
+        self.refresh_relics_tree()
+        self.tree_relics.selection_set(rid)
+        self.on_relic_tree_select()
+
+        self.lbl_relic_form_msg.config(text=f"✓ Đã lưu relic [{rid}] vào config/relics.json!", fg="#00e676")
 
     # --- Lưu & Đồng bộ cấu hình ---
     def update_diff_status(self):

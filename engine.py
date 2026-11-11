@@ -113,6 +113,27 @@ class Ent:
         self.break_last = -99.0
         self.target = None
         self.trig_last = {}
+        # Hệ thống Relic nâng cao
+        self.combo_count = 0
+        self.last_hit_t = -99.0
+        self.last_take_hit_t = -99.0
+        self.hots = []
+        self.lifesteal_pct = 0.0
+        self.lifesteal_until = -1.0
+        self.reflect_pct = 0.0
+        self.reflect_until = -1.0
+        self.zero_stam_until = -1.0
+        self.free_cast_until = -1.0
+        self.anti_heal_until = -1.0
+        self.stam_frozen_until = -1.0
+        self.super_armor_until = -1.0
+        self.dmg_to_heal_until = -1.0
+        self.death_defiance_done = False
+        self.stam_regen_mult = 1.0
+        self.stam_regen_until = -1.0
+        self.last_damage_dealt = 0.0
+        self.cast_speed_until = -1.0
+        self.extended_evasion_until = -1.0
 
     # ---- chỉ số -------------------------------------------------------------
     def add_mod(self, stat, mode, value, group="default", until=None, name=None,
@@ -388,7 +409,7 @@ class Sim:
                         st["ch"] += g if st["sk"]["magic"] == "Sylva" else 0
 
     # ---- tính damage thuần (không đổi trạng thái) ----
-    def compute(self, src, tgt, base, magic, atk=None, bypass_def=False, final_raw=False, is_bl=False):
+    def compute(self, src, tgt, base, magic, atk=None, bypass_def=False, final_raw=False, is_bl=False, atk_scale=1.0):
         t, P, caps = self.t, self.P, self.caps
         sturd = P["sturd"]
         kim_obj = tgt.kind == "object" and tgt.magic == "Agenet"
@@ -398,6 +419,7 @@ class Sim:
             raw = base
         else:
             a = atk if atk is not None else src.stat("atk")
+            scaled_a = a * atk_scale
             dmg_mult = src.stat("damage_mult")
             raw_fn = getattr(self, "_cached_raw_fn", None)
             if raw_fn is None:
@@ -405,16 +427,20 @@ class Sim:
                 if raw_expr and str(raw_expr).strip():
                     try:
                         code = compile(str(raw_expr).strip(), "<raw_expr>", "eval")
-                        raw_fn = lambda a_val, b_val, m_val: eval(code, {"__builtins__": None, "max": max, "min": min}, {"atk": a_val, "base": b_val, "damage_mult": m_val})
+                        raw_fn = lambda a_val, b_val, m_val, a_raw, s_val: eval(
+                            code,
+                            {"__builtins__": None, "max": max, "min": min},
+                            {"atk": a_val, "base": b_val, "damage_mult": m_val, "raw_atk": a_raw, "atk_scale": s_val}
+                        )
                     except Exception:
-                        raw_fn = lambda a_val, b_val, m_val: (a_val + b_val) * m_val
+                        raw_fn = lambda a_val, b_val, m_val, a_raw, s_val: (a_val + b_val) * m_val
                 else:
-                    raw_fn = lambda a_val, b_val, m_val: (a_val + b_val) * m_val
+                    raw_fn = lambda a_val, b_val, m_val, a_raw, s_val: (a_val + b_val) * m_val
                 self._cached_raw_fn = raw_fn
             try:
-                raw = float(self._cached_raw_fn(a, base, dmg_mult))
+                raw = float(self._cached_raw_fn(scaled_a, base, dmg_mult, a, atk_scale))
             except Exception:
-                raw = (a + base) * dmg_mult
+                raw = (scaled_a + base) * dmg_mult
 
         if kim_obj and magic == "Ignis" and t < tgt.sturd_until:
             raw *= 1 + sturd["ignis_bonus"]
@@ -480,18 +506,34 @@ class Sim:
 
     # ---- gây damage ----
     def hit(self, src, tgt, base, magic, atk=None, dot=False, true=False, bypass_def=False,
-            final_raw=False, cat=None, trigger=True, is_bl=False, sid=None):
+            final_raw=False, cat=None, trigger=True, is_bl=False, sid=None, atk_scale=1.0):
         t = self.t
         if not tgt.alive or tgt.iframe_until > t:
             return 0.0
-        dealt = base if true else self.compute(src, tgt, base, magic, atk, bypass_def, final_raw, is_bl)
+        dealt = base if true else self.compute(src, tgt, base, magic, atk, bypass_def, final_raw, is_bl, atk_scale=atk_scale)
+        if tgt.dmg_to_heal_until > t and dealt > 0:
+            self.heal(tgt, dealt)
+            if self.log_on:
+                self.L("%s CHUYỂN HOÁ SÁT THƯƠNG THÀNH HỒI MÁU (+%.0f HP)!" % (tgt.name, dealt))
+            return dealt
+
         rem = dealt
+        shield_had = any(sh[0] > 0 and sh[1] > t for sh in tgt.shield)
         if not true:
             for sh in tgt.shield:
                 if sh[1] > t and sh[0] > 0 and rem > 0:
                     take = min(sh[0], rem)
                     sh[0] -= take
                     rem -= take
+        shield_now = any(sh[0] > 0 and sh[1] > t for sh in tgt.shield)
+        if shield_had and not shield_now:
+            self.fire_trigger("on_shield_broken", tgt, src)
+
+        if tgt.hp - rem <= 0 and tgt.alive:
+            self.fire_trigger("on_fatal_damage", tgt, src, extra={"damage": dealt})
+            if tgt.death_defiance_done and tgt.hp > 0:
+                rem = 0.0
+
         tgt.hp -= rem
         c = cat or ("true" if true else "dot" if dot else "direct")
         self.m[src.name][c] += dealt
@@ -502,6 +544,18 @@ class Sim:
             hp_txt = "" if tgt.hp > 1e11 else "  [HP %.0f/%.0f]" % (max(0.0, tgt.hp), tgt.maxhp)
             ab = "  (khiên hấp thụ %.0f)" % (dealt - rem) if (not true and dealt - rem > 0.5) else ""
             self.L("%s → %s: %s (%s) %.0f dmg%s%s" % (src.name, tgt.name, sid or cat or ("true" if true else "dmg"), magic, dealt, ab, hp_txt))
+
+        # Lifesteal
+        if (src.lifesteal_pct > 0 or src.lifesteal_until > t) and dealt > 0 and src.alive:
+            ls = dealt * max(src.lifesteal_pct, 0.25 if src.lifesteal_until > t else 0.0)
+            self.heal(src, ls, quiet=True)
+
+        # Reflect
+        if (tgt.reflect_pct > 0 or tgt.reflect_until > t) and not dot and not true and trigger and tgt.alive and src.alive:
+            ref_pct = max(tgt.reflect_pct, 0.35 if tgt.reflect_until > t else 0.0)
+            ref_dmg = dealt * ref_pct
+            self.hit(tgt, src, ref_dmg, "True", atk=0.0, true=True, trigger=False, cat="reflect")
+
         if trigger and not dot and (dealt > 0 or self.S("trigger_on_zero_damage")):
             self._on_hit(src, tgt, magic, dealt)
         self._check_death(tgt)
@@ -529,12 +583,21 @@ class Sim:
     def heal(self, e, amount, quiet=False):
         if amount <= 0 or not e.alive:
             return
+        if e.anti_heal_until > self.t:
+            amount *= 0.5
+            if self.log_on and not quiet:
+                self.L(f"   → [Anti-Heal] {e.name} bị giảm 50% hồi phục: nhận {amount:.0f} HP")
         amount *= e.stat("heal_mult")
+        old_hp = e.hp
         if e.hp < e.maxhp:
             e.hp = min(e.maxhp, e.hp + amount)
         self.m[e.name]["heal"] += amount
         if self.log_on and not quiet and amount >= 0.01 * e.maxhp:
             self.L("%s: hồi %.0f HP" % (e.name, amount))
+        if old_hp >= e.maxhp:
+            self.fire_trigger("on_overheal", e, extra={"amount": amount})
+        else:
+            self.fire_trigger("on_healed", e, extra={"amount": amount})
         mode = self.P["blood_loss"]["heal_clears"]
         if e.bl["stacks"]:
             if mode == "all":
@@ -552,6 +615,7 @@ class Sim:
         if undispellable:
             e.vg["exp"] = []
             e.drained_until = -1.0
+        self.fire_trigger("on_cleanse", e)
 
     def _check_death(self, e):
         if e.hp > 0 or not e.alive:
@@ -632,6 +696,7 @@ class Sim:
         if magic == "Fulgur" and src.has("fulgur_chain") and tgt.kind == "object":
             p = P["fulgur_chain"]
             if tgt.magic in p["trigger_magics"] or tgt.wet():
+                self.fire_trigger("on_trigger_reaction", src, tgt)
                 bonus = p["bonus_pct"] * src.mcf("fulgur_chain") * dealt
                 self.raw_extra(src, tgt, bonus, "bonus")
                 n = 0
@@ -650,17 +715,67 @@ class Sim:
         # Break (Kim) lên mục tiêu Frozen
         if src.has("break") and tgt.frozen():
             p = P["break"]
+            self.fire_trigger("on_trigger_reaction", src, tgt)
             self.raw_extra(src, tgt, p["bonus_pct"] * dealt, "bonus")
             icd = max(p["icd"], P["reaction"]["icd"]) if self.S("break_uses_reaction_icd") else p["icd"]
             if t - tgt.break_last >= icd - 1e-9:
                 tgt.break_last = t
                 self.raw_extra(src, tgt, p["true_pct_max_hp"] * tgt.maxhp, "true", true=True)
-        # relic on_hit
-        for i, tr in enumerate(src.triggers):
-            if tr["type"] == "on_hit" and t - src.trig_last.get(i, -99) >= tr.get("icd", 0) - 1e-9:
-                src.trig_last[i] = t
-                for eff in tr["effects"]:
-                    self.apply_effect(eff, src, tgt)
+
+        # Cập nhật chuỗi Combo & thời điểm tương tác
+        if t - src.last_hit_t <= 2.5:
+            src.combo_count += 1
+        else:
+            src.combo_count = 1
+        src.last_hit_t = t
+        src.last_damage_dealt = dealt
+        tgt.last_take_hit_t = t
+
+        # Kích hoạt Triggers của người tấn công (Attacker Triggers)
+        self.fire_trigger("on_hit", src, tgt)
+        if src.combo_count >= 3:
+            self.fire_trigger("on_combo_hits", src, tgt, extra={"combo": src.combo_count})
+        if src.combo_count >= 5:
+            self.fire_trigger("on_finisher_hit", src, tgt)
+        if t - src.last_take_hit_t <= 1.0:
+            self.fire_trigger("on_counter_attack", src, tgt)
+        if magic == "True":
+            self.fire_trigger("on_deal_true_dmg", src, tgt)
+
+        # Triggers theo trạng thái của mục tiêu (Target Condition Triggers)
+        if tgt.hp / max(1.0, tgt.maxhp) < 0.35:
+            self.fire_trigger("on_target_hp_below", src, tgt)
+        if tgt.hp >= tgt.maxhp - 1e-6:
+            self.fire_trigger("on_target_hp_full", src, tgt)
+        if (src.hp / max(1.0, src.maxhp)) < (tgt.hp / max(1.0, tgt.maxhp)):
+            self.fire_trigger("on_target_underdog", src, tgt)
+        if tgt.stam < 25.0:
+            self.fire_trigger("on_target_exhausted", src, tgt)
+        if any(s[0] > 0 and s[1] > t for s in tgt.shield):
+            self.fire_trigger("on_target_shielded", src, tgt)
+        else:
+            self.fire_trigger("on_target_shieldless", src, tgt)
+
+        debuff_cnt = len([m for m in tgt.mods if m.get("debuff")]) + len(tgt.slows) + len(tgt.dots)
+        if tgt.bl["stacks"]: debuff_cnt += 1
+        if tgt.fc["exp"]: debuff_cnt += 1
+        if debuff_cnt >= 2:
+            self.fire_trigger("on_target_multi_debuff", src, tgt)
+
+        if tgt.frozen():
+            self.fire_trigger("on_hit_frozen", src, tgt)
+        if tgt.wet():
+            self.fire_trigger("on_hit_wet", src, tgt)
+
+        # Kích hoạt Triggers của người nhận đòn (Defender Triggers)
+        if dealt > 0:
+            self.fire_trigger("on_take_hit", tgt, src, extra={"damage": dealt})
+            if dealt >= tgt.maxhp * 0.15:
+                self.fire_trigger("on_take_heavy_hit", tgt, src, extra={"damage": dealt})
+            if tgt.hp / max(1.0, tgt.maxhp) <= 0.5:
+                self.fire_trigger("on_hp_below", tgt, src)
+            if tgt.hp / max(1.0, tgt.maxhp) >= 0.8:
+                self.fire_trigger("on_hp_above", tgt, src)
 
     def _frigid_add(self, src, tgt):
         p, fc, t = self.P["frigid_core"], tgt.fc, self.t
@@ -683,6 +798,394 @@ class Sim:
         tgt.fc["frozen_once"] = True
         tgt.frozen_block = (t + dur + p["frozen_immunity"]) if p["frozen_immunity"] > 0 else -1.0
 
+    # ---- HỆ THỐNG KÍCH HOẠT NỘI TẠI & RELIC TRIGGER ----
+    def fire_trigger(self, event_type, ent, enemy=None, extra=None):
+        if not ent or not getattr(ent, "alive", True):
+            return
+        t = self.t
+        for i, tr in enumerate(ent.triggers):
+            if tr.get("type") != event_type:
+                continue
+
+            chance = float(tr.get("chance", 1.0))
+            if chance < 1.0 and self.rng.random() > chance:
+                continue
+
+            # Kiểm tra các điều kiện bổ sung
+            if event_type == "on_hp_below":
+                thresh = float(tr.get("hp_threshold", 0.5))
+                if ent.hp / max(1.0, ent.maxhp) > thresh:
+                    continue
+            elif event_type == "on_hp_above":
+                thresh = float(tr.get("hp_threshold", 0.7))
+                if ent.hp / max(1.0, ent.maxhp) < thresh:
+                    continue
+            elif event_type == "on_target_hp_below":
+                if not enemy:
+                    continue
+                thresh = float(tr.get("hp_threshold", 0.35))
+                if enemy.hp / max(1.0, enemy.maxhp) > thresh:
+                    continue
+            elif event_type == "on_take_heavy_hit":
+                dmg_taken = extra.get("damage", 0.0) if isinstance(extra, dict) else 0.0
+                thresh_pct = float(tr.get("heavy_hit_pct", 0.15))
+                if dmg_taken < ent.maxhp * thresh_pct:
+                    continue
+            elif event_type == "on_combo_hits":
+                combo = extra.get("combo", 0) if isinstance(extra, dict) else 0
+                if combo < int(tr.get("min_combo", 3)):
+                    continue
+            elif event_type == "on_combat_time_elapsed":
+                t_elap = extra.get("time", t) if isinstance(extra, dict) else t
+                if t_elap < float(tr.get("combat_time", 10.0)):
+                    continue
+
+            # Kiểm tra hồi chiêu nội tại (ICD / every)
+            icd = float(tr.get("icd", tr.get("every", 0.0)))
+            if t - ent.trig_last.get(i, -99.0) < icd - 1e-9:
+                continue
+            ent.trig_last[i] = t
+
+            tr_name = tr.get("name") or tr.get("action") or event_type
+            if self.log_on:
+                self.L(f"   ★ [Nội Tại / Relic] {ent.name} kích hoạt: {tr_name} ({event_type})")
+
+            # Thực thi hành động phần thưởng (Reward Action)
+            act = tr.get("action")
+            if act == "reduce_cd":
+                target_sk = tr.get("target_skill", "basic")
+                val_pct = float(tr.get("value_pct", 0.5))
+                val_flat = float(tr.get("value_flat", 0.0))
+                self._trigger_reduce_cd(ent, target_sk, val_pct, val_flat)
+            elif act == "reset_cd":
+                target_sk = tr.get("target_skill", "basic")
+                self._trigger_reset_cd(ent, target_sk)
+            elif act == "gain_charge":
+                target_sk = tr.get("target_skill", "basic")
+                n_ch = int(tr.get("charges", 1))
+                self._trigger_gain_charge(ent, target_sk, n_ch)
+            elif act == "free_cast":
+                dur = float(tr.get("duration", 3.0))
+                ent.free_cast_until = t + dur
+                if self.log_on:
+                    self.L(f"      + Kỹ năng tung miễn phí (Free Cast) trong {dur:.1f}s")
+            elif act == "echo_strike" and enemy:
+                echo_pct = float(tr.get("echo_pct", 0.5))
+                dmg = max(20.0, (ent.last_damage_dealt if ent.last_damage_dealt > 0 else ent.stat("atk")) * echo_pct)
+                self.schedule(0.25, lambda e=ent, tg=enemy, d=dmg: self.hit(e, tg, d, "Neutral", true=True, trigger=False, cat="echo"))
+                if self.log_on:
+                    self.L(f"      + Vọng Kích (Echo Strike): Kích hoạt đòn đánh phụ {dmg:.0f} dmg sau 0.25s!")
+            elif act == "buff_stat":
+                stat = tr.get("stat", "atk")
+                mode = tr.get("mode", "pct")
+                val = float(tr.get("value", 0.2))
+                dur = float(tr.get("duration", 4.0))
+                ent.add_mod(stat, mode, val, group="relic_buff", until=t + dur, max_stacks=int(tr.get("max_stacks", 1)))
+                if self.log_on:
+                    disp_val = f"+{val*100:.0f}%" if mode == "pct" else f"+{val:.0f}"
+                    self.L(f"      + Tăng chỉ số {stat.upper()}: {disp_val} trong {dur:.1f}s")
+            elif act == "stacking_atk":
+                val = float(tr.get("value", 0.05))
+                dur = float(tr.get("duration", 6.0))
+                mx = int(tr.get("max_stacks", 5))
+                ent.add_mod("atk", "pct", val, group="stacking_atk", until=t + dur, name="relic_stack_atk", max_stacks=mx)
+                if self.log_on:
+                    self.L(f"      + Tích tầng sức mạnh: +{val*100:.0f}% ATK (tối đa {mx} tầng) trong {dur:.1f}s")
+            elif act == "true_damage" and enemy:
+                amt = float(tr.get("amount", 0.0)) + float(tr.get("pct_max", 0.0)) * enemy.maxhp
+                self.hit(ent, enemy, amt, "True", atk=0.0, true=True, trigger=False)
+                if self.log_on:
+                    self.L(f"      + Gây thêm sát thương chuẩn: {amt:.0f} True Dmg lên {enemy.name}")
+            elif act == "execute_damage" and enemy:
+                missing_pct = 1.0 - (enemy.hp / max(1.0, enemy.maxhp))
+                bonus_scale = float(tr.get("missing_scale", 1.5))
+                base_dmg = float(tr.get("amount", 200.0))
+                exec_dmg = base_dmg * (1.0 + missing_pct * bonus_scale)
+                self.hit(ent, enemy, exec_dmg, "True", atk=0.0, true=True, trigger=False)
+                if self.log_on:
+                    self.L(f"      + Đòn kết liễu (Execute): {exec_dmg:.0f} True Dmg (địch tổn thất {missing_pct*100:.0f}% máu)")
+            elif act == "lifesteal":
+                dur = float(tr.get("duration", 5.0))
+                pct = float(tr.get("lifesteal_pct", 0.3))
+                ent.lifesteal_pct = pct
+                ent.lifesteal_until = t + dur
+                if self.log_on:
+                    self.L(f"      + Nhận Hút Máu: +{pct*100:.0f}% Lifesteal trong {dur:.1f}s")
+            elif act == "stamina_leech" and enemy:
+                leech_amt = float(tr.get("amount", 30.0))
+                drained = min(enemy.stam, leech_amt)
+                enemy.stam = max(0.0, enemy.stam - drained)
+                ent.stam = min(180.0, ent.stam + drained)
+                if self.log_on:
+                    self.L(f"      + Hút Thể Lực: Cướp {drained:.0f} Stamina từ {enemy.name} (chuyển sang bản thân)")
+            elif act == "dot_detonation" and enemy:
+                det_dmg = 0.0
+                for d in enemy.dots:
+                    rem_ticks = max(0.0, (d["until"] - t) / max(0.1, d["tick"]))
+                    base = (d["base"] + d["atk"] * d["coef"]) * d["tick"]
+                    det_dmg += base * rem_ticks
+                enemy.dots = []
+                if det_dmg > 0:
+                    self.hit(ent, enemy, det_dmg, "True", atk=0.0, true=True, trigger=False, cat="dot_detonate")
+                    if self.log_on:
+                        self.L(f"      + KÍCH NỔ DoT: Phát nổ toàn bộ {det_dmg:.0f} dmg DoT lên {enemy.name}!")
+            elif act == "aoe_shockwave":
+                base_wave = float(tr.get("amount", 250.0)) + ent.stat("atk") * float(tr.get("atk_scale", 0.5))
+                for x in self._enemies_of(ent):
+                    if x.alive:
+                        self.hit(ent, x, base_wave, "Neutral", true=False, trigger=False)
+                if self.log_on:
+                    self.L(f"      + Sóng Xung Kích Chấn Động: {base_wave:.0f} dmg nổ lan diện rộng!")
+            elif act == "def_to_atk":
+                dur = float(tr.get("duration", 5.0))
+                conv_pct = float(tr.get("conversion_pct", 0.25))
+                bonus_atk = ent.stat("defense") * conv_pct
+                ent.add_mod("atk", "add", bonus_atk, group="def_to_atk", until=t + dur)
+                if self.log_on:
+                    self.L(f"      + Thiết Giáp Hóa Kiếm: Chuyển {conv_pct*100:.0f}% Giáp thành +{bonus_atk:.0f} ATK trong {dur:.1f}s")
+            elif act == "berserk_scaling":
+                missing_10 = (1.0 - (ent.hp / max(1.0, ent.maxhp))) * 10.0
+                bonus_mult = missing_10 * float(tr.get("mult_per_10pct", 0.05))
+                dur = float(tr.get("duration", 5.0))
+                ent.add_mod("damage_mult", "pct", bonus_mult, group="berserk", until=t + dur)
+                if self.log_on:
+                    self.L(f"      + Cuồng Nộ (Berserk): Nhận +{bonus_mult*100:.0f}% Dmg Mult trong {dur:.1f}s")
+            elif act == "heal":
+                amt = float(tr.get("amount", 0.0)) + float(tr.get("pct_max", 0.0)) * ent.maxhp
+                self.heal(ent, amt)
+                if self.log_on:
+                    self.L(f"      + Hồi máu: +{amt:.0f} HP")
+            elif act == "hot":
+                dur = float(tr.get("duration", 5.0))
+                total_amt = float(tr.get("amount", 0.0)) + float(tr.get("pct_max", 0.0)) * ent.maxhp
+                tick_rate = float(tr.get("tick", 1.0))
+                n_ticks = max(1, int(dur / tick_rate))
+                ent.hots.append({"until": t + dur, "next": t + tick_rate, "tick": tick_rate, "amount_per_tick": total_amt / n_ticks})
+                if self.log_on:
+                    self.L(f"      + Hồi máu theo thời gian (HoT): {total_amt:.0f} HP trong {dur:.1f}s")
+            elif act == "shield":
+                amt = float(tr.get("amount", 0.0)) + float(tr.get("pct_max", 0.0)) * ent.maxhp
+                dur = float(tr.get("duration", 5.0))
+                ent.shield.append([amt, t + dur])
+                if self.log_on:
+                    self.L(f"      + Nhận Khiên: {amt:.0f} (tồn tại {dur:.1f}s)")
+            elif act == "reflective_shield":
+                amt = float(tr.get("amount", 0.0)) + float(tr.get("pct_max", 0.0)) * ent.maxhp
+                dur = float(tr.get("duration", 5.0))
+                ref = float(tr.get("reflect_pct", 0.35))
+                ent.shield.append([amt, t + dur])
+                ent.reflect_pct = ref
+                ent.reflect_until = t + dur
+                if self.log_on:
+                    self.L(f"      + Nhận Khiên Phản Kích: {amt:.0f} (Phản {ref*100:.0f}% dmg trong {dur:.1f}s)")
+            elif act == "damage_reflection":
+                dur = float(tr.get("duration", 4.0))
+                ref = float(tr.get("reflect_pct", 0.40))
+                ent.reflect_pct = ref
+                ent.reflect_until = t + dur
+                if self.log_on:
+                    self.L(f"      + Gai Phản Đòn: Phản {ref*100:.0f}% sát thương nhận phải trong {dur:.1f}s")
+            elif act == "iframes":
+                dur = float(tr.get("duration", 1.0))
+                ent.iframe_until = max(ent.iframe_until, t + dur)
+                if self.log_on:
+                    self.L(f"      + Khung Bất Tử: Miễn nhiễm sát thương trong {dur:.1f}s")
+            elif act == "damage_to_heal":
+                dur = float(tr.get("duration", 3.0))
+                ent.dmg_to_heal_until = t + dur
+                if self.log_on:
+                    self.L(f"      + Hộ Mệnh Chuyển Hoá: Sát thương nhận vào chuyển thành HỒI MÁU trong {dur:.1f}s!")
+            elif act == "death_defiance":
+                if ent.death_defiance_done and not tr.get("repeatable", False):
+                    continue
+                ent.hp = max(1.0, ent.maxhp * float(tr.get("hp_pct", 0.20)))
+                dur = float(tr.get("duration", 1.5))
+                ent.iframe_until = t + dur
+                sh_amt = ent.maxhp * float(tr.get("shield_pct", 0.35))
+                ent.shield.append([sh_amt, t + 5.0])
+                ent.death_defiance_done = True
+                if self.log_on:
+                    self.L(f"      ★ [CỨU TỬ KHẨN CẤP] {ent.name} chặn đòn chí tử! Giữ lại {ent.hp:.0f} HP, {dur:.1f}s bất tử và {sh_amt:.0f} khiên!")
+            elif act == "auto_cleanse":
+                self.cleanse(ent, undispellable=True)
+                if self.log_on:
+                    self.L(f"      + Đại Thanh Tẩy: Xoá bỏ toàn bộ debuff và hiệu ứng khống chế!")
+            elif act == "super_armor":
+                dur = float(tr.get("duration", 4.0))
+                ent.super_armor_until = t + dur
+                ent.stun_until = -1.0
+                if self.log_on:
+                    self.L(f"      + Trọng Giáp Bất Động: Miễn nhiễm khống chế trong {dur:.1f}s")
+            elif act == "restore_stamina":
+                stam_amt = float(tr.get("amount", 30.0))
+                ent.stam = min(180.0, ent.stam + stam_amt)
+                if self.log_on:
+                    self.L(f"      + Hồi {stam_amt:.0f} Thể Lực (hiện tại: {ent.stam:.0f})")
+            elif act == "stamina_regen":
+                dur = float(tr.get("duration", 5.0))
+                mult = float(tr.get("regen_mult", 2.0))
+                ent.stam_regen_mult = mult
+                ent.stam_regen_until = t + dur
+                if self.log_on:
+                    self.L(f"      + Tăng tốc hồi Thể Lực: x{mult:.1f} tốc độ hồi Stamina trong {dur:.1f}s")
+            elif act == "zero_stamina_cost":
+                dur = float(tr.get("duration", 4.0))
+                ent.zero_stam_until = t + dur
+                if self.log_on:
+                    self.L(f"      + Vô Cực Thể Lực: Lướt Né / Đỡ đòn không tốn Stamina trong {dur:.1f}s")
+            elif act == "reset_dodge_cd":
+                ent.dodge_lock = t
+                if self.log_on:
+                    self.L(f"      + Làm mới hồi chiêu Lướt Né (Sẵn sàng Dodge)")
+            elif act == "extended_evasion":
+                dur = float(tr.get("duration", 5.0))
+                ent.extended_evasion_until = t + dur
+                if self.log_on:
+                    self.L(f"      + Lướt Né Siêu Linh: Tăng thêm i-frames né đòn trong {dur:.1f}s")
+            elif act == "cast_speed_buff":
+                dur = float(tr.get("duration", 5.0))
+                ent.cast_speed_until = t + dur
+                if self.log_on:
+                    self.L(f"      + Thần Tốc Ra Chiêu: Tăng 30% tốc độ tung kỹ năng trong {dur:.1f}s")
+            elif act == "apply_cc" and enemy:
+                c_raw = tr.get("cc_type", "stun")
+                dur = float(tr.get("duration", 1.5))
+                if c_raw == "stun":
+                    enemy.stun_until = max(enemy.stun_until, t + dur)
+                elif c_raw == "slow":
+                    enemy.slows.append({"v": float(tr.get("slow_pct", 0.4)), "until": t + dur})
+                if self.log_on:
+                    self.L(f"      + Gây khống chế [{c_raw.upper()}] lên {enemy.name} trong {dur:.1f}s")
+            elif act == "stamina_drain" and enemy:
+                amt = float(tr.get("amount", 40.0))
+                enemy.stam = max(0.0, enemy.stam - amt)
+                if self.log_on:
+                    self.L(f"      + Tiêu trừ Thể Lực: Trừ {amt:.0f} Stamina của {enemy.name} (còn {enemy.stam:.0f})")
+            elif act == "stamina_freeze" and enemy:
+                dur = float(tr.get("duration", 3.0))
+                enemy.stam_frozen_until = t + dur
+                if self.log_on:
+                    self.L(f"      + Đóng Băng Thể Lực: {enemy.name} không thể hồi Stamina trong {dur:.1f}s!")
+            elif act == "evasion_lock" and enemy:
+                dur = float(tr.get("duration", 3.0))
+                enemy.dodge_lock = max(enemy.dodge_lock, t + dur)
+                if self.log_on:
+                    self.L(f"      + Khóa Thân Thể: {enemy.name} bị KHÓA LƯỚT NÉ trong {dur:.1f}s!")
+            elif act == "cooldown_silence" and enemy:
+                amt = float(tr.get("amount", 2.0))
+                for st in enemy.skills.values():
+                    if st["rech"] > 0:
+                        st["rech"] += amt
+                if self.log_on:
+                    self.L(f"      + Tê Liệt Kỹ Năng: Tăng thêm +{amt:.1f}s hồi chiêu kỹ năng của {enemy.name}")
+            elif act == "apply_elemental_status" and enemy:
+                elem = tr.get("element", "wet")
+                dur = float(tr.get("duration", 5.0))
+                if elem == "wet":
+                    enemy.wet_until = max(enemy.wet_until, t + dur)
+                elif elem == "frigid":
+                    enemy.fc["exp"].append(t + dur)
+                elif elem == "blood_loss":
+                    enemy.bl["stacks"].append(t + dur)
+                    enemy.bl["src"] = ent
+                elif elem == "vague":
+                    enemy.vg["exp"].append(t + dur)
+                    enemy.vg["src"] = ent
+                if self.log_on:
+                    self.L(f"      + Gán trạng thái nguyên tố [{elem.upper()}] lên {enemy.name} trong {dur:.1f}s")
+            elif act == "anti_heal" and enemy:
+                dur = float(tr.get("duration", 5.0))
+                enemy.anti_heal_until = t + dur
+                if self.log_on:
+                    self.L(f"      + Vết Thương Sâu (Anti-Heal): Giảm 50% hồi phục của {enemy.name} trong {dur:.1f}s")
+            elif act == "shred_def_res" and enemy:
+                dur = float(tr.get("duration", 4.0))
+                stat = tr.get("stat", "defense")
+                val = float(tr.get("value", 0.30))
+                enemy.add_mod(stat, "pct", -val, group="shred", until=t + dur, debuff=True)
+                if self.log_on:
+                    self.L(f"      + Bào mòn phòng ngự (Shred {stat.upper()}): Trừ {val*100:.0f}% {stat} của {enemy.name} trong {dur:.1f}s")
+            elif act == "contagion" and enemy:
+                other_enemies = [x for x in self._enemies_of(ent) if x is not enemy and x.alive]
+                for oe in other_enemies:
+                    for m in enemy.mods:
+                        if m.get("debuff") and m.get("until", 0) > t:
+                            oe.add_mod(m["stat"], m["mode"], m["value"], group="contagion", until=m["until"], debuff=True)
+                    if enemy.wet():
+                        oe.wet_until = max(oe.wet_until, enemy.wet_until)
+                    if enemy.frozen():
+                        oe.frozen_until = max(oe.frozen_until, enemy.frozen_until)
+                if self.log_on and other_enemies:
+                    self.L(f"      + Dịch Hạch Lây Lan: Phát tán debuff từ {enemy.name} sang toàn bộ đối thủ khác!")
+
+            # Kèm hiệu ứng chung (nếu có: stun, slow, dot...)
+            for eff in tr.get("effects", []):
+                target = enemy if eff.get("to") != "self" else ent
+                if target:
+                    self.apply_effect(eff, ent, target)
+
+    def _trigger_gain_charge(self, ent, target_skill="basic", charges=1):
+        sids = []
+        if target_skill == "basic":
+            sids = [sid for sid, st in ent.skills.items() if st["branch"] == "basic"]
+        elif target_skill == "branch_a":
+            sids = [sid for sid, st in ent.skills.items() if st["branch"] == "a"]
+        elif target_skill == "branch_b":
+            sids = [sid for sid, st in ent.skills.items() if st["branch"] == "b"]
+        elif target_skill == "all":
+            sids = list(ent.skills.keys())
+        elif target_skill in ent.skills:
+            sids = [target_skill]
+        for sid in sids:
+            st = ent.skills[sid]
+            st["ch"] = min(st["max"] + 1, st["ch"] + charges)
+            if self.log_on:
+                self.L(f"      + Tăng lần dùng [{sid}]: +{charges} (hiện có: {st['ch']}/{st['max']})")
+
+    def _trigger_reduce_cd(self, ent, target_skill="basic", pct=0.0, flat=0.0):
+        sids = []
+        if target_skill == "basic":
+            sids = [sid for sid, st in ent.skills.items() if st["branch"] == "basic"]
+        elif target_skill == "branch_a":
+            sids = [sid for sid, st in ent.skills.items() if st["branch"] == "a"]
+        elif target_skill == "branch_b":
+            sids = [sid for sid, st in ent.skills.items() if st["branch"] == "b"]
+        elif target_skill == "all":
+            sids = list(ent.skills.keys())
+        elif target_skill in ent.skills:
+            sids = [target_skill]
+
+        for sid in sids:
+            st = ent.skills[sid]
+            max_cd = self.cd_eff(ent, st)
+            amt = max_cd * pct + flat
+            old_rech = st["rech"]
+            st["rech"] = max(0.0, st["rech"] - amt)
+            if old_rech > 1e-9 and st["rech"] <= 1e-9:
+                if st["ch"] < st["max"]:
+                    st["ch"] += 1
+                    if st["ch"] < st["max"]:
+                        st["rech"] = self.cd_eff(ent, st)
+                    else:
+                        st["rech"] = 0.0
+            if self.log_on:
+                self.L(f"      + Giảm hồi chiêu [{sid}]: -{amt:.1f}s (còn lại: {st['rech']:.1f}s, charges: {st['ch']})")
+
+    def _trigger_reset_cd(self, ent, target_skill="basic"):
+        sids = []
+        if target_skill == "basic":
+            sids = [sid for sid, st in ent.skills.items() if st["branch"] == "basic"]
+        elif target_skill == "all":
+            sids = list(ent.skills.keys())
+        elif target_skill in ent.skills:
+            sids = [target_skill]
+        for sid in sids:
+            st = ent.skills[sid]
+            st["rech"] = 0.0
+            st["ch"] = st["max"]
+            if self.log_on:
+                self.L(f"      + Làm mới hoàn toàn kỹ năng [{sid}]!")
+
     # ---- hiệu ứng tổng quát (skill/relic) ----
     def apply_effect(self, eff, src, enemy):
         t = self.t
@@ -704,6 +1207,8 @@ class Sim:
             tgt.add_mod(eff["stat"], eff.get("mode", "pct"), eff["value"] * k, eff.get("group", "skill"),
                         until=t + dur, name=eff.get("name"), max_stacks=eff.get("max_stacks"),
                         debuff=(typ == "debuff"))
+            if typ == "debuff":
+                self.fire_trigger("on_receive_debuff", tgt, src)
         elif typ == "slow":
             name, mx = eff.get("name"), eff.get("max_stacks", 1)
             same = [s for s in tgt.slows if name and s["name"] == name and s["until"] > t]
@@ -714,8 +1219,10 @@ class Sim:
                 for s in same:
                     s["until"] = t + dur
                 tgt.slows.append({"v": eff["value"] * k, "until": t + dur, "name": name})
+            self.fire_trigger("on_apply_cc", src, tgt)
         elif typ == "stun":
             tgt.stun_until = max(tgt.stun_until, t + dur)
+            self.fire_trigger("on_apply_cc", src, tgt)
         elif typ == "dot":
             tgt.dots.append({"until": t + dur, "next": t, "tick": eff.get("tick", 0.5),
                              "base": eff.get("dps_base", 0.0) * k, "coef": eff.get("atk_coef", 0.0),
@@ -782,18 +1289,31 @@ class Sim:
     def cast(self, e, sid, st, tgt):
         t, R = self.t, self.R
         sk = st["sk"]
-        st["ch"] -= 1
-        if st["rech"] <= 1e-9:
-            st["rech"] = self.cd_eff(e, st)
-        e.gcd = t + sk.get("cast_time", R["combat"]["gcd"])
+        if e.free_cast_until > t:
+            pass
+        else:
+            st["ch"] -= 1
+            if st["rech"] <= 1e-9:
+                st["rech"] = self.cd_eff(e, st)
+        cast_time = sk.get("cast_time", R["combat"]["gcd"])
+        if e.cast_speed_until > t:
+            cast_time *= 0.70
+        e.gcd = t + cast_time
         self.sk_cast[(e.name, sid)] += 1
         self.L("%s dùng %s → %s" % (e.name, sid, tgt.name))
         atk = e.stat("atk")                                  # snapshot ATK lúc cast
-        for tr_i, tr in enumerate(e.triggers):
-            if tr["type"] == "on_cast" and t - e.trig_last.get(tr_i, -99) >= tr.get("icd", 0) - 1e-9:
-                e.trig_last[tr_i] = t
-                for eff in tr["effects"]:
-                    self.apply_effect(eff, e, tgt)
+        self.fire_trigger("on_cast", e, tgt)
+        self.fire_trigger("on_cast_any", e, tgt)
+        if st["branch"] == "basic":
+            self.fire_trigger("on_cast_basic", e, tgt)
+        elif st["branch"] == "a":
+            self.fire_trigger("on_cast_magic_1", e, tgt)
+        elif st["branch"] == "b":
+            self.fire_trigger("on_cast_magic_2", e, tgt)
+        if sk.get("cd", 0) > 0 and st["branch"] != "basic":
+            self.fire_trigger("on_cast_cd_skill", e, tgt)
+        if st["ch"] <= 0:
+            self.fire_trigger("on_skill_depleted", e, tgt)
         for eff in sk.get("effects", []):                    # hiệu ứng 'on cast' (to=self)
             if eff.get("to", DEFAULT_TO.get(eff["type"], "enemy")) == "self":
                 self.apply_effect(eff, e, tgt)
@@ -855,7 +1375,7 @@ class Sim:
                 if can_react:
                     # A. PARRY (Đỡ gạt phản công)
                     parry_cfg = beh.get("parry", {})
-                    p_cost = parry_cfg.get("stamina_cost", 10.0) * tgt.stat("stamina_cost_mult")
+                    p_cost = 0.0 if tgt.zero_stam_until > t else (parry_cfg.get("stamina_cost", 10.0) * tgt.stat("stamina_cost_mult"))
                     p_rate = parry_cfg.get("rate", 0.20) * comp_mult
                     if tgt.stam >= p_cost and t >= getattr(tgt, "parry_lock", 0.0) and self.rng.random() < p_rate:
                         tgt.stam -= p_cost
@@ -867,11 +1387,14 @@ class Sim:
                         self.L("   ★ %s PARRY HOÀN HẢO! Đỡ gạt tuyệt đỉnh, %s bị choáng %.1fs!" % (tgt.name, e.name, c_stun))
                         counter_dmg = max(10.0, tgt.stat("atk") * 0.35)
                         self.hit(tgt, e, counter_dmg, "Neutral", sid="parry_counter", true=True)
+                        self.fire_trigger("on_parry", tgt, e)
+                        if tgt.stam <= 0.0:
+                            self.fire_trigger("on_exhausted", tgt, e)
                         return
 
                     # B. DODGE (Lướt né đòn)
                     dodge_cfg = beh.get("dodge", {})
-                    d_cost = dodge_cfg.get("stamina_cost", 25.0) * tgt.stat("stamina_cost_mult")
+                    d_cost = 0.0 if tgt.zero_stam_until > t else (dodge_cfg.get("stamina_cost", 25.0) * tgt.stat("stamina_cost_mult"))
                     d_rate = dodge_cfg.get("rate", 0.40) * comp_mult
                     if tgt.stam >= d_cost and t >= getattr(tgt, "dodge_lock", 0.0) and self.rng.random() < d_rate:
                         tgt.stam -= d_cost
@@ -879,14 +1402,22 @@ class Sim:
                         d_cd = dodge_cfg.get("cd", 1.5)
                         tgt.dodge_lock = t + d_cd
                         iframes = dodge_cfg.get("iframes", 0.30)
-                        tgt.iframe_until = t + iframes
+                        extra_iframe = 0.20 if tgt.extended_evasion_until > t else 0.0
+                        tgt.iframe_until = t + iframes + extra_iframe
                         self.m[tgt.name]["dodges"] += 1
                         self.L("   ◆ %s LƯỚT NÉ (DODGE) thành công! (stamina còn %.0f)" % (tgt.name, tgt.stam))
+                        self.fire_trigger("on_dodge", tgt, e)
+                        if self.rng.random() < 0.35:
+                            self.fire_trigger("on_perfect_dodge", tgt, e)
+                        if d_cost >= 30.0:
+                            self.fire_trigger("on_heavy_stamina_spent", tgt, e)
+                        if tgt.stam <= 0.0:
+                            self.fire_trigger("on_exhausted", tgt, e)
                         return
 
                     # C. GUARD (Block đòn thường)
                     guard_cfg = beh.get("guard", {})
-                    g_cost = guard_cfg.get("stamina_cost", R["stamina"]["guard_cost"]) * tgt.stat("stamina_cost_mult")
+                    g_cost = 0.0 if tgt.zero_stam_until > t else (guard_cfg.get("stamina_cost", R["stamina"]["guard_cost"]) * tgt.stat("stamina_cost_mult"))
                     g_rate = guard_cfg.get("rate", R["combat"]["guard_q"]) * comp_mult
                     if tgt.stam >= g_cost and self.rng.random() < g_rate:
                         tgt.stam -= g_cost
@@ -899,15 +1430,20 @@ class Sim:
                             self.blocked_buffs[tgt.name] += 1
                         self.m[tgt.name]["blocks"] += 1
                         self.L("   → %s BLOCK đòn đánh (stamina còn %.0f)" % (tgt.name, tgt.stam))
+                        self.fire_trigger("on_block", tgt, e)
+                        if tgt.stam <= 0.0:
+                            self.fire_trigger("on_guard_break", tgt, e)
+                            self.fire_trigger("on_exhausted", tgt, e)
                         return
                 else:
                     if tgt.stam < 20.0:
                         self.L("   ! %s kiệt sức (hết stamina), không thể phòng thủ!" % tgt.name)
+                        self.fire_trigger("on_exhausted", tgt, e)
                     else:
                         self.L("   ! %s không kịp phản xạ đòn đánh!" % tgt.name)
             else:
                 q = tgt.guard_q if tgt.guard_q is not None else R["combat"]["guard_q"]
-                cost = R["stamina"]["guard_cost"] * tgt.stat("stamina_cost_mult")
+                cost = 0.0 if tgt.zero_stam_until > t else (R["stamina"]["guard_cost"] * tgt.stat("stamina_cost_mult"))
                 if tgt.stam >= cost and q > 0 and self.rng.random() < q:
                     tgt.stam -= cost
                     tgt.stam_t = 0.0
@@ -919,6 +1455,10 @@ class Sim:
                         self.blocked_buffs[tgt.name] += 1
                     self.m[tgt.name]["blocks"] += 1
                     self.L("   → %s BLOCK (stamina còn %.0f)" % (tgt.name, tgt.stam))
+                    self.fire_trigger("on_block", tgt, e)
+                    if tgt.stam <= 0.0:
+                        self.fire_trigger("on_guard_break", tgt, e)
+                        self.fire_trigger("on_exhausted", tgt, e)
                     return
         interval = sk.get("hit_interval", 0.2)
         for i in range(nh):
@@ -928,8 +1468,9 @@ class Sim:
     def _land(self, e, tgt, sk, sid, atk, first):
         if not tgt.alive:
             return
-        if sk.get("base", 0) or not sk.get("true_base"):
-            self.hit(e, tgt, sk.get("base", 0), sk["magic"], atk=atk, sid=sid)
+        atk_scale = float(sk.get("atk_scale", sk.get("atk_pct", sk.get("scale_atk", 1.0))))
+        if sk.get("base", 0) or atk_scale > 0 or not sk.get("true_base"):
+            self.hit(e, tgt, sk.get("base", 0), sk["magic"], atk=atk, sid=sid, atk_scale=atk_scale)
         if sk.get("true_base"):
             self.hit(e, tgt, sk["true_base"], sk["magic"], true=True, sid=sid)
         if first:
@@ -953,16 +1494,42 @@ class Sim:
             self._stack_log(e, "Shadow Screep", len(e.screep["exp"]), P["shadow_screep"]["max_stacks"])
             self._stack_log(e, "Vague", len(e.vg["exp"]), P["vague_drain"]["max_stacks"])
             self._stack_log(e, "Frigid Core", len(e.fc["exp"]), P["frigid_core"]["max_stacks"])
+        # HoT (Hồi máu theo thời gian)
+        keep_hots = []
+        for h in e.hots:
+            if h["until"] <= t:
+                continue
+            if t >= h["next"]:
+                h["next"] += h["tick"]
+                self.heal(e, h["amount_per_tick"], quiet=True)
+            keep_hots.append(h)
+        e.hots = keep_hots
+
+        # Super Armor (Trọng giáp kháng choáng)
+        if e.super_armor_until > t:
+            e.stun_until = -1.0
+
+        expired_sh = [s for s in e.shield if s[1] <= t and s[0] > 0]
+        if expired_sh:
+            self.fire_trigger("on_shield_expired", e)
         e.shield = [s for s in e.shield if s[1] > t and s[0] > 0]
         e.guard_res = [g for g in e.guard_res if g[2] > t]
         if len(e.mods) > 0:
             e.mods = [m for m in e.mods if m["until"] is None or m["until"] > t]
         # stamina
-        e.stam_t += dt
-        cap = e.base.get("stamina", 180)
-        rg = self.R["stamina"]
-        if e.stam_t >= rg["regen_delay"] and e.stam < cap:
-            e.stam = min(cap, e.stam + rg["regen"] * dt)
+        if e.stam_frozen_until > t:
+            pass  # Thể lực bị đóng băng (không hồi)
+        else:
+            e.stam_t += dt
+            cap = e.base.get("stamina", 180)
+            rg = self.R["stamina"]
+            regen_rate = rg["regen"] * (e.stam_regen_mult if e.stam_regen_until > t else 1.0)
+            if e.stam_t >= rg["regen_delay"] and e.stam < cap:
+                e.stam = min(cap, e.stam + regen_rate * dt)
+                if e.stam >= cap - 1e-6:
+                    self.fire_trigger("on_stamina_full", e)
+        if e.stam <= 35.0:
+            self.fire_trigger("on_stamina_low", e)
         # tâm lý chiến đấu (panic / clutch)
         if hasattr(e, "behavior") and e.behavior:
             psy = e.behavior.get("psychology", {})
@@ -1011,14 +1578,12 @@ class Sim:
                 d["next"] += d["tick"]
                 base = (d["base"] + d["atk"] * d["coef"]) * d["tick"]
                 self.hit(d["src"], e, base, d["magic"], atk=0.0, dot=True, trigger=False)
+                self.fire_trigger("on_take_dot_tick", e, d["src"], extra={"damage": base})
             keep.append(d)
         e.dots = keep
-        # relic periodic
-        for i, tr in enumerate(e.triggers):
-            if tr["type"] == "periodic" and t - e.trig_last.get(i, 0.0) >= tr["every"] - 1e-9:
-                e.trig_last[i] = t
-                for eff in tr["effects"]:
-                    self.apply_effect(eff, e, self.pick_target(e))
+        # relic periodic & combat time
+        self.fire_trigger("periodic", e, self.pick_target(e))
+        self.fire_trigger("on_combat_time_elapsed", e, self.pick_target(e), extra={"time": t})
 
     def _uptime(self, e):
         if not e.alive:
@@ -1049,6 +1614,8 @@ class Sim:
 
     def run(self):
         dt = self.dt
+        for e in self.ents:
+            self.fire_trigger("on_combat_start", e, self.pick_target(e))
         while self.t < self.T:
             if self.sample_every and self.t >= self._next_sample - 1e-9:
                 self._take_sample()
@@ -1071,7 +1638,8 @@ class Sim:
                     break
         self.t_end = self.t
         if self.sample_every:                       # điền các mốc còn lại bằng trạng thái cuối
-            while self._next_sample <= self.T + 1e-9:
+            limit_t = self.t if not self.infinite else self.T
+            while self._next_sample <= limit_t + 1e-9:
                 self._take_sample()
         return self
 
@@ -1096,11 +1664,12 @@ class Sim:
 
 # --------------------------------------------------------------------------- kiểm tra luật skill / build
 def skill_dps_potential(cfg, sk):
-    """DPS tiềm năng nếu dùng liên tục theo cooldown: (ATK gốc + base) * hits / cd (+ true_base)."""
+    """DPS tiềm năng nếu dùng liên tục theo cooldown: (ATK gốc * atk_scale + base) * hits / cd (+ true_base)."""
     atk = cfg["rules"]["stats_base"]["atk"]
+    atk_scale = float(sk.get("atk_scale", sk.get("atk_pct", sk.get("scale_atk", 1.0))))
     hits = sk.get("hits", 1)
     cd = max(1e-9, sk.get("cd", 1.0))
-    return ((atk + sk.get("base", 0)) * hits + sk.get("true_base", 0) * hits) / cd if hits else 0.0
+    return ((atk * atk_scale + sk.get("base", 0)) * hits + sk.get("true_base", 0) * hits) / cd if hits else 0.0
 
 
 def validate_cfg(cfg):

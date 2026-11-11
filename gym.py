@@ -262,7 +262,10 @@ def describe(cfg, probe):
             st = e.skills[sid]
             sk = st["sk"]
             br = {"basic": "basic", "a": "nhánh1", "b": "nhánh2"}[st["branch"]]
-            L.append("       - %-14s %-7s %-9s %-8s base %-4s CD %.1f" % (sid, br, sk.get("tier", "?"), sk["magic"], sk.get("base", 0), probe.cd_eff(e, st)))
+            scale_val = sk.get("atk_scale", sk.get("atk_pct", sk.get("scale_atk", 1.0)))
+            scale_str = f"+{round(float(scale_val)*100)}%ATK"
+            L.append("       - %-14s %-7s %-9s %-8s base %-4s %-9s CD %.1f" % (
+                sid, br, sk.get("tier", "?"), sk["magic"], sk.get("base", 0), scale_str, probe.cd_eff(e, st)))
     return L
 
 

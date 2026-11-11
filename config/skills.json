@@ -1,5 +1,5 @@
 {
-  "_help": "THƯ VIỆN SKILL. Mỗi skill: magic, tier (Basic|Mid|High|Ultimate; tier KHÔNG khóa chỉ số), base (AbilityBaseDamage), cd (giây, mỗi charge), charges, cast_time, hits, hit_interval, hit_chance (null = combat.p_hit), true_base, effects, lifetime. Bể basic của 1 magic = các skill tier Basic thuộc magic đó. Skill mẫu M_basic/M_1..M_4 chỉ là SỐ GIẢ ĐỊNH để thử tool, hãy thay bằng skill thật.",
+  "_help": "THƯ VIỆN SKILL. Mỗi skill: magic, tier (Basic|Mid|High|Ultimate; tier KHÔNG khóa chỉ số), base (AbilityBaseDamage), atk_scale (hệ số scale theo % ATK, vd: 1.0 = 100%), cd (giây, mỗi charge), charges, cast_time, hits, hit_interval, hit_chance (null = combat.p_hit), true_base, effects, lifetime, desc. Bể basic của 1 magic = các skill tier Basic thuộc magic đó. Skill mẫu M_basic/M_1..M_4 chỉ là SỐ GIẢ ĐỊNH để thử tool, hãy thay bằng skill thật.",
   "Agenet_basic": {
     "name": "Agenet basic (mẫu)",
     "magic": "Agenet",
@@ -12,7 +12,7 @@
     "magic": "Agenet",
     "tier": "Mid",
     "base": 120,
-    "cd": 4
+    "cd": 4.0
   },
   "Agenet_2": {
     "name": "Agenet #2 (mẫu)",
